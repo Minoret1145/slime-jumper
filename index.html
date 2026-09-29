@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Slime Jumper Online - Слайм Прыгун</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts: Comfortaa & Caveat -->
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Comfortaa:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase JS SDK (Compat version for single-file RTDB) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <style>
+        * {
+            font-family: 'Comfortaa', cursive, sans-serif;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #090d16 0%, #111827 50%, #1e1035 100%);
+            color: #f8fafc;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            overflow: hidden;
+        }
+        
+        .font-handwriting {
+            font-family: 'Caveat', cursive;
+        }
+
+        .glass-card {
+            background: rgba(17, 24, 39, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+        }
+
+        .btn-bounce {
+            transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-bounce:hover {
+            transform: translateY(-2px) scale(1.02);
+        }
+        .btn-bounce:active {
+            transform: translateY(1px) scale(0.97);
+        }
+
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #3b82f6;
+            color: #ffffff;
+            border-radius: 9999px;
+            width: 1.15rem;
+            height: 1.15rem;
+            font-size: 0.65rem;
+            margin-left: 0.35rem;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+            flex-shrink: 0;
+        }
+
+        .touch-btn {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            transition: background 0.1s, transform 0.1s;
+        }
+        .touch-btn:active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0.94);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(168, 85, 247, 0.5);
+            border-radius: 4px;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(168, 85, 247, 0.8); }
+        }
+        .glow-active {
+            animation: pulseGlow 2s infinite;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex items-center justify-center p-0 m-0 overflow-hidden">
+
+    <div id="app-container" class="relative w-full h-full max-w-md max-h-[860px] sm:h-[95%] sm:rounded-3xl glass-card flex flex-col overflow-hidden border-0 sm:border">
+
+        <!-- HEADER BAR -->
+        <header id="ui-header" class="w-full px-5 py-3.5 flex items-center justify-between z-20 border-b border-white/10 bg-slate-900/80 backdrop-blur-md">
+            <div class="flex items-center space-x-3">
+                <div id="header-avatar-container" class="w-10 h-10 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-xl shadow-inner overflow-hidden">
+                    🧪
+                </div>
+                <div>
+                    <div class="flex items-center">
+                        <span id="user-nickname" class="font-bold text-white text-sm truncate max-w-[110px]">Гость</span>
+                        <span id="user-verified-badge" class="verified-badge hidden" title="Верифицирован">✓</span>
+                    </div>
+                    <div id="user-role-badge" class="text-[9px] font-bold text-emerald-400 uppercase tracking-wider">Игрок</div>
+                </div>
+            </div>
+
+            <!-- COINS & BEST SCORE -->
+            <div class="flex items-center space-x-2">
+                <div class="flex items-center bg-amber-500/20 border border-amber-400/40 px-3 py-1 rounded-full space-x-1.5">
+                    <i class="fa-solid fa-coins text-amber-400 text-xs animate-bounce"></i>
+                    <span id="user-coins" class="font-bold text-amber-300 text-xs">0</span>
+                </div>
+                <div class="flex items-center bg-cyan-500/20 border border-cyan-400/40 px-3 py-1 rounded-full space-x-1">
+                    <i class="fa-solid fa-trophy text-cyan-400 text-xs"></i>
+                    <span id="user-highscore" class="font-bold text-cyan-300 text-xs">0м</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- SCREEN CONTENT AREA -->
+        <main class="relative flex-1 w-full h-full overflow-hidden flex flex-col items-center justify-center">
+
+            <!-- 1. MAIN MENU SCREEN -->
+            <div id="screen-main-menu" class="screen flex flex-col items-center justify-between w-full h-full p-6 text-center z-10">
+                <div class="my-auto space-y-1">
+                    <div class="relative inline-block">
+                        <h1 class="font-handwriting text-5xl sm:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 filter drop-shadow-[0_4px_12px_rgba(16,185,129,0.5)]">
+                            Слайм Прыгун
+                        </h1>
+                        <div class="absolute -top-3 -right-4 text-xl animate-spin" style="animation-duration: 8s;">✨</div>
+                    </div>
+                    <p class="text-[11px] text-slate-300 font-semibold tracking-wide">Онлайн Версия с Общим Сервером</p>
+                </div>
+
+                <!-- Slime Preview Avatar -->
+                <div class="my-auto relative flex items-center justify-center h-32 w-32">
+                    <div class="absolute inset-0 bg-emerald-500/10 rounded-full blur-xl animate-pulse"></div>
+                    <canvas id="slime-menu-preview" width="120" height="120" class="z-10 drop-shadow-lg"></canvas>
+                </div>
+
+                <!-- MENU BUTTONS -->
+                <div class="w-full space-y-2.5 mb-auto max-w-xs">
+                    <button id="btn-play" class="btn-bounce w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-base shadow-lg shadow-emerald-600/30 border border-emerald-300/30 flex items-center justify-center space-x-2.5">
+                        <i class="fa-solid fa-play"></i>
+                        <span>ИГРАТЬ</span>
+                    </button>
+
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <button id="btn-wardrobe" class="btn-bounce py-3 px-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 text-white font-bold text-xs border border-slate-600/50 flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-shirt text-purple-400"></i>
+                            <span>Гардероб</span>
+                        </button>
+                        <button id="btn-leaderboard" class="btn-bounce py-3 px-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 text-white font-bold text-xs border border-slate-600/50 flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-trophy text-amber-400"></i>
+                            <span>Онлайн Топ</span>
+                        </button>
+                    </div>
+
+                    <button id="btn-settings" class="btn-bounce w-full py-2.5 px-4 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 text-white font-bold text-xs border border-slate-600/50 flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-gear text-cyan-400"></i>
+                        <span>Настройки</span>
+                    </button>
+
+                    <!-- ADMIN PANEL BUTTON -->
+                    <button id="btn-admin-panel" class="btn-bounce hidden w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold text-xs border border-rose-300/30 flex items-center justify-center space-x-2 shadow-lg shadow-rose-900/40">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span>Панель Администратора</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. GAMEPLAY SCREEN -->
+            <div id="screen-game" class="screen hidden absolute inset-0 w-full h-full flex flex-col bg-slate-950">
+                <!-- HUD -->
+                <div class="absolute top-3 left-3 right-3 flex justify-between items-center z-10 pointer-events-none">
+                    <div class="bg-slate-900/80 backdrop-blur border border-white/10 px-3.5 py-1.5 rounded-2xl flex items-center space-x-2">
+                        <i class="fa-solid fa-ruler-vertical text-emerald-400 text-xs"></i>
+                        <span id="game-score" class="font-bold text-white text-sm">0 м</span>
+                    </div>
+
+                    <div class="bg-slate-900/80 backdrop-blur border border-white/10 px-3.5 py-1.5 rounded-2xl flex items-center space-x-2">
+                        <i class="fa-solid fa-coins text-amber-400 text-xs"></i>
+                        <span id="game-coins" class="font-bold text-amber-300 text-sm">0</span>
+                    </div>
+                </div>
+
+                <!-- CANVAS -->
+                <canvas id="game-canvas" class="w-full h-full block touch-none cursor-pointer"></canvas>
+
+                <!-- TOUCH CONTROLS -->
+                <div class="absolute bottom-4 left-4 right-4 flex justify-between gap-4 z-20 pointer-events-auto">
+                    <button id="btn-touch-left" class="touch-btn flex-1 py-4 rounded-2xl flex items-center justify-center text-white text-xs font-bold active:bg-white/30 select-none">
+                        <i class="fa-solid fa-caret-left mr-1.5 text-base"></i> Налево
+                    </button>
+                    <button id="btn-touch-right" class="touch-btn flex-1 py-4 rounded-2xl flex items-center justify-center text-white text-xs font-bold active:bg-white/30 select-none">
+                        Направо <i class="fa-solid fa-caret-right ml-1.5 text-base"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3. WARDROBE MODAL -->
+            <div id="modal-wardrobe" class="modal hidden fixed inset-0 z-30 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+                <div class="w-full max-w-sm glass-card rounded-3xl p-5 flex flex-col max-h-[85vh]">
+                    <div class="flex justify-between items-center mb-3 border-b border-white/10 pb-2.5">
+                        <h2 class="font-handwriting text-3xl text-purple-300 flex items-center gap-2">
+                            <i class="fa-solid fa-shirt text-purple-400 text-2xl"></i> Гардероб
+                        </h2>
+                        <button class="btn-close-modal text-slate-400 hover:text-white text-xl">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <div id="wardrobe-skins-list" class="flex-1 overflow-y-auto space-y-2.5 pr-1 py-1"></div>
+                </div>
+            </div>
+
+            <!-- 4. LEADERBOARD MODAL -->
+            <div id="modal-leaderboard" class="modal hidden fixed inset-0 z-30 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+                <div class="w-full max-w-sm glass-card rounded-3xl p-5 flex flex-col max-h-[85vh]">
+                    <div class="flex justify-between items-center mb-3 border-b border-white/10 pb-2.5">
+                        <h2 class="font-handwriting text-3xl text-amber-300 flex items-center gap-2">
+                            <i class="fa-solid fa-trophy text-amber-400 text-2xl"></i> Онлайн Рейтинг
+                        </h2>
+                        <button class="btn-close-modal text-slate-400 hover:text-white text-xl">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <div id="leaderboard-list" class="flex-1 overflow-y-auto space-y-2 pr-1"></div>
+                </div>
+            </div>
+
+            <!-- 5. SETTINGS MODAL -->
+            <div id="modal-settings" class="modal hidden fixed inset-0 z-30 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+                <div class="w-full max-w-sm glass-card rounded-3xl p-5 flex flex-col space-y-3.5 max-h-[90vh] overflow-y-auto">
+                    <div class="flex justify-between items-center border-b border-white/10 pb-2.5">
+                        <h2 class="font-handwriting text-3xl text-cyan-300 flex items-center gap-2">
+                            <i class="fa-solid fa-gear text-cyan-400 text-2xl"></i> Настройки
+                        </h2>
+                        <button class="btn-close-modal text-slate-400 hover:text-white text-xl">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <!-- Change Nickname -->
+                    <div class="bg-slate-900/60 p-3.5 rounded-2xl border border-white/5 space-y-2">
+                        <span class="font-bold text-xs text-slate-200 block">Изменить Никнейм</span>
+                        <div class="flex gap-2">
+                            <input type="text" id="input-new-nickname" placeholder="Новый никнейм" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400">
+                            <button id="btn-save-nickname" class="btn-bounce px-3 py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl text-xs whitespace-nowrap">
+                                Сохранить
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Sound Toggle -->
+                    <div class="flex justify-between items-center bg-slate-900/60 p-3.5 rounded-2xl border border-white/5">
+                        <div class="flex items-center space-x-2.5">
+                            <i class="fa-solid fa-volume-high text-cyan-400 text-sm"></i>
+                            <span class="font-bold text-xs text-slate-200">Звуковые Эффекты</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="setting-sound-toggle" class="sr-only peer" checked>
+                            <div class="w-10 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-500"></div>
+                        </label>
+                    </div>
+
+                    <!-- Change Password -->
+                    <div class="bg-slate-900/60 p-3.5 rounded-2xl border border-white/5 space-y-2">
+                        <span class="font-bold text-xs text-slate-200 block">Сменить Пароль</span>
+                        <input type="password" id="input-new-password" placeholder="Новый пароль" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400">
+                        <button id="btn-save-password" class="w-full py-2 bg-cyan-600/80 hover:bg-cyan-500 text-white font-bold rounded-xl text-xs transition">
+                            Обновить пароль
+                        </button>
+                    </div>
+
+                    <div class="pt-2 border-t border-white/10 space-y-2">
+                        <button id="btn-logout" class="w-full py-2.5 bg-rose-600/80 hover:bg-rose-600 text-white font-bold rounded-2xl text-xs flex items-center justify-center space-x-2 transition">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                            <span>Выйти из аккаунта</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. ADMIN PANEL MODAL -->
+            <div id="modal-admin" class="modal hidden fixed inset-0 z-30 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+                <div class="w-full max-w-sm glass-card rounded-3xl p-5 flex flex-col space-y-3 max-h-[90vh]">
+                    <div class="flex justify-between items-center border-b border-white/10 pb-2.5">
+                        <h2 class="font-handwriting text-3xl text-rose-400 flex items-center gap-2">
+                            <i class="fa-solid fa-user-shield text-rose-500 text-2xl"></i> Онлайн Админка
+                        </h2>
+                        <button class="btn-close-modal text-slate-400 hover:text-white text-xl">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-300">Выберите онлайн игрока:</label>
+                        <select id="admin-user-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-400">
+                        </select>
+                    </div>
+
+                    <div id="admin-user-info-box" class="bg-slate-900/80 p-3.5 rounded-2xl border border-slate-700/60 space-y-2.5">
+                        <div class="text-xs text-slate-300 space-y-1">
+                            <div>Никнейм: <span id="admin-info-nick" class="font-bold text-white">-</span></div>
+                            <div>Статус бана: <span id="admin-info-ban" class="font-bold">-</span></div>
+                            <div>Галочка: <span id="admin-info-verified" class="font-bold">-</span></div>
+                            <div>Монеты: <span id="admin-info-coins" class="font-bold text-amber-300">-</span></div>
+                        </div>
+
+                        <div class="pt-2 border-t border-slate-800 space-y-2">
+                            <button id="admin-btn-toggle-ban" class="w-full py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 font-bold text-xs flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-ban text-red-400"></i>
+                                <span id="admin-text-toggle-ban">Забанить / Разбанить</span>
+                            </button>
+
+                            <button id="admin-btn-toggle-verify" class="w-full py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 font-bold text-xs flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-circle-check text-blue-400"></i>
+                                <span id="admin-text-toggle-verify">Выдать / Снять галочку</span>
+                            </button>
+
+                            <div class="flex gap-2 pt-1">
+                                <input type="number" id="admin-input-coins" placeholder="Количество монет" class="w-1/2 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                                <button id="admin-btn-add-coins" class="w-1/2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-1">
+                                    <i class="fa-solid fa-plus"></i>
+                                    <span>Выдать</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. GAME OVER MODAL -->
+            <div id="modal-game-over" class="modal hidden fixed inset-0 z-40 bg-slate-950/85 backdrop-blur-lg flex items-center justify-center p-4">
+                <div class="w-full max-w-xs glass-card rounded-3xl p-6 text-center space-y-4">
+                    <div class="space-y-1">
+                        <div class="text-4xl animate-bounce">🌀</div>
+                        <h2 class="font-handwriting text-4xl text-rose-400 font-bold tracking-wide">ВЫ УПАЛИ!</h2>
+                        <p class="text-[11px] text-slate-300">Слайм затянут в космический портал</p>
+                    </div>
+
+                    <div class="bg-slate-900/70 border border-white/10 rounded-2xl p-3.5 space-y-2">
+                        <div>
+                            <div class="text-[10px] text-slate-400 font-semibold uppercase">Набрано высоты</div>
+                            <div id="gameover-score" class="font-bold text-3xl text-emerald-400">0 м</div>
+                        </div>
+
+                        <div class="flex justify-around pt-2 border-t border-white/5">
+                            <div>
+                                <div class="text-[9px] text-slate-400 uppercase">Собрано монет</div>
+                                <div id="gameover-coins" class="font-bold text-amber-300 text-sm">0</div>
+                            </div>
+                            <div>
+                                <div class="text-[9px] text-slate-400 uppercase">Ваш Рекорд</div>
+                                <div id="gameover-best" class="font-bold text-cyan-300 text-sm">0 м</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <button id="btn-restart" class="btn-bounce w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-sm rounded-2xl shadow-lg shadow-emerald-600/30 flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-rotate-right"></i>
+                            <span>ИГРАТЬ СНОВА</span>
+                        </button>
+                        <button id="btn-gameover-menu" class="btn-bounce w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl border border-slate-600/50">
+                            Главное меню
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. AUTH MODAL -->
+            <div id="modal-auth" class="modal fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-xl flex items-center justify-center p-4">
+                <div class="w-full max-w-sm glass-card rounded-3xl p-6 space-y-4 border border-emerald-500/20 shadow-2xl">
+                    <div class="text-center space-y-1">
+                        <div class="text-4xl mb-1">🧪</div>
+                        <h2 class="font-handwriting text-3xl text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">
+                            Слайм Прыгун
+                        </h2>
+                        <p class="text-xs text-slate-300">Онлайн войти или зарегистрироваться</p>
+                    </div>
+
+                    <div class="flex bg-slate-900 p-1 rounded-xl border border-slate-800">
+                        <button id="tab-auth-login" class="flex-1 py-2 rounded-lg text-xs font-bold transition bg-emerald-500 text-slate-950">Войти</button>
+                        <button id="tab-auth-register" class="flex-1 py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white">Регистрация</button>
+                    </div>
+
+                    <form id="form-auth" class="space-y-3" onsubmit="return false;">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 mb-1">Никнейм</label>
+                            <input type="text" id="auth-username" required placeholder="Введите никнейм" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-400">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 mb-1">Пароль</label>
+                            <input type="password" id="auth-password" required placeholder="Введите пароль" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-400">
+                        </div>
+
+                        <div id="auth-error-msg" class="text-xs text-rose-400 font-bold hidden text-center bg-rose-500/10 p-2.5 rounded-xl border border-rose-500/20"></div>
+
+                        <button type="submit" id="btn-auth-submit" class="btn-bounce w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/30">
+                            Войти в аккаунт
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- TOAST NOTIFICATIONS -->
+            <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col space-y-2 pointer-events-none w-11/12 max-w-xs"></div>
+
+        </main>
+    </div>
+
+    <script>
+        /* =====================================================================
+           1. FIREBASE ONLINE DATABASE SETUP (Общий Сервер)
+           Если вы не настроили свои ключи, будет работать с гибридным резервным каналом!
+        ===================================================================== */
+        const firebaseConfig = {
+            apiKey: "AIzaSySlimeJumperPublicKey2026",
+            authDomain: "slime-jumper-db.firebaseapp.com",
+            databaseURL: "https://slime-jumper-db-default-rtdb.firebaseio.com",
+            projectId: "slime-jumper-db",
+            storageBucket: "slime-jumper-db.appspot.com",
+            messagingSenderId: "100020003000",
+            appId: "1:100020003000:web:998877665544332211"
+        };
+
+        let db = null;
+        let isOnline = false;
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            isOnline = true;
+        } catch (e) {
+            console.warn("Firebase fallback to LocalStorage mode:", e);
+            isOnline = false;
+        }
+
+        // LOCALSTORAGE KEYS FOR FALLBACK
+        const DB_KEY = 'SLIME_USERS_DB_ONLINE_V2';
+        const SESSION_KEY = 'SLIME_CURRENT_USER_V2';
+        const SETTINGS_KEY = 'SLIME_SETTINGS_V2';
+
+        const SKINS = [
+            { id: 'default', name: 'Классический', price: 0, color: '#10B981', secondary: '#059669', eyeColor: '#000000', icon: '🟢', crown: false },
+            { id: 'mint', name: 'Мятный', price: 100, color: '#14B8A6', secondary: '#0D9488', eyeColor: '#042F2E', icon: '🍃', crown: false },
+            { id: 'flame', name: 'Огненный', price: 250, color: '#EF4444', secondary: '#B91C1C', eyeColor: '#450A0A', icon: '🔥', crown: false },
+            { id: 'royal', name: 'Королевский', price: 500, color: '#F59E0B', secondary: '#D97706', eyeColor: '#451A03', icon: '👑', crown: true },
+            { id: 'rainbow', name: 'Радужный', price: 1000, color: 'rainbow', secondary: '#8B5CF6', eyeColor: '#ffffff', icon: '🌈', crown: false },
+            { id: 'cyber', name: 'Кибер Неон', price: 1500, color: '#06B6D4', secondary: '#EC4899', eyeColor: '#38BDF8', icon: '⚡', crown: false, cyberGlow: true }
+        ];
+
+        let usersDB = {
+            'admin': {
+                password: 'admin123',
+                coins: 10000,
+                highScore: 350,
+                skins: ['default', 'mint', 'flame', 'royal', 'rainbow', 'cyber'],
+                equippedSkin: 'royal',
+                isVerified: true,
+                isBanned: false,
+                isAdmin: true
+            }
+        };
+
+        let appSettings = { soundEnabled: true };
+        let currentUser = null;
+        let isAuthLoginMode = true;
+
+        // WEB AUDIO SYNTHESIZER
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) audioCtx = new AudioContext();
+            }
+        }
+
+        function playSound(type) {
+            if (!appSettings.soundEnabled || !audioCtx) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            try {
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'jump') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(190, now);
+                    osc.frequency.exponentialRampToValueAtTime(460, now + 0.14);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.14);
+                    osc.start(now);
+                    osc.stop(now + 0.14);
+                } else if (type === 'spring') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(280, now);
+                    osc.frequency.exponentialRampToValueAtTime(850, now + 0.28);
+                    gain.gain.setValueAtTime(0.35, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.28);
+                    osc.start(now);
+                    osc.stop(now + 0.28);
+                } else if (type === 'coin') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(987.77, now);
+                    osc.frequency.setValueAtTime(1318.51, now + 0.08);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.22);
+                    osc.start(now);
+                    osc.stop(now + 0.22);
+                } else if (type === 'portal') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(550, now);
+                    osc.frequency.exponentialRampToValueAtTime(50, now + 1.2);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 1.2);
+                    osc.start(now);
+                    osc.stop(now + 1.2);
+                }
+            } catch (e) {
+                console.warn('Audio play error:', e);
+            }
+        }
+
+        /* ONLINE SYNC FUNCTIONS */
+        function saveUserDataOnline(nick) {
+            if (!nick || !usersDB[nick]) return;
+            localStorage.setItem(DB_KEY, JSON.stringify(usersDB));
+
+            if (isOnline && db) {
+                db.ref('users/' + nick).set(usersDB[nick]);
+            }
+        }
+
+        function loadStorageData() {
+            const rawUsers = localStorage.getItem(DB_KEY);
+            if (rawUsers) {
+                try { usersDB = JSON.parse(rawUsers); } catch(e) {}
+            }
+
+            const rawSettings = localStorage.getItem(SETTINGS_KEY);
+            if (rawSettings) {
+                try { appSettings = JSON.parse(rawSettings); } catch(e) {}
+            }
+
+            const savedSessionUser = localStorage.getItem(SESSION_KEY);
+            if (savedSessionUser && usersDB[savedSessionUser] && !usersDB[savedSessionUser].isBanned) {
+                currentUser = savedSessionUser;
+            }
+
+            if (isOnline && db) {
+                db.ref('users').on('value', (snapshot) => {
+                    const onlineData = snapshot.val();
+                    if (onlineData) {
+                        usersDB = { ...usersDB, ...onlineData };
+                        localStorage.setItem(DB_KEY, JSON.stringify(usersDB));
+
+                        if (currentUser && usersDB[currentUser]) {
+                            if (usersDB[currentUser].isBanned) {
+                                setSessionUser(null);
+                                document.getElementById('modal-auth').classList.remove('hidden');
+                                showToast('Ваш аккаунт был забанен онлайн!', true);
+                            } else {
+                                updateUIHeader();
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function setSessionUser(nick) {
+            currentUser = nick;
+            if (nick) localStorage.setItem(SESSION_KEY, nick);
+            else localStorage.removeItem(SESSION_KEY);
+        }
+
+        function showToast(msg, isError = false) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `p-3 rounded-2xl text-xs font-bold text-white shadow-xl transition-all transform duration-300 opacity-0 translate-y-2 border ${
+                isError ? 'bg-rose-600/90 border-rose-400' : 'bg-emerald-600/90 border-emerald-400'
+            }`;
+            toast.innerText = msg;
+            container.appendChild(toast);
+
+            setTimeout(() => toast.classList.remove('opacity-0', 'translate-y-2'), 10);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+
+        function updateUIHeader() {
+            if (!currentUser || !usersDB[currentUser]) return;
+
+            const u = usersDB[currentUser];
+            document.getElementById('user-nickname').innerText = currentUser;
+            document.getElementById('user-coins').innerText = u.coins;
+            document.getElementById('user-highscore').innerText = `${u.highScore}м`;
+
+            const badge = document.getElementById('user-verified-badge');
+            if (u.isVerified) badge.classList.remove('hidden');
+            else badge.classList.add('hidden');
+
+            const roleBadge = document.getElementById('user-role-badge');
+            if (u.isAdmin) {
+                roleBadge.innerText = 'АДМИНИСТРАТОР';
+                roleBadge.className = 'text-[9px] font-bold text-rose-400 uppercase tracking-wider';
+                document.getElementById('btn-admin-panel').classList.remove('hidden');
+            } else {
+                roleBadge.innerText = 'Игрок';
+                roleBadge.className = 'text-[9px] font-bold text-emerald-400 uppercase tracking-wider';
+                document.getElementById('btn-admin-panel').classList.add('hidden');
+            }
+
+            document.getElementById('setting-sound-toggle').checked = appSettings.soundEnabled;
+            renderMenuPreviewSlime();
+        }
+
+        function changeUserNickname(newNick) {
+            newNick = newNick.trim();
+            if (!newNick) { showToast('Никнейм не может быть пустым!', true); return; }
+            if (newNick === currentUser) { showToast('Это ваш текущий никнейм!'); return; }
+            if (usersDB[newNick]) { showToast('Этот никнейм уже занят!', true); return; }
+            if (newNick.length < 3) { showToast('Ник слишком короткий!', true); return; }
+
+            const oldNick = currentUser;
+            usersDB[newNick] = usersDB[oldNick];
+            delete usersDB[oldNick];
+
+            if (isOnline && db) {
+                db.ref('users/' + oldNick).remove();
+                db.ref('users/' + newNick).set(usersDB[newNick]);
+            }
+
+            setSessionUser(newNick);
+            localStorage.setItem(DB_KEY, JSON.stringify(usersDB));
+            updateUIHeader();
+            showToast('Никнейм успешно изменен!');
+        }
+
+        function renderMenuPreviewSlime() {
+            const canvas = document.getElementById('slime-menu-preview');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const activeSkinId = usersDB[currentUser]?.equippedSkin || 'default';
+            const skin = SKINS.find(s => s.id === activeSkinId) || SKINS[0];
+
+            drawSlimeGraphic(ctx, 60, 75, 36, 36, skin, 0, false, 0);
+        }
+
+        function handleLogin(username, password) {
+            username = username.trim();
+            if (!username || !password) { showAuthError('Заполните все поля'); return; }
+
+            const user = usersDB[username];
+            if (!user || user.password !== password) { showAuthError('Неверный никнейм или пароль'); return; }
+            if (user.isBanned) { showAuthError('Ваш аккаунт забанен администратором!'); return; }
+
+            setSessionUser(username);
+            document.getElementById('modal-auth').classList.add('hidden');
+            updateUIHeader();
+            showToast(`Добро пожаловать, ${username}!`);
+        }
+
+        function handleRegister(username, password) {
+            username = username.trim();
+            if (!username || !password) { showAuthError('Заполните все поля'); return; }
+            if (username.length < 3) { showAuthError('Никнейм от 3 символов'); return; }
+            if (usersDB[username]) { showAuthError('Такой ник уже существует'); return; }
+
+            usersDB[username] = {
+                password: password,
+                coins: 0,
+                highScore: 0,
+                skins: ['default'],
+                equippedSkin: 'default',
+                isVerified: false,
+                isBanned: false,
+                isAdmin: false
+            };
+
+            saveUserDataOnline(username);
+            setSessionUser(username);
+            document.getElementById('modal-auth').classList.add('hidden');
+            updateUIHeader();
+            showToast('Аккаунт успешно создан!');
+        }
+
+        function showAuthError(text) {
+            const el = document.getElementById('auth-error-msg');
+            el.innerText = text;
+            el.classList.remove('hidden');
+        }
+
+        function openWardrobe() {
+            const list = document.getElementById('wardrobe-skins-list');
+            list.innerHTML = '';
+            const user = usersDB[currentUser];
+
+            SKINS.forEach(skin => {
+                const isOwned = user.skins.includes(skin.id);
+                const isActive = user.equippedSkin === skin.id;
+
+                const card = document.createElement('div');
+                card.className = `p-3 rounded-2xl border flex items-center justify-between ${
+                    isActive ? 'bg-purple-900/40 border-purple-400 glow-active' : 'bg-slate-900/60 border-slate-700/60'
+                }`;
+
+                card.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="text-3xl">${skin.icon}</div>
+                        <div>
+                            <div class="font-bold text-xs text-white">${skin.name}</div>
+                            <div class="text-[10px] text-slate-400">${isOwned ? 'Приобретено' : `Цена: ${skin.price} монет`}</div>
+                        </div>
+                    </div>
+                    <div>
+                        ${
+                            isActive ? `<span class="px-3 py-1.5 rounded-xl bg-purple-500/30 border border-purple-400 text-purple-300 text-xs font-bold">Надет</span>` :
+                            isOwned ? `<button onclick="equipSkin('${skin.id}')" class="btn-bounce px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold">Надеть</button>` :
+                            `<button onclick="buySkin('${skin.id}')" class="btn-bounce px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center space-x-1">
+                                <i class="fa-solid fa-coins"></i> <span>Купить</span>
+                            </button>`
+                        }
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+
+            document.getElementById('modal-wardrobe').classList.remove('hidden');
+        }
+
+        window.equipSkin = function(skinId) {
+            usersDB[currentUser].equippedSkin = skinId;
+            saveUserDataOnline(currentUser);
+            openWardrobe();
+            updateUIHeader();
+            playSound('coin');
+            showToast('Скин выбран!');
+        };
+
+        window.buySkin = function(skinId) {
+            const skin = SKINS.find(s => s.id === skinId);
+            const user = usersDB[currentUser];
+
+            if (user.coins >= skin.price) {
+                user.coins -= skin.price;
+                user.skins.push(skinId);
+                user.equippedSkin = skinId;
+                saveUserDataOnline(currentUser);
+                openWardrobe();
+                updateUIHeader();
+                playSound('coin');
+                showToast(`Вы купили ${skin.name}!`);
+            } else {
+                showToast('Недостаточно монет!', true);
+            }
+        };
+
+        function openLeaderboard() {
+            const list = document.getElementById('leaderboard-list');
+            list.innerHTML = '';
+
+            const sorted = Object.keys(usersDB)
+                .map(nick => ({ nick, ...usersDB[nick] }))
+                .filter(u => !u.isBanned)
+                .sort((a, b) => b.highScore - a.highScore);
+
+            sorted.forEach((u, index) => {
+                let rankBadge = `<span class="font-bold text-xs text-slate-400 w-5">#${index + 1}</span>`;
+                if (index === 0) rankBadge = `<span class="text-amber-400 text-base w-5"><i class="fa-solid fa-crown"></i></span>`;
+                else if (index === 1) rankBadge = `<span class="text-slate-300 text-sm w-5"><i class="fa-solid fa-medal"></i></span>`;
+                else if (index === 2) rankBadge = `<span class="text-amber-600 text-sm w-5"><i class="fa-solid fa-medal"></i></span>`;
+
+                const row = document.createElement('div');
+                row.className = `p-3 rounded-2xl flex items-center justify-between border ${
+                    u.nick === currentUser ? 'bg-emerald-950/40 border-emerald-500/50' : 'bg-slate-900/50 border-slate-800'
+                }`;
+
+                row.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        ${rankBadge}
+                        <div>
+                            <div class="font-bold text-xs text-white flex items-center">
+                                ${u.nick}
+                                ${u.isVerified ? '<span class="verified-badge">✓</span>' : ''}
+                            </div>
+                            <div class="text-[9px] text-slate-400">${u.isAdmin ? 'Администратор' : 'Игрок'}</div>
+                        </div>
+                    </div>
+                    <div class="font-bold text-emerald-400 text-xs">
+                        ${u.highScore} м
+                    </div>
+                `;
+                list.appendChild(row);
+            });
+
+            document.getElementById('modal-leaderboard').classList.remove('hidden');
+        }
+
+        function openAdminPanel() {
+            const select = document.getElementById('admin-user-select');
+            select.innerHTML = '';
+
+            Object.keys(usersDB).forEach(nick => {
+                const opt = document.createElement('option');
+                opt.value = nick;
+                opt.innerText = nick + (usersDB[nick].isBanned ? ' (Забанен)' : '');
+                select.appendChild(opt);
+            });
+
+            select.value = currentUser;
+            updateAdminPanelUserInfo();
+            document.getElementById('modal-admin').classList.remove('hidden');
+        }
+
+        function updateAdminPanelUserInfo() {
+            const select = document.getElementById('admin-user-select');
+            const targetNick = select.value;
+            if (!targetNick || !usersDB[targetNick]) return;
+
+            const u = usersDB[targetNick];
+            document.getElementById('admin-info-nick').innerText = targetNick;
+            document.getElementById('admin-info-ban').innerText = u.isBanned ? 'ЗАБАНЕН' : 'Активен';
+            document.getElementById('admin-info-ban').className = u.isBanned ? 'font-bold text-rose-500' : 'font-bold text-emerald-400';
+
+            document.getElementById('admin-info-verified').innerText = u.isVerified ? 'Выдана (✓)' : 'Нет';
+            document.getElementById('admin-info-coins').innerText = u.coins;
+
+            document.getElementById('admin-text-toggle-ban').innerText = u.isBanned ? 'Разбанить аккаунт' : 'Забанить аккаунт';
+            document.getElementById('admin-text-toggle-verify').innerText = u.isVerified ? 'Снять галочку' : 'Выдать галочку';
+        }
+
+        /* =====================================================================
+           2. GAMEPLAY & CANVAS ENGINE
+        ===================================================================== */
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let gameState = 'MENU';
+        let score = 0;
+        let coinsCollected = 0;
+        let cameraY = 0;
+        let highestY = 0;
+
+        const slime = {
+            x: 200, y: 400, vx: 0, vy: 0,
+            radius: 22, squishX: 1, squishY: 1, rotation: 0
+        };
+
+        const portal = { x: 0, y: 0, radius: 0, angle: 0, active: false };
+        const keys = { left: false, right: false };
+        let platforms = [];
+        let coins = [];
+        let particles = [];
+
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+
+        function initGame() {
+            resizeCanvas();
+            score = 0;
+            coinsCollected = 0;
+            cameraY = 0;
+
+            slime.x = canvas.width / 2;
+            slime.y = canvas.height - 150;
+            slime.vx = 0;
+            slime.vy = -12;
+            slime.radius = 22;
+            slime.squishX = 1;
+            slime.squishY = 1;
+            slime.rotation = 0;
+
+            highestY = slime.y;
+            portal.active = false;
+            portal.radius = 0;
+            portal.angle = 0;
+
+            platforms = [];
+            coins = [];
+            particles = [];
+
+            platforms.push({
+                x: canvas.width / 2 - 60, y: canvas.height - 60,
+                width: 120, height: 16, type: 'normal', vx: 0, broken: false
+            });
+
+            let currentY = canvas.height - 140;
+            while (currentY > -1000) {
+                spawnPlatform(currentY);
+                currentY -= Math.floor(Math.random() * 45 + 55);
+            }
+
+            gameState = 'PLAYING';
+            playSound('jump');
+            requestAnimationFrame(gameLoop);
+        }
+
+        function spawnPlatform(y) {
+            const width = Math.max(65, 100 - Math.floor(score / 50));
+            const x = Math.random() * (canvas.width - width - 20) + 10;
+            
+            const rand = Math.random();
+            let type = 'normal';
+            let vx = 0;
+
+            if (rand < 0.25) {
+                type = 'moving';
+                vx = (Math.random() > 0.5 ? 1 : -1) * (1.5 + Math.random() * 1.5);
+            } else if (rand < 0.40) {
+                type = 'spring';
+            } else if (rand < 0.50 && score > 30) {
+                type = 'breakable';
+            }
+
+            platforms.push({ x, y, width, height: 16, type, vx, broken: false });
+
+            if (Math.random() < 0.4 && type !== 'breakable') {
+                coins.push({
+                    x: x + width / 2, y: y - 24,
+                    radius: 9, collected: false, rotation: 0
+                });
+            }
+        }
+
+        function triggerPortalSequence() {
+            gameState = 'FALLING_PORTAL';
+            portal.active = true;
+            portal.x = slime.x;
+            portal.y = cameraY + canvas.height - 50;
+            portal.radius = 5;
+            portal.angle = 0;
+            playSound('portal');
+        }
+
+        function updateGame() {
+            if (gameState === 'PLAYING') {
+                const accel = 0.8;
+                const maxSpeed = 7.5;
+                const friction = 0.88;
+
+                if (keys.left) slime.vx -= accel;
+                if (keys.right) slime.vx += accel;
+
+                slime.vx *= friction;
+                slime.vx = Math.max(-maxSpeed, Math.min(maxSpeed, slime.vx));
+                slime.x += slime.vx;
+
+                if (slime.x < -slime.radius) slime.x = canvas.width + slime.radius;
+                if (slime.x > canvas.width + slime.radius) slime.x = -slime.radius;
+
+                slime.vy += 0.42;
+                slime.y += slime.vy;
+
+                slime.squishX += (1 - slime.squishX) * 0.15;
+                slime.squishY += (1 - slime.squishY) * 0.15;
+
+                if (slime.y < highestY) {
+                    const diff = highestY - slime.y;
+                    highestY = slime.y;
+                    score += Math.floor(diff / 10);
+                    document.getElementById('game-score').innerText = `${score} м`;
+                }
+
+                const targetCameraY = highestY - canvas.height * 0.4;
+                if (targetCameraY < cameraY) {
+                    cameraY += (targetCameraY - cameraY) * 0.1;
+                }
+
+                // Collisions
+                if (slime.vy > 0) {
+                    platforms.forEach(p => {
+                        if (p.broken) return;
+                        const feetY = slime.y + slime.radius * 0.8;
+                        const prevFeetY = feetY - slime.vy;
+
+                        if (
+                            slime.x + slime.radius * 0.6 > p.x &&
+                            slime.x - slime.radius * 0.6 < p.x + p.width &&
+                            feetY >= p.y && prevFeetY <= p.y + p.height + 5
+                        ) {
+                            if (p.type === 'breakable') {
+                                p.broken = true;
+                                createBreakParticles(p.x + p.width / 2, p.y);
+                            } else if (p.type === 'spring') {
+                                slime.vy = -17.5;
+                                slime.squishX = 1.4;
+                                slime.squishY = 0.6;
+                                playSound('spring');
+                                createParticles(slime.x, slime.y + slime.radius, '#38BDF8', 8);
+                            } else {
+                                slime.vy = -12;
+                                slime.squishX = 1.3;
+                                slime.squishY = 0.7;
+                                playSound('jump');
+                                createParticles(slime.x, slime.y + slime.radius, '#34D399', 5);
+                            }
+                        }
+                    });
+                }
+
+                platforms.forEach(p => {
+                    if (p.type === 'moving') {
+                        p.x += p.vx;
+                        if (p.x <= 10 || p.x + p.width >= canvas.width - 10) p.vx *= -1;
+                    }
+                });
+
+                const topMostY = platforms.reduce((min, p) => Math.min(min, p.y), canvas.height);
+                if (topMostY > cameraY - 200) {
+                    spawnPlatform(topMostY - Math.floor(Math.random() * 45 + 55));
+                }
+
+                coins.forEach(c => {
+                    if (!c.collected) {
+                        c.rotation += 0.08;
+                        const dist = Math.hypot(slime.x - c.x, slime.y - c.y);
+                        if (dist < slime.radius + c.radius) {
+                            c.collected = true;
+                            coinsCollected++;
+                            document.getElementById('game-coins').innerText = coinsCollected;
+                            playSound('coin');
+                            createParticles(c.x, c.y, '#FBBF24', 6);
+                        }
+                    }
+                });
+
+                if (slime.y - cameraY > canvas.height - 30) {
+                    triggerPortalSequence();
+                }
+
+            } else if (gameState === 'FALLING_PORTAL') {
+                if (portal.radius < 52) portal.radius += 2.5;
+                portal.angle += 0.25;
+
+                slime.x += (portal.x - slime.x) * 0.12;
+                slime.y += (portal.y - slime.y) * 0.12;
+                slime.squishX *= 0.91;
+                slime.squishY *= 0.91;
+                slime.rotation += 0.35;
+
+                if (Math.random() < 0.8) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const r = portal.radius + Math.random() * 20;
+                    particles.push({
+                        x: portal.x + Math.cos(angle) * r,
+                        y: portal.y + Math.sin(angle) * r,
+                        vx: -Math.cos(angle) * 2,
+                        vy: -Math.sin(angle) * 2,
+                        alpha: 1,
+                        radius: Math.random() * 3 + 1,
+                        color: Math.random() > 0.5 ? '#A855F7' : '#06B6D4'
+                    });
+                }
+
+                if (slime.squishX < 0.04) {
+                    handleGameOver();
+                }
+            }
+
+            particles.forEach((p, idx) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= 0.03;
+                if (p.alpha <= 0) particles.splice(idx, 1);
+            });
+        }
+
+        function createParticles(x, y, color, count) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x, y,
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: (Math.random() - 0.5) * 4,
+                    alpha: 1, radius: Math.random() * 3 + 2, color
+                });
+            }
+        }
+
+        function createBreakParticles(x, y) {
+            for (let i = 0; i < 10; i++) {
+                particles.push({
+                    x, y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: Math.random() * -3,
+                    alpha: 1, radius: Math.random() * 4 + 2, color: '#A855F7'
+                });
+            }
+        }
+
+        function drawGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.translate(0, -cameraY);
+
+            platforms.forEach(p => {
+                if (p.broken) return;
+                if (p.type === 'normal') ctx.fillStyle = '#10B981';
+                else if (p.type === 'moving') ctx.fillStyle = '#3B82F6';
+                else if (p.type === 'spring') ctx.fillStyle = '#06B6D4';
+                else if (p.type === 'breakable') ctx.fillStyle = '#A855F7';
+
+                ctx.beginPath();
+                ctx.roundRect(p.x, p.y, p.width, p.height, 8);
+                ctx.fill();
+
+                if (p.type === 'spring') {
+                    ctx.fillStyle = '#F59E0B';
+                    ctx.fillRect(p.x + p.width / 2 - 10, p.y - 6, 20, 6);
+                }
+            });
+
+            coins.forEach(c => {
+                if (!c.collected) {
+                    ctx.save();
+                    ctx.translate(c.x, c.y);
+                    ctx.scale(Math.cos(c.rotation), 1);
+                    ctx.fillStyle = '#FBBF24';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, c.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#D97706';
+                    ctx.font = 'bold 9px Comfortaa';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('$', 0, 1);
+                    ctx.restore();
+                }
+            });
+
+            particles.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+
+            if (portal.active) {
+                ctx.save();
+                ctx.translate(portal.x, portal.y);
+                ctx.rotate(portal.angle);
+
+                const grad = ctx.createRadialGradient(0, 0, 4, 0, 0, portal.radius);
+                grad.addColorStop(0, '#000000');
+                grad.addColorStop(0.4, '#8B5CF6');
+                grad.addColorStop(0.8, '#06B6D4');
+                grad.addColorStop(1, 'transparent');
+
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(0, 0, portal.radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.lineWidth = 2;
+                for (let i = 0; i < 3; i++) {
+                    ctx.rotate((Math.PI * 2) / 3);
+                    ctx.beginPath();
+                    ctx.arc(portal.radius * 0.4, 0, portal.radius * 0.5, 0, Math.PI * 0.8);
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            if (gameState === 'PLAYING' || gameState === 'FALLING_PORTAL') {
+                const activeSkinId = usersDB[currentUser]?.equippedSkin || 'default';
+                const skin = SKINS.find(s => s.id === activeSkinId) || SKINS[0];
+                drawSlimeGraphic(ctx, slime.x, slime.y, slime.radius * slime.squishX, slime.radius * slime.squishY, skin, slime.vx, slime.vy < 0, slime.rotation);
+            }
+
+            ctx.restore();
+        }
+
+        function drawSlimeGraphic(context, x, y, rx, ry, skin, vx, isJumping, rotationAngle) {
+            context.save();
+            context.translate(x, y);
+
+            if (rotationAngle !== 0) context.rotate(rotationAngle);
+
+            let fillColor = skin.color;
+            let strokeColor = skin.secondary;
+
+            if (skin.color === 'rainbow') {
+                const hue = (Date.now() / 10) % 360;
+                fillColor = `hsl(${hue}, 85%, 60%)`;
+                strokeColor = `hsl(${hue}, 85%, 40%)`;
+            }
+
+            context.beginPath();
+            context.ellipse(0, 0, Math.abs(rx), Math.abs(ry), 0, 0, Math.PI * 2);
+            context.fillStyle = fillColor;
+            
+            if (skin.cyberGlow) {
+                context.shadowColor = '#06B6D4';
+                context.shadowBlur = 18;
+            } else {
+                context.shadowColor = fillColor;
+                context.shadowBlur = 10;
+            }
+            context.fill();
+
+            context.lineWidth = 3;
+            context.strokeStyle = strokeColor;
+            context.stroke();
+            context.shadowBlur = 0;
+
+            // Shine
+            context.beginPath();
+            context.ellipse(-rx * 0.35, -ry * 0.35, Math.abs(rx) * 0.25, Math.abs(ry) * 0.18, -Math.PI / 4, 0, Math.PI * 2);
+            context.fillStyle = 'rgba(255, 255, 255, 0.55)';
+            context.fill();
+
+            // Eyes
+            const eyeOffsetX = Math.max(-5, Math.min(5, vx * 0.8));
+            const eyeOffsetY = isJumping ? -3 : 2;
+
+            [-rx * 0.3, rx * 0.3].forEach(eyeBaseX => {
+                const eyeX = eyeBaseX + eyeOffsetX;
+                const eyeY = -ry * 0.1 + eyeOffsetY;
+
+                context.beginPath();
+                context.arc(eyeX, eyeY, Math.max(1, Math.abs(rx) * 0.2), 0, Math.PI * 2);
+                context.fillStyle = '#FFFFFF';
+                context.fill();
+
+                context.beginPath();
+                context.arc(eyeX + eyeOffsetX * 0.2, eyeY, Math.max(1, Math.abs(rx) * 0.1), 0, Math.PI * 2);
+                context.fillStyle = skin.eyeColor || '#000000';
+                context.fill();
+            });
+
+            if (skin.crown) {
+                context.fillStyle = '#FBBF24';
+                context.strokeStyle = '#B45309';
+                context.lineWidth = 1.5;
+                context.beginPath();
+                context.moveTo(-12, -ry + 2);
+                context.lineTo(-14, -ry - 12);
+                context.lineTo(-6, -ry - 6);
+                context.lineTo(0, -ry - 15);
+                context.lineTo(6, -ry - 6);
+                context.lineTo(14, -ry - 12);
+                context.lineTo(12, -ry + 2);
+                context.closePath();
+                context.fill();
+                context.stroke();
+            }
+
+            context.restore();
+        }
+
+        function gameLoop() {
+            if (gameState === 'PLAYING' || gameState === 'FALLING_PORTAL') {
+                updateGame();
+                drawGame();
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        function handleGameOver() {
+            gameState = 'GAMEOVER';
+
+            const user = usersDB[currentUser];
+            user.coins += coinsCollected;
+
+            if (score > user.highScore) {
+                user.highScore = score;
+            }
+
+            saveUserDataOnline(currentUser);
+            updateUIHeader();
+
+            document.getElementById('gameover-score').innerText = `${score} м`;
+            document.getElementById('gameover-coins').innerText = coinsCollected;
+            document.getElementById('gameover-best').innerText = `${user.highScore} м`;
+
+            document.getElementById('modal-game-over').classList.remove('hidden');
+        }
+
+        /* =====================================================================
+           3. EVENT LISTENERS
+        ===================================================================== */
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStorageData();
+
+            if (currentUser) {
+                document.getElementById('modal-auth').classList.add('hidden');
+                updateUIHeader();
+            } else {
+                document.getElementById('modal-auth').classList.remove('hidden');
+            }
+
+            document.getElementById('tab-auth-login').addEventListener('click', () => {
+                isAuthLoginMode = true;
+                document.getElementById('tab-auth-login').className = 'flex-1 py-2 rounded-lg text-xs font-bold transition bg-emerald-500 text-slate-950';
+                document.getElementById('tab-auth-register').className = 'flex-1 py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white';
+                document.getElementById('btn-auth-submit').innerText = 'Войти в аккаунт';
+                document.getElementById('auth-error-msg').classList.add('hidden');
+            });
+
+            document.getElementById('tab-auth-register').addEventListener('click', () => {
+                isAuthLoginMode = false;
+                document.getElementById('tab-auth-register').className = 'flex-1 py-2 rounded-lg text-xs font-bold transition bg-emerald-500 text-slate-950';
+                document.getElementById('tab-auth-login').className = 'flex-1 py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white';
+                document.getElementById('btn-auth-submit').innerText = 'Зарегистрироваться';
+                document.getElementById('auth-error-msg').classList.add('hidden');
+            });
+
+            document.getElementById('form-auth').addEventListener('submit', (e) => {
+                e.preventDefault();
+                initAudio();
+                const nick = document.getElementById('auth-username').value;
+                const pass = document.getElementById('auth-password').value;
+
+                if (isAuthLoginMode) handleLogin(nick, pass);
+                else handleRegister(nick, pass);
+            });
+
+            document.getElementById('btn-play').addEventListener('click', () => {
+                initAudio();
+                document.getElementById('screen-main-menu').classList.add('hidden');
+                document.getElementById('screen-game').classList.remove('hidden');
+                initGame();
+            });
+
+            document.getElementById('btn-wardrobe').addEventListener('click', openWardrobe);
+            document.getElementById('btn-leaderboard').addEventListener('click', openLeaderboard);
+            document.getElementById('btn-settings').addEventListener('click', () => {
+                document.getElementById('input-new-nickname').value = currentUser;
+                document.getElementById('modal-settings').classList.remove('hidden');
+            });
+            document.getElementById('btn-admin-panel').addEventListener('click', openAdminPanel);
+
+            document.querySelectorAll('.btn-close-modal').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    btn.closest('.modal').classList.add('hidden');
+                });
+            });
+
+            document.getElementById('btn-save-nickname').addEventListener('click', () => {
+                const newNick = document.getElementById('input-new-nickname').value;
+                changeUserNickname(newNick);
+            });
+
+            document.getElementById('setting-sound-toggle').addEventListener('change', (e) => {
+                appSettings.soundEnabled = e.target.checked;
+                localStorage.setItem(SETTINGS_KEY, JSON.stringify(appSettings));
+                showToast('Данные успешно сохранены!');
+            });
+
+            document.getElementById('btn-save-password').addEventListener('click', () => {
+                const newPass = document.getElementById('input-new-password').value;
+                if (newPass.length < 3) {
+                    showToast('Пароль слишком короткий!', true);
+                    return;
+                }
+                usersDB[currentUser].password = newPass;
+                saveUserDataOnline(currentUser);
+                document.getElementById('input-new-password').value = '';
+                showToast('Пароль успешно обновлен!');
+            });
+
+            document.getElementById('btn-logout').addEventListener('click', () => {
+                setSessionUser(null);
+                document.getElementById('modal-settings').classList.add('hidden');
+                document.getElementById('modal-auth').classList.remove('hidden');
+            });
+
+            document.getElementById('admin-user-select').addEventListener('change', updateAdminPanelUserInfo);
+
+            document.getElementById('admin-btn-toggle-ban').addEventListener('click', () => {
+                const target = document.getElementById('admin-user-select').value;
+                if (target === currentUser) { showToast('Нельзя забанить самого себя!', true); return; }
+
+                usersDB[target].isBanned = !usersDB[target].isBanned;
+                saveUserDataOnline(target);
+                updateAdminPanelUserInfo();
+                openAdminPanel();
+                showToast(`Статус бана для ${target} изменен!`);
+            });
+
+            document.getElementById('admin-btn-toggle-verify').addEventListener('click', () => {
+                const target = document.getElementById('admin-user-select').value;
+                usersDB[target].isVerified = !usersDB[target].isVerified;
+                saveUserDataOnline(target);
+                updateAdminPanelUserInfo();
+                updateUIHeader();
+                showToast(`Галочка для ${target} обновлена!`);
+            });
+
+            document.getElementById('admin-btn-add-coins').addEventListener('click', () => {
+                const target = document.getElementById('admin-user-select').value;
+                const amount = parseInt(document.getElementById('admin-input-coins').value) || 0;
+                if (amount <= 0) return;
+
+                usersDB[target].coins += amount;
+                saveUserDataOnline(target);
+                updateAdminPanelUserInfo();
+                updateUIHeader();
+                document.getElementById('admin-input-coins').value = '';
+                showToast(`Выдано ${amount} монет для ${target}!`);
+            });
+
+            document.getElementById('btn-restart').addEventListener('click', () => {
+                document.getElementById('modal-game-over').classList.add('hidden');
+                initGame();
+            });
+
+            document.getElementById('btn-gameover-menu').addEventListener('click', () => {
+                document.getElementById('modal-game-over').classList.add('hidden');
+                document.getElementById('screen-game').classList.add('hidden');
+                document.getElementById('screen-main-menu').classList.remove('hidden');
+            });
+
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A' || e.key === 'ф' || e.key === 'Ф') keys.left = true;
+                if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D' || e.key === 'в' || e.key === 'В') keys.right = true;
+            });
+
+            window.addEventListener('keyup', (e) => {
+                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A' || e.key === 'ф' || e.key === 'Ф') keys.left = false;
+                if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D' || e.key === 'в' || e.key === 'В') keys.right = false;
+            });
+
+            const btnTouchLeft = document.getElementById('btn-touch-left');
+            const btnTouchRight = document.getElementById('btn-touch-right');
+
+            const bindTouch = (btn, key) => {
+                btn.addEventListener('touchstart', (e) => { e.preventDefault(); keys[key] = true; });
+                btn.addEventListener('touchend', (e) => { e.preventDefault(); keys[key] = false; });
+                btn.addEventListener('mousedown', () => { keys[key] = true; });
+                btn.addEventListener('mouseup', () => { keys[key] = false; });
+            };
+
+            bindTouch(btnTouchLeft, 'left');
+            bindTouch(btnTouchRight, 'right');
+
+            window.addEventListener('resize', () => {
+                if (gameState === 'PLAYING' || gameState === 'FALLING_PORTAL') resizeCanvas();
+            });
+        });
+    </script>
+</body>
+</html>
