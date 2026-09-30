@@ -1,1469 +1,1121 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Slime Jump - Cyber Adventure</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Font Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Fredoka', 'Inter', sans-serif;
-            touch-action: manipulation;
-            user-select: none;
-            -webkit-user-select: none;
-            background-color: #0f172a;
-        }
-        canvas {
-            display: block;
-            touch-action: none;
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.6);
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #10b981;
-            border-radius: 4px;
-        }
-        .glow-green {
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
-        }
-        .glow-red {
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
-        }
-        .glow-gold {
-            box-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
-        }
-        .laser-beam {
-            background: linear-gradient(90deg, rgba(239,68,68,0) 0%, rgba(239,68,68,0.8) 50%, rgba(239,68,68,0) 100%);
-        }
-        @keyframes pulse-fast {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.05); }
-        }
-        .animate-pulse-fast {
-            animation: pulse-fast 0.8s infinite;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Slime Jump - Cyber Edition</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background: #060913;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Главный контейнер приложения */
+    .app-container {
+      width: 100%;
+      max-width: 420px;
+      height: 94vh;
+      max-height: 840px;
+      background: #0c1220;
+      border: 1px solid #1a263d;
+      border-radius: 24px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 16px 50px rgba(0, 0, 0, 0.9), 0 0 20px rgba(46, 213, 115, 0.1);
+    }
+
+    /* Верхняя карточка профиля */
+    .user-card {
+      margin: 18px 18px 10px;
+      background: #141e30;
+      border: 1px solid #22324e;
+      border-radius: 16px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .user-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-avatar {
+      width: 42px;
+      height: 42px;
+      background: #2ed573;
+      border-radius: 10px;
+      box-shadow: 0 0 14px rgba(46, 213, 115, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+    }
+
+    .user-details {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-weight: 800;
+      font-size: 16px;
+      color: #ffffff;
+      letter-spacing: 0.3px;
+    }
+
+    .user-record {
+      font-size: 13px;
+      color: #2ed573;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .btn-login {
+      background: #1f2d47;
+      border: 1px solid #2e4368;
+      color: #e1e8ed;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-login:hover {
+      background: #2a3d60;
+      border-color: #3b5684;
+    }
+
+    /* Главный баннер логотипа */
+    .hero-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      position: relative;
+    }
+
+    .boss-badge {
+      background: #ff4757;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 3px 9px;
+      border-radius: 6px;
+      letter-spacing: 0.8px;
+      position: absolute;
+      top: 20%;
+      right: 18%;
+      transform: rotate(10deg);
+      box-shadow: 0 0 15px rgba(255, 71, 87, 0.7);
+      animation: pulseGlow 1.4s infinite alternate ease-in-out;
+    }
+
+    @keyframes pulseGlow {
+      0% { transform: rotate(10deg) scale(1); box-shadow: 0 0 10px rgba(255, 71, 87, 0.5); }
+      100% { transform: rotate(10deg) scale(1.1); box-shadow: 0 0 20px rgba(255, 71, 87, 0.9); }
+    }
+
+    .game-title {
+      font-size: 42px;
+      font-weight: 900;
+      font-style: italic;
+      color: #2ed573;
+      text-shadow: 0 0 25px rgba(46, 213, 115, 0.6), 0 0 5px rgba(255, 255, 255, 0.8);
+      letter-spacing: 1.5px;
+      line-height: 1;
+    }
+
+    .subtitle {
+      color: #8899a6;
+      font-size: 13px;
+      margin-top: 10px;
+      font-weight: 500;
+    }
+
+    /* Блок кнопок меню */
+    .menu-actions {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn-play {
+      background: #2ed573;
+      color: #0b150f;
+      font-size: 20px;
+      font-weight: 900;
+      border: none;
+      padding: 16px;
+      border-radius: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 25px rgba(46, 213, 115, 0.45);
+      transition: transform 0.15s, background 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-play:hover {
+      background: #32e07b;
+      box-shadow: 0 6px 30px rgba(46, 213, 115, 0.6);
+    }
+
+    .btn-play:active {
+      transform: scale(0.97);
+    }
+
+    .grid-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn-menu {
+      background: #141e30;
+      border: 1px solid #22324e;
+      color: #ffffff;
+      padding: 13px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-menu:hover {
+      background: #1c2b45;
+      border-color: #2e4368;
+    }
+
+    .btn-admin {
+      background: #341f97;
+      border: 1px solid #5f27cd;
+      color: #ffffff;
+    }
+
+    .btn-admin:hover {
+      background: #4228b8;
+      border-color: #713bdb;
+    }
+
+    .footer-note {
+      text-align: center;
+      color: #556980;
+      font-size: 12px;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    /* Игровой холст */
+    #gameCanvas {
+      width: 100%;
+      height: 100%;
+      display: none;
+      background: #080d1a;
+    }
+
+    /* Модальные окна */
+    .modal {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(8, 13, 26, 0.96);
+      backdrop-filter: blur(10px);
+      display: none;
+      flex-direction: column;
+      padding: 24px;
+      z-index: 100;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #1c2b45;
+      padding-bottom: 12px;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .btn-close {
+      background: #1f2d47;
+      border: none;
+      color: #fff;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      color: #8899a6;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .form-input {
+      width: 100%;
+      background: #141e30;
+      border: 1px solid #22324e;
+      padding: 12px 14px;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: #2ed573;
+    }
+
+    .btn-action {
+      width: 100%;
+      background: #2ed573;
+      color: #0b150f;
+      font-weight: 800;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 15px;
+      margin-top: 10px;
+      transition: background 0.2s;
+    }
+
+    .btn-action:hover {
+      background: #32e07b;
+    }
+
+    /* Экраны Бан и Game Over */
+    .ban-screen {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #110507;
+      color: #ff4757;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 30px;
+      z-index: 200;
+    }
+
+    .ban-icon { font-size: 64px; margin-bottom: 16px; }
+    .ban-title { font-size: 26px; font-weight: 900; margin-bottom: 10px; }
+    .ban-desc { font-size: 14px; color: #a4b0be; line-height: 1.5; }
+
+    .game-over-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(4, 7, 15, 0.9);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 90;
+      backdrop-filter: blur(6px);
+    }
+
+    /* Переключатель звука */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #1a263d;
+    }
+  </style>
 </head>
-<body class="bg-slate-950 text-white min-h-screen flex items-center justify-center p-0 md:p-4 overflow-hidden select-none">
+<body>
 
-    <!-- MAIN CONTAINER -->
-    <div id="app-container" class="relative w-full max-w-md h-screen md:h-[840px] md:max-h-[92vh] bg-slate-900 md:rounded-3xl shadow-2xl overflow-hidden border border-slate-800 flex flex-col">
-        
-        <!-- TOP HUD -->
-        <div id="top-hud" class="absolute top-0 left-0 right-0 z-20 p-4 flex justify-between items-center pointer-events-none bg-gradient-to-b from-slate-950/80 to-transparent">
-            <div class="flex items-center space-x-2 bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-slate-700/50 pointer-events-auto">
-                <i class="fa-solid fa-coins text-amber-400 text-lg"></i>
-                <span id="hud-coins" class="font-bold text-amber-300 text-sm">0</span>
-            </div>
-            
-            <div id="hud-score-container" class="flex flex-col items-center bg-slate-900/80 backdrop-blur-md px-4 py-1 rounded-full border border-slate-700/50">
-                <span class="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Высота</span>
-                <span id="hud-score" class="font-black text-emerald-400 text-base">0 M</span>
-            </div>
-
-            <div class="flex space-x-2 pointer-events-auto">
-                <button id="btn-admin-shortcut" class="hidden bg-purple-600/80 hover:bg-purple-600 text-white p-2 rounded-full backdrop-blur-md transition border border-purple-400/30">
-                    <i class="fa-solid fa-user-shield text-sm"></i>
-                </button>
-                <button id="btn-pause" class="bg-slate-800/80 hover:bg-slate-700 text-white p-2 rounded-full backdrop-blur-md transition border border-slate-700">
-                    <i class="fa-solid fa-pause text-sm"></i>
-                </button>
-            </div>
+  <div class="app-container">
+    
+    <!-- Главное Меню -->
+    <div id="mainMenu" style="display: flex; flex-direction: column; height: 100%;">
+      
+      <!-- Карточка пользователя -->
+      <div class="user-card">
+        <div class="user-left">
+          <div class="user-avatar" id="avatarBox">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3">
+              <rect x="3" y="3" width="18" height="18" rx="5" />
+            </svg>
+          </div>
+          <div class="user-details">
+            <span class="user-name" id="displayName">Гость</span>
+            <span class="user-record" id="displayRecord">Рекорд: 0М</span>
+          </div>
         </div>
+        <button class="btn-login" onclick="openModal('authModal')">
+          👤 Войти
+        </button>
+      </div>
 
-        <!-- BOSS HEALTH / ALERT BAR -->
-        <div id="boss-hud" class="absolute top-16 left-4 right-4 z-20 transition-all duration-500 opacity-0 transform -translate-y-4 pointer-events-none">
-            <div class="bg-slate-900/90 border border-red-500/50 rounded-xl p-2.5 backdrop-blur-md shadow-lg flex flex-col space-y-1">
-                <div class="flex justify-between items-center text-xs font-bold">
-                    <span class="text-red-400 flex items-center space-x-1">
-                        <i class="fa-solid fa-skull animate-bounce"></i>
-                        <span id="boss-name">КИБЕР-БОСС ВЫСОТЫ</span>
-                    </span>
-                    <span id="boss-distance" class="text-xs text-amber-400 font-mono">До 500M</span>
-                </div>
-                <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden border border-slate-700">
-                    <div id="boss-hp-bar" class="bg-gradient-to-r from-red-600 to-amber-500 h-full w-full transition-all duration-300"></div>
-                </div>
-            </div>
+      <!-- Центральный заголовок -->
+      <div class="hero-section">
+        <div class="boss-badge">BOSS 500M</div>
+        <h1 class="game-title">SLIME JUMP</h1>
+        <p class="subtitle">Прыгай вверх, уворачивайся от лазеров и сосулек!</p>
+      </div>
+
+      <!-- Главные Кнопки -->
+      <div class="menu-actions">
+        <button class="btn-play" onclick="startGame()">
+          ▶ ИГРАТЬ
+        </button>
+
+        <div class="grid-buttons">
+          <button class="btn-menu" onclick="openModal('wardrobeModal')">
+            👕 Гардероб
+          </button>
+          <button class="btn-menu" onclick="openModal('topModal')">
+            🏆 Топ Игроков
+          </button>
+          <button class="btn-menu" onclick="openModal('settingsModal')">
+            ⚙ Настройки
+          </button>
+          <button class="btn-menu btn-admin" onclick="openModal('adminModal')">
+            🛡 Админка
+          </button>
         </div>
+      </div>
 
-        <!-- CANVAS GAME LAYER -->
-        <canvas id="gameCanvas" class="w-full h-full bg-slate-950"></canvas>
-
-        <!-- TOUCH CONTROLS OVERLAY FOR MOBILE -->
-        <div id="touch-controls" class="absolute bottom-6 left-0 right-0 z-20 px-6 flex justify-between pointer-events-none md:hidden">
-            <button id="btn-touch-left" class="pointer-events-auto w-16 h-16 rounded-full bg-slate-800/60 active:bg-emerald-500/40 border border-slate-700/50 backdrop-blur-sm flex items-center justify-center text-2xl text-white">
-                <i class="fa-solid fa-arrow-left"></i>
-            </button>
-            <button id="btn-touch-right" class="pointer-events-auto w-16 h-16 rounded-full bg-slate-800/60 active:bg-emerald-500/40 border border-slate-700/50 backdrop-blur-sm flex items-center justify-center text-2xl text-white">
-                <i class="fa-solid fa-arrow-right"></i>
-            </button>
-        </div>
-
-        <!-- MAIN MENU OVERLAY -->
-        <div id="menu-overlay" class="absolute inset-0 z-30 bg-slate-950/90 backdrop-blur-md flex flex-col justify-between p-6 overflow-y-auto custom-scrollbar">
-            <!-- Header User Profile Banner -->
-            <div class="flex items-center justify-between bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
-                <div class="flex items-center space-x-3">
-                    <div id="menu-avatar-preview" class="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center border border-emerald-500/30">
-                        <span class="text-2xl">🟩</span>
-                    </div>
-                    <div>
-                        <div class="flex items-center space-x-1.5">
-                            <span id="user-nickname" class="font-bold text-white text-base">Гость</span>
-                            <span id="user-badge" class="hidden text-emerald-400 text-xs" title="Верифицирован">
-                                <i class="fa-solid fa-circle-check"></i>
-                            </span>
-                        </div>
-                        <div class="text-xs text-slate-400 flex items-center space-x-2">
-                            <span>Рекорд: <strong id="user-high-score" class="text-emerald-400">0M</strong></span>
-                        </div>
-                    </div>
-                </div>
-                <button id="btn-open-auth" class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-semibold px-3 py-2 rounded-xl border border-slate-700 transition">
-                    <i class="fa-solid fa-user-gear mr-1"></i> Войти
-                </button>
-            </div>
-
-            <!-- Title Header -->
-            <div class="text-center my-auto py-6">
-                <div class="inline-block relative">
-                    <h1 class="text-5xl font-black italic tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 drop-shadow-lg">
-                        SLIME JUMP
-                    </h1>
-                    <span class="absolute -top-3 -right-6 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest animate-pulse">
-                        Boss 500M
-                    </span>
-                </div>
-                <p class="text-slate-400 text-xs mt-2 font-medium">Прыгай вверх, уворачивайся от лазеров!</p>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="space-y-3 my-auto">
-                <button id="btn-start-game" class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black text-xl rounded-2xl shadow-lg glow-green transition-transform active:scale-95 flex items-center justify-center space-x-2">
-                    <i class="fa-solid fa-play"></i>
-                    <span>ИГРАТЬ</span>
-                </button>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <button id="btn-open-wardrobe" class="py-3.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-white font-bold rounded-2xl transition flex items-center justify-center space-x-2">
-                        <i class="fa-solid fa-shirt text-emerald-400"></i>
-                        <span>Гардероб</span>
-                    </button>
-                    <button id="btn-open-leaderboard" class="py-3.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-white font-bold rounded-2xl transition flex items-center justify-center space-x-2">
-                        <i class="fa-solid fa-trophy text-amber-400"></i>
-                        <span>Топ Игроков</span>
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <button id="btn-open-settings" class="py-3 bg-slate-900/60 hover:bg-slate-800 border border-slate-800/80 text-slate-300 font-semibold rounded-2xl transition flex items-center justify-center space-x-2 text-sm">
-                        <i class="fa-solid fa-gear"></i>
-                        <span>Настройки</span>
-                    </button>
-                    <button id="btn-open-admin" class="py-3 bg-purple-950/40 hover:bg-purple-900/40 border border-purple-800/50 text-purple-300 font-semibold rounded-2xl transition flex items-center justify-center space-x-2 text-sm">
-                        <i class="fa-solid fa-shield-halved"></i>
-                        <span>Админка</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Footer info -->
-            <div class="text-center text-[11px] text-slate-500 mt-4">
-                <span>Управление: Стрелки / Касания по бокам</span>
-            </div>
-        </div>
-
-        <!-- AUTH MODAL -->
-        <div id="auth-modal" class="hidden absolute inset-0 z-40 bg-slate-950/95 backdrop-blur-lg flex flex-col p-6 justify-center">
-            <button class="btn-close-modal absolute top-5 right-5 text-slate-400 hover:text-white text-xl">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
-            <div class="text-center mb-6">
-                <h2 class="text-2xl font-bold text-white">Аккаунт Slime Jump</h2>
-                <p class="text-xs text-slate-400 mt-1">Сохраняйте монеты, рекорды и скины</p>
-            </div>
-
-            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Никнейм</label>
-                    <input type="text" id="auth-username" placeholder="Придумайте ник..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Пароль</label>
-                    <input type="password" id="auth-password" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500">
-                </div>
-
-                <div class="flex space-x-3 pt-2">
-                    <button id="btn-auth-login" class="flex-1 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl transition text-sm">
-                        Войти
-                    </button>
-                    <button id="btn-auth-register" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition text-sm border border-slate-700">
-                        Регистрация
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- WARDROBE & SHOP MODAL -->
-        <div id="wardrobe-modal" class="hidden absolute inset-0 z-40 bg-slate-950/95 backdrop-blur-lg flex flex-col p-5 overflow-y-auto custom-scrollbar">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-white flex items-center space-x-2">
-                    <i class="fa-solid fa-shirt text-emerald-400"></i>
-                    <span>Гардероб Слайма</span>
-                </h2>
-                <button class="btn-close-modal text-slate-400 hover:text-white text-xl">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <!-- Preview Box -->
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col items-center justify-center mb-4 relative overflow-hidden">
-                <div class="absolute top-3 right-3 bg-slate-950/80 px-3 py-1 rounded-full border border-slate-800 text-amber-300 text-xs font-bold flex items-center space-x-1">
-                    <i class="fa-solid fa-coins text-amber-400"></i>
-                    <span id="wardrobe-coins-display">0</span>
-                </div>
-                <canvas id="wardrobePreviewCanvas" width="160" height="160" class="my-2"></canvas>
-                <span id="preview-item-name" class="text-sm font-bold text-emerald-400">Зеленый Слайм</span>
-            </div>
-
-            <!-- Category Tabs -->
-            <div class="flex bg-slate-900 p-1 rounded-xl mb-4 border border-slate-800">
-                <button id="tab-skins" class="flex-1 py-2 text-xs font-bold rounded-lg bg-emerald-500 text-slate-950 transition">Скины</button>
-                <button id="tab-accessories" class="flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 transition">Аксессуары</button>
-            </div>
-
-            <!-- Items Grid -->
-            <div id="shop-items-grid" class="grid grid-cols-2 gap-3 mb-4">
-                <!-- Dynamic Items Inserted via JS -->
-            </div>
-        </div>
-
-        <!-- LEADERBOARD MODAL -->
-        <div id="leaderboard-modal" class="hidden absolute inset-0 z-40 bg-slate-950/95 backdrop-blur-lg flex flex-col p-5">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-white flex items-center space-x-2">
-                    <i class="fa-solid fa-trophy text-amber-400"></i>
-                    <span>Таблица Лидеров</span>
-                </h2>
-                <button class="btn-close-modal text-slate-400 hover:text-white text-xl">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <div class="flex-1 bg-slate-900 border border-slate-800 rounded-2xl p-3 overflow-y-auto custom-scrollbar">
-                <div id="leaderboard-list" class="space-y-2">
-                    <!-- Dynamic List via JS -->
-                    <div class="text-center py-10 text-slate-500 text-sm">
-                        <i class="fa-solid fa-spinner animate-spin text-xl mb-2"></i>
-                        <p>Загрузка игроков...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ADMIN PANEL MODAL -->
-        <div id="admin-modal" class="hidden absolute inset-0 z-40 bg-slate-950/95 backdrop-blur-lg flex flex-col p-5 overflow-y-auto custom-scrollbar">
-            <div class="flex justify-between items-center mb-4 border-b border-purple-900/50 pb-3">
-                <h2 class="text-xl font-bold text-purple-400 flex items-center space-x-2">
-                    <i class="fa-solid fa-user-shield"></i>
-                    <span>Панель Администратора</span>
-                </h2>
-                <button class="btn-close-modal text-slate-400 hover:text-white text-xl">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <div class="space-y-4">
-                <!-- Self Cheat Controls -->
-                <div class="bg-purple-950/30 border border-purple-800/40 rounded-2xl p-4">
-                    <h3 class="text-xs font-bold text-purple-300 uppercase tracking-wider mb-3">Управление Игроком</h3>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button id="btn-admin-add-coins" class="py-2.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1.5">
-                            <i class="fa-solid fa-coins"></i>
-                            <span>+1000 Монет</span>
-                        </button>
-                        <button id="btn-admin-toggle-verify" class="py-2.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1.5">
-                            <i class="fa-solid fa-badge-check"></i>
-                            <span>Переключить Галочку</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Ban / Unban System Controls -->
-                <div class="bg-purple-950/30 border border-purple-800/40 rounded-2xl p-4 space-y-3">
-                    <h3 class="text-xs font-bold text-purple-300 uppercase tracking-wider">Система Банов</h3>
-                    
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">Никнейм игрока для бана/разбана</label>
-                        <div class="flex space-x-2">
-                            <input type="text" id="admin-target-nickname" placeholder="Введите ник..." class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2">
-                        <button id="btn-admin-ban-user" class="py-2.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1.5">
-                            <i class="fa-solid fa-ban"></i>
-                            <span>Заблокировать</span>
-                        </button>
-                        <button id="btn-admin-unban-user" class="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition flex items-center justify-center space-x-1.5">
-                            <i class="fa-solid fa-circle-check"></i>
-                            <span>Разблокировать</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- All Players Database Summary -->
-                <div class="bg-purple-950/30 border border-purple-800/40 rounded-2xl p-4">
-                    <h3 class="text-xs font-bold text-purple-300 uppercase tracking-wider mb-2">Список Зарегистрированных</h3>
-                    <div id="admin-users-list" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar text-xs">
-                        <p class="text-slate-500 text-center py-4">Нажмите заново для обновления...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SETTINGS MODAL -->
-        <div id="settings-modal" class="hidden absolute inset-0 z-40 bg-slate-950/95 backdrop-blur-lg flex flex-col p-5 justify-center">
-            <button class="btn-close-modal absolute top-5 right-5 text-slate-400 hover:text-white text-xl">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
-            <h2 class="text-2xl font-bold text-white text-center mb-6">Настройки</h2>
-
-            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-4">
-                <div class="flex items-center justify-between">
-                    <span class="text-sm font-semibold text-slate-300">Звуковые эффекты</span>
-                    <button id="btn-toggle-sound" class="w-12 h-6 bg-emerald-500 rounded-full p-1 transition duration-300 flex items-center justify-end">
-                        <div class="w-4 h-4 bg-white rounded-full"></div>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- BANNED USER SCREEN OVERLAY -->
-        <div id="ban-screen" class="hidden absolute inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center p-6 text-center">
-            <div class="w-20 h-20 bg-red-500/10 border-2 border-red-500 rounded-full flex items-center justify-center text-red-500 text-4xl mb-4 animate-bounce">
-                <i class="fa-solid fa-ban"></i>
-            </div>
-            <h2 class="text-2xl font-black text-red-500 mb-2">Ваш аккаунт заблокирован!</h2>
-            <p class="text-sm text-slate-400 max-w-xs mb-6">
-                Вы были заблокированы администратором за нарушение правил игры. Доступ к игровому процессу ограничен.
-            </p>
-            <button id="btn-ban-logout" class="py-3 px-6 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl border border-slate-700 text-sm transition">
-                Выйти из аккаунта
-            </button>
-        </div>
-
-        <!-- GAME OVER OVERLAY -->
-        <div id="gameover-modal" class="hidden absolute inset-0 z-30 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center">
-            <h2 class="text-3xl font-black text-red-500 mb-1">ИГРА ОКОНЧЕНА</h2>
-            <p id="gameover-reason" class="text-xs text-slate-400 mb-6">Вы упали в пропасть!</p>
-
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 w-full max-w-xs mb-6 space-y-3">
-                <div class="flex justify-between items-center text-sm">
-                    <span class="text-slate-400">Набранная высота:</span>
-                    <span id="go-score" class="font-bold text-emerald-400 text-base">0 M</span>
-                </div>
-                <div class="flex justify-between items-center text-sm">
-                    <span class="text-slate-400">Собрано монет:</span>
-                    <span id="go-coins" class="font-bold text-amber-400 text-base">+0</span>
-                </div>
-                <div class="flex justify-between items-center text-sm border-t border-slate-800 pt-2">
-                    <span class="text-slate-400">Рекорд:</span>
-                    <span id="go-best" class="font-bold text-white text-base">0 M</span>
-                </div>
-            </div>
-
-            <div class="space-y-3 w-full max-w-xs">
-                <button id="btn-restart-game" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-black text-lg rounded-xl shadow-lg glow-green transition active:scale-95">
-                    ИГРАТЬ СНОВА
-                </button>
-                <button id="btn-return-menu" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl border border-slate-700 text-sm transition">
-                    В ГЛАВНОЕ МЕНЮ
-                </button>
-            </div>
-        </div>
-
-        <!-- NOTIFICATION TOAST -->
-        <div id="toast" class="absolute bottom-16 left-1/2 transform -translate-x-1/2 z-50 bg-slate-800 text-white text-xs font-semibold px-4 py-2.5 rounded-full border border-slate-700 shadow-xl opacity-0 pointer-events-none transition-all duration-300">
-            Сообщение
-        </div>
-
+      <div class="footer-note">
+        Управление: Стрелки / A-D / Касания по бокам экрана
+      </div>
     </div>
 
-    <!-- FIREBASE & GAME MODULE LOGIC -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <!-- Игровой Холст -->
+    <canvas id="gameCanvas"></canvas>
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'slime-jump-v1';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "demo-key",
-            authDomain: "demo.firebaseapp.com",
-            projectId: "demo-project",
-            storageBucket: "demo.appspot.com",
-            messagingSenderId: "000000000",
-            appId: "1:000000000:web:0000000"
-        };
+    <!-- Экран Блокировки -->
+    <div class="ban-screen" id="banScreen">
+      <div class="ban-icon">🚫</div>
+      <div class="ban-title">АККАУНТ ЗАБЛОКИРОВАН</div>
+      <div class="ban-desc">Доступ к игре заблокирован администратором системы. По вопросам разбана обратитесь в поддержку.</div>
+    </div>
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    <!-- Экран Окончания Игры -->
+    <div class="game-over-overlay" id="gameOverOverlay">
+      <h2 style="font-size: 34px; color: #ff4757; font-weight: 900; margin-bottom: 8px; text-shadow: 0 0 15px rgba(255, 71, 87, 0.5);">ВЫ УПАЛИ!</h2>
+      <p style="font-size: 19px; color: #fff; margin-bottom: 24px; font-weight: 700;" id="finalScoreText">Высота: 0М</p>
+      <button class="btn-play" style="width: 220px;" onclick="startGame()">
+        🔄 Ещё раз
+      </button>
+      <button class="btn-menu" style="margin-top: 12px; width: 220px;" onclick="quitToMenu()">
+        🏠 В меню
+      </button>
+    </div>
 
-        // Helper path functions for Rule 1 compliance
-        const getPublicProfilesCol = () => collection(db, 'artifacts', appId, 'public', 'data', 'profiles');
-        const getProfileDoc = (uid) => doc(db, 'artifacts', appId, 'public', 'data', 'profiles', uid);
+    <!-- Модалка Авторизации -->
+    <div class="modal" id="authModal">
+      <div class="modal-header">
+        <span class="modal-title">Вход / Регистрация</span>
+        <button class="btn-close" onclick="closeModal('authModal')">✕</button>
+      </div>
+      <div class="form-group">
+        <label>Никнейм игрока</label>
+        <input type="text" class="form-input" id="authNameInput" placeholder="Введите имя...">
+      </div>
+      <button class="btn-action" onclick="saveAuth()">Войти в аккаунт</button>
+    </div>
 
-        class SoundEngine {
-            constructor() {
-                this.ctx = null;
-                this.enabled = true;
-            }
+    <!-- Модалка Настроек -->
+    <div class="modal" id="settingsModal">
+      <div class="modal-header">
+        <span class="modal-title">⚙ Настройки</span>
+        <button class="btn-close" onclick="closeModal('settingsModal')">✕</button>
+      </div>
+      <div class="form-group">
+        <label>Изменить Никнейм</label>
+        <input type="text" class="form-input" id="settingsNickInput" placeholder="Новый ник...">
+      </div>
+      <button class="btn-action" onclick="updateNickname()" style="margin-bottom: 20px;">Сохранить ник</button>
 
-            init() {
-                if (!this.ctx) {
-                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-            }
+      <div class="toggle-row">
+        <span>Звуковые эффекты</span>
+        <input type="checkbox" id="soundToggle" checked style="transform: scale(1.4); cursor: pointer;">
+      </div>
+    </div>
 
-            playJump() {
-                if (!this.enabled) return;
-                this.init();
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(300, this.ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(600, this.ctx.currentTime + 0.15);
-                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.15);
-            }
+    <!-- Модалка Гардероба -->
+    <div class="modal" id="wardrobeModal">
+      <div class="modal-header">
+        <span class="modal-title">👕 Гардероб Слаймов</span>
+        <button class="btn-close" onclick="closeModal('wardrobeModal')">✕</button>
+      </div>
+      <p style="color: #8899a6; font-size: 13px; margin-bottom: 16px;">Выберите стиль вашего героя:</p>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+        <button class="btn-menu" style="background: #2ed573; color: #000; font-weight: 800;" onclick="selectSkin('#2ed573')">Изумрудный</button>
+        <button class="btn-menu" style="background: #00d2d3; color: #000; font-weight: 800;" onclick="selectSkin('#00d2d3')">Ледяной</button>
+        <button class="btn-menu" style="background: #ff4757; color: #fff; font-weight: 800;" onclick="selectSkin('#ff4757')">Огненный</button>
+        <button class="btn-menu" style="background: #a55eea; color: #fff; font-weight: 800;" onclick="selectSkin('#a55eea')">Кибер-Фиолет</button>
+        <button class="btn-menu" style="background: #ffa502; color: #000; font-weight: 800;" onclick="selectSkin('#ffa502')">Золотой</button>
+        <button class="btn-menu" style="background: #ff6b81; color: #fff; font-weight: 800;" onclick="selectSkin('#ff6b81')">Розовый</button>
+      </div>
+    </div>
 
-            playCoin() {
-                if (!this.enabled) return;
-                this.init();
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(900, this.ctx.currentTime);
-                osc.frequency.setValueAtTime(1200, this.ctx.currentTime + 0.08);
-                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.2);
-            }
+    <!-- Модалка Таблицы Лидеров -->
+    <div class="modal" id="topModal">
+      <div class="modal-header">
+        <span class="modal-title">🏆 Топ Игроков</span>
+        <button class="btn-close" onclick="closeModal('topModal')">✕</button>
+      </div>
+      <div id="leaderboardList" style="display: flex; flex-direction: column; gap: 10px;">
+        <!-- Динамически рендерится -->
+      </div>
+    </div>
 
-            playBossLaser() {
-                if (!this.enabled) return;
-                this.init();
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(150, this.ctx.currentTime);
-                osc.frequency.linearRampToValueAtTime(400, this.ctx.currentTime + 0.3);
-                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.4);
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.4);
-            }
+    <!-- Модалка Админки -->
+    <div class="modal" id="adminModal">
+      <div class="modal-header">
+        <span class="modal-title">🛡 Управление Банами</span>
+        <button class="btn-close" onclick="closeModal('adminModal')">✕</button>
+      </div>
+      <div class="form-group">
+        <label>Никнейм для блокировки / разблокировки</label>
+        <input type="text" class="form-input" id="adminBanInput" placeholder="Введите ник...">
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-action" style="background: #ff4757; color: #fff;" onclick="toggleBanUser(true)">Забанить</button>
+        <button class="btn-action" style="background: #2ed573; color: #000;" onclick="toggleBanUser(false)">Разбанить</button>
+      </div>
+      <div style="margin-top: 24px;">
+        <label style="color:#8899a6; font-size:13px; font-weight: 600;">Список забаненных аккаунтов:</label>
+        <div id="bannedList" style="color: #ff4757; font-size: 14px; margin-top: 8px; font-weight: bold; background: #141e30; padding: 12px; border-radius: 8px; border: 1px solid #22324e;">
+          Нет забаненных
+        </div>
+      </div>
+    </div>
 
-            playDefeat() {
-                if (!this.enabled) return;
-                this.init();
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(250, this.ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.4);
-                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.4);
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.4);
-            }
+  </div>
+
+  <script>
+    // =========================================================
+    // СОСТОЯНИЕ И ДАННЫЕ ПРИЛОЖЕНИЯ
+    // =========================================================
+    let currentUser = localStorage.getItem('slime_user') || 'Гость';
+    let highRecord = parseInt(localStorage.getItem('slime_record') || '0');
+    let selectedColor = localStorage.getItem('slime_color') || '#2ed573';
+    let bannedUsers = JSON.parse(localStorage.getItem('slime_banned') || '[]');
+    let soundEnabled = true;
+
+    // Синтезатор Звуков (Web Audio API)
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      if (!audioCtx) audioCtx = new AudioCtx();
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'jump') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.exponentialRampToValueAtTime(420, now + 0.12);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      } else if (type === 'laser') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.linearRampToValueAtTime(150, now + 0.2);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      } else if (type === 'icicle') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(200, now + 0.15);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      } else if (type === 'gameover') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.linearRampToValueAtTime(80, now + 0.4);
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      }
+    }
+
+    // Обновление UI
+    function updateUI() {
+      document.getElementById('displayName').innerText = currentUser;
+      document.getElementById('displayRecord').innerText = `Рекорд: ${highRecord}М`;
+      document.getElementById('avatarBox').style.background = selectedColor;
+      document.getElementById('avatarBox').style.boxShadow = `0 0 14px ${selectedColor}`;
+      document.getElementById('settingsNickInput').value = currentUser;
+
+      // Проверка бана
+      if (bannedUsers.map(u => u.toLowerCase()).includes(currentUser.toLowerCase())) {
+        document.getElementById('banScreen').style.display = 'flex';
+      } else {
+        document.getElementById('banScreen').style.display = 'none';
+      }
+
+      renderLeaderboard();
+      renderBannedList();
+    }
+
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    function saveAuth() {
+      const val = document.getElementById('authNameInput').value.trim();
+      if (val) {
+        currentUser = val;
+        localStorage.setItem('slime_user', currentUser);
+        updateUI();
+        closeModal('authModal');
+      }
+    }
+
+    function updateNickname() {
+      const val = document.getElementById('settingsNickInput').value.trim();
+      if (val) {
+        currentUser = val;
+        localStorage.setItem('slime_user', currentUser);
+        updateUI();
+        closeModal('settingsModal');
+      }
+    }
+
+    function selectSkin(color) {
+      selectedColor = color;
+      localStorage.setItem('slime_color', color);
+      updateUI();
+      closeModal('wardrobeModal');
+    }
+
+    function toggleBanUser(status) {
+      const target = document.getElementById('adminBanInput').value.trim();
+      if (!target) return;
+
+      const targetLower = target.toLowerCase();
+      if (status) {
+        if (!bannedUsers.map(u => u.toLowerCase()).includes(targetLower)) {
+          bannedUsers.push(target);
         }
+      } else {
+        bannedUsers = bannedUsers.filter(u => u.toLowerCase() !== targetLower);
+      }
 
-        const sounds = new SoundEngine();
+      localStorage.setItem('slime_banned', JSON.stringify(bannedUsers));
+      document.getElementById('adminBanInput').value = '';
+      updateUI();
+    }
 
-        const SKINS = {
-            green: { id: 'green', name: 'Зеленый Слайм', color: '#10b981', eyes: '#ffffff', price: 0 },
-            blue: { id: 'blue', name: 'Ледяной Слайм', color: '#06b6d4', eyes: '#ffffff', price: 200 },
-            purple: { id: 'purple', name: 'Астральный Слайм', color: '#8b5cf6', eyes: '#f43f5e', price: 500 },
-            gold: { id: 'gold', name: 'Золотой Слайм', color: '#f59e0b', eyes: '#ffffff', price: 1000 },
-            cyber: { id: 'cyber', name: 'Неоновый Слайм', color: '#ec4899', eyes: '#06b6d4', price: 2000 }
-        };
+    function renderBannedList() {
+      const box = document.getElementById('bannedList');
+      if (bannedUsers.length === 0) {
+        box.innerText = 'Список забаненных пуст';
+      } else {
+        box.innerText = bannedUsers.join(', ');
+      }
+    }
 
-        const ACCESSORIES = {
-            none: { id: 'none', name: 'Без аксессуара', icon: '❌', price: 0 },
-            crown: { id: 'crown', name: 'Корона', icon: '👑', price: 300 },
-            viking: { id: 'viking', name: 'Шлем Викинга', icon: '🪖', price: 500 },
-            glasses: { id: 'glasses', name: 'Крутые Очки', icon: '🕶️', price: 400 },
-            headphones: { id: 'headphones', name: 'Наушники', icon: '🎧', price: 600 }
-        };
+    function renderLeaderboard() {
+      const list = document.getElementById('leaderboardList');
+      const scores = [
+        { name: currentUser, score: highRecord },
+        { name: "ProJumper", score: 540 },
+        { name: "IceMaster", score: 410 },
+        { name: "CyberSlime", score: 290 }
+      ].sort((a, b) => b.score - a.score);
 
-        let currentUser = null;
-        let userData = {
-            username: 'Гость',
-            coins: 0,
-            highScore: 0,
-            isVerified: false,
-            isBanned: false,
-            unlockedSkins: ['green'],
-            unlockedAccessories: ['none'],
-            equippedSkin: 'green',
-            equippedAccessory: 'none'
-        };
+      list.innerHTML = scores.map((item, idx) => `
+        <div style="background: #141e30; padding: 12px 16px; border-radius: 10px; border: 1px solid #22324e; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-weight: 700;">#${idx + 1} <span style="color: ${item.name === currentUser ? '#2ed573' : '#fff'};">${item.name}</span></span>
+          <span style="color: #2ed573; font-weight: 900; font-size: 15px;">${item.score}М</span>
+        </div>
+      `).join('');
+    }
 
-        let activeProfileUnsubscribe = null;
+    document.getElementById('soundToggle').addEventListener('change', (e) => {
+      soundEnabled = e.target.checked;
+    });
 
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            toast.classList.remove('opacity-0');
-            toast.classList.add('opacity-100');
-            setTimeout(() => {
-                toast.classList.remove('opacity-100');
-                toast.classList.add('opacity-0');
-            }, 2500);
-        }
+    // =========================================================
+    // ИГРОВОЙ ДВИЖОК CANVAS
+    // =========================================================
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
 
-        async function initAuth() {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (err) {
-                console.error("Auth init error:", err);
-            }
-        }
+    let gameActive = false;
+    let score = 0;
+    let player, platforms, particles, boss1, boss2, icicles;
+    let keys = {};
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                // Listen to profile changes in Firestore
-                if (activeProfileUnsubscribe) activeProfileUnsubscribe();
+    function initGameCanvas() {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+    }
 
-                const pDocRef = getProfileDoc(user.uid);
-                activeProfileUnsubscribe = onSnapshot(pDocRef, (snap) => {
-                    if (snap.exists()) {
-                        userData = { ...userData, ...snap.data() };
-                        updateUI();
-                        checkBanStatus();
-                    } else {
-                        // Initialize default document
-                        const defaultData = {
-                            username: 'Слайм_' + user.uid.substring(0, 4),
-                            coins: 0,
-                            highScore: 0,
-                            isVerified: false,
-                            isBanned: false,
-                            unlockedSkins: ['green'],
-                            unlockedAccessories: ['none'],
-                            equippedSkin: 'green',
-                            equippedAccessory: 'none'
-                        };
-                        setDoc(pDocRef, defaultData);
-                    }
-                }, (err) => console.error("Firestore snapshot error:", err));
-            }
+    function startGame() {
+      if (bannedUsers.map(u => u.toLowerCase()).includes(currentUser.toLowerCase())) {
+        updateUI();
+        return;
+      }
+
+      initGameCanvas();
+      document.getElementById('mainMenu').style.display = 'none';
+      document.getElementById('gameOverOverlay').style.display = 'none';
+      canvas.style.display = 'block';
+
+      score = 0;
+      particles = [];
+
+      player = {
+        x: canvas.width / 2 - 16,
+        y: canvas.height - 100,
+        w: 32,
+        h: 32,
+        vx: 0,
+        vy: -11,
+        color: selectedColor,
+        squash: 1
+      };
+
+      // Генерация платформ
+      platforms = [
+        { x: canvas.width / 2 - 45, y: canvas.height - 40, w: 90, h: 14, type: 'normal' }
+      ];
+
+      for (let i = 0; i < 8; i++) {
+        spawnPlatform(canvas.height - 110 - i * 85);
+      }
+
+      // Босс 1 (100М - 500М)
+      boss1 = {
+        active: false,
+        x: canvas.width / 2,
+        y: 80,
+        angle: 0,
+        sweepSpeed: 0.025
+      };
+
+      // Босс 2 (Ледяной Слайм 600M+)
+      boss2 = {
+        active: false,
+        x: canvas.width / 2,
+        y: 90,
+        timer: 0,
+        floatOffset: 0
+      };
+
+      icicles = [];
+      gameActive = true;
+      requestAnimationFrame(gameLoop);
+    }
+
+    function spawnPlatform(y) {
+      const types = ['normal', 'normal', 'moving', 'breakable', 'spring'];
+      const type = types[Math.floor(Math.random() * types.length)];
+      platforms.push({
+        x: Math.random() * (canvas.width - 80),
+        y: y,
+        w: 75,
+        h: 14,
+        type: type,
+        vx: type === 'moving' ? (Math.random() > 0.5 ? 2 : -2) : 0,
+        broken: false
+      });
+    }
+
+    function quitToMenu() {
+      gameActive = false;
+      canvas.style.display = 'none';
+      document.getElementById('gameOverOverlay').style.display = 'none';
+      document.getElementById('mainMenu').style.display = 'flex';
+      updateUI();
+    }
+
+    // Слушатели управления
+    window.addEventListener('keydown', e => keys[e.key] = true);
+    window.addEventListener('keyup', e => keys[e.key] = false);
+
+    canvas.addEventListener('touchstart', e => {
+      const touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+      if (touchX < canvas.width / 2) {
+        keys['ArrowLeft'] = true; keys['ArrowRight'] = false;
+      } else {
+        keys['ArrowRight'] = true; keys['ArrowLeft'] = false;
+      }
+    });
+
+    canvas.addEventListener('touchend', () => {
+      keys['ArrowLeft'] = false; keys['ArrowRight'] = false;
+    });
+
+    // Создание частиц
+    function createParticles(x, y, color, count = 6) {
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: x, y: y,
+          vx: (Math.random() - 0.5) * 6,
+          vy: (Math.random() - 0.5) * 6,
+          size: Math.random() * 4 + 2,
+          color: color,
+          life: 20
         });
+      }
+    }
 
-        function checkBanStatus() {
-            const banScreen = document.getElementById('ban-screen');
-            if (userData.isBanned) {
-                banScreen.classList.remove('hidden');
-                game.active = false;
-            } else {
-                banScreen.classList.add('hidden');
-            }
+    // Главный игровой цикл
+    function gameLoop() {
+      if (!gameActive) return;
+
+      ctx.fillStyle = '#080d1a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Физика Игрока
+      if (keys['ArrowLeft'] || keys['a'] || keys['A']) player.vx = -5.5;
+      else if (keys['ArrowRight'] || keys['d'] || keys['D']) player.vx = 5.5;
+      else player.vx *= 0.82;
+
+      player.vy += 0.42; // Гравитация
+      player.x += player.vx;
+      player.y += player.vy;
+
+      // Телепорт по краям
+      if (player.x < -20) player.x = canvas.width - 15;
+      if (player.x > canvas.width) player.x = -15;
+
+      // Скролл экрана
+      if (player.y < canvas.height / 2) {
+        let diff = canvas.height / 2 - player.y;
+        player.y = canvas.height / 2;
+        score += Math.floor(diff / 4);
+
+        platforms.forEach(p => {
+          p.y += diff;
+          if (p.y > canvas.height) {
+            platforms.splice(platforms.indexOf(p), 1);
+            spawnPlatform(0);
+          }
+        });
+      }
+
+      // Отрисовка и физика Платформ
+      platforms.forEach(p => {
+        if (p.broken) return;
+
+        if (p.type === 'moving') {
+          p.x += p.vx;
+          if (p.x <= 0 || p.x + p.w >= canvas.width) p.vx *= -1;
         }
 
-        function updateUI() {
-            document.getElementById('user-nickname').innerText = userData.username;
-            document.getElementById('hud-coins').innerText = userData.coins;
-            document.getElementById('wardrobe-coins-display').innerText = userData.coins;
-            document.getElementById('user-high-score').innerText = userData.highScore + 'M';
+        // Цвета платформ
+        if (p.type === 'normal') ctx.fillStyle = '#1e3799';
+        else if (p.type === 'moving') ctx.fillStyle = '#2ed573';
+        else if (p.type === 'breakable') ctx.fillStyle = '#eb2f06';
+        else if (p.type === 'spring') ctx.fillStyle = '#f6b93b';
 
-            const badge = document.getElementById('user-badge');
-            if (userData.isVerified) {
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-            }
+        ctx.beginPath();
+        ctx.roundRect(p.x, p.y, p.w, p.h, 6);
+        ctx.fill();
 
-            renderWardrobePreview();
+        if (p.type === 'spring') {
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(p.x + p.w / 2 - 8, p.y - 4, 16, 4);
         }
 
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-
-        function resizeCanvas() {
-            const container = document.getElementById('app-container');
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
+        // Столкновение с платформой
+        if (player.vy > 0 &&
+            player.x + player.w > p.x &&
+            player.x < p.x + p.w &&
+            player.y + player.h >= p.y &&
+            player.y + player.h <= p.y + p.h + 12) {
+          
+          if (p.type === 'breakable') {
+            p.broken = true;
+            createParticles(p.x + p.w/2, p.y, '#eb2f06', 10);
+          } else if (p.type === 'spring') {
+            player.vy = -16; // Высокий прыжок
+            playSound('jump');
+            createParticles(player.x + 16, player.y + 32, '#f6b93b', 8);
+          } else {
+            player.vy = -11; // Обычный прыжок
+            playSound('jump');
+            createParticles(player.x + 16, player.y + 32, player.color, 6);
+          }
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        class GameEngine {
-            constructor() {
-                this.active = false;
-                this.score = 0;
-                this.coinsCollected = 0;
-                this.cameraY = 0;
-
-                // Slime Player
-                this.player = {
-                    x: canvas.width / 2,
-                    y: canvas.height - 150,
-                    radius: 20,
-                    vx: 0,
-                    vy: 0,
-                    jumpForce: -13.5,
-                    gravity: 0.45,
-                    isGrounded: false
-                };
-
-                this.platforms = [];
-                this.coins = [];
-                this.particles = [];
-
-                // Controls
-                this.keys = { left: false, right: false };
-
-                // Boss state (100M - 500M)
-                this.boss = {
-                    active: false,
-                    despawned: false,
-                    hp: 100,
-                    x: canvas.width / 2,
-                    y: -100,
-                    targetY: 100,
-                    laserX: canvas.width / 2,
-                    laserState: 'idle', // 'idle', 'warning', 'laser'
-                    laserTimer: 0,
-                    laserWidth: 0,
-                    maxLaserWidth: 36
-                };
-            }
-
-            start() {
-                if (userData.isBanned) {
-                    showToast('Ваш аккаунт заблокирован!');
-                    return;
-                }
-
-                this.active = true;
-                this.score = 0;
-                this.coinsCollected = 0;
-                this.cameraY = 0;
-
-                this.player.x = canvas.width / 2;
-                this.player.y = canvas.height - 200;
-                this.player.vx = 0;
-                this.player.vy = this.player.jumpForce;
-
-                this.boss.active = false;
-                this.boss.despawned = false;
-                this.boss.y = -100;
-                this.boss.laserState = 'idle';
-
-                this.generateInitialPlatforms();
-
-                document.getElementById('menu-overlay').classList.add('hidden');
-                document.getElementById('gameover-modal').classList.add('hidden');
-                document.getElementById('boss-hud').classList.add('opacity-0', '-translate-y-4');
-
-                sounds.playJump();
-            }
-
-            generateInitialPlatforms() {
-                this.platforms = [];
-                this.coins = [];
-                
-                // Base platform
-                this.platforms.push({ x: canvas.width / 2 - 60, y: canvas.height - 80, w: 120, h: 16, type: 'normal' });
-
-                for (let i = 0; i < 12; i++) {
-                    this.spawnPlatform(canvas.height - 180 - i * 80);
-                }
-            }
-
-            spawnPlatform(y) {
-                const w = Math.max(60, 110 - Math.floor(this.score / 50));
-                const x = Math.random() * (canvas.width - w);
-                const rand = Math.random();
-                let type = 'normal';
-
-                if (rand < 0.25) type = 'moving';
-                else if (rand < 0.35) type = 'spring';
-
-                this.platforms.push({
-                    x: x,
-                    y: y,
-                    w: w,
-                    h: 16,
-                    type: type,
-                    vx: type === 'moving' ? (Math.random() > 0.5 ? 2 : -2) : 0
-                });
-
-                // Spawn Coin
-                if (Math.random() < 0.4) {
-                    this.coins.push({
-                        x: x + w / 2,
-                        y: y - 25,
-                        r: 10,
-                        collected: false
-                    });
-                }
-            }
-
-            update() {
-                if (!this.active) return;
-
-                // Player physics
-                if (this.keys.left) this.player.vx = -6;
-                else if (this.keys.right) this.player.vx = 6;
-                else this.player.vx *= 0.8;
-
-                this.player.x += this.player.vx;
-                this.player.vy += this.player.gravity;
-                this.player.y += this.player.vy;
-
-                // Screen Wrap Left/Right
-                if (this.player.x < -this.player.radius) this.player.x = canvas.width + this.player.radius;
-                if (this.player.x > canvas.width + this.player.radius) this.player.x = -this.player.radius;
-
-                // Camera follow player up
-                if (this.player.y < canvas.height * 0.45) {
-                    const diff = canvas.height * 0.45 - this.player.y;
-                    this.player.y += diff;
-                    
-                    // Score calculation
-                    this.score += Math.floor(diff * 0.1);
-
-                    // Shift platforms & coins
-                    this.platforms.forEach(p => p.y += diff);
-                    this.coins.forEach(c => c.y += diff);
-                    this.particles.forEach(p => p.y += diff);
-
-                    // Spawn new platforms as highest moves down
-                    const highestY = Math.min(...this.platforms.map(p => p.y));
-                    if (highestY > 80) {
-                        this.spawnPlatform(highestY - 80);
-                    }
-                }
-
-                // Platform collisions (only falling down)
-                if (this.player.vy > 0) {
-                    this.platforms.forEach(p => {
-                        if (
-                            this.player.x + this.player.radius > p.x &&
-                            this.player.x - this.player.radius < p.x + p.w &&
-                            this.player.y + this.player.radius >= p.y &&
-                            this.player.y + this.player.radius <= p.y + p.h + 10
-                        ) {
-                            if (p.type === 'spring') {
-                                this.player.vy = this.player.jumpForce * 1.5;
-                                this.createParticles(this.player.x, this.player.y, '#f59e0b');
-                            } else {
-                                this.player.vy = this.player.jumpForce;
-                            }
-                            sounds.playJump();
-                        }
-                    });
-                }
-
-                // Move platforms
-                this.platforms.forEach(p => {
-                    if (p.type === 'moving') {
-                        p.x += p.vx;
-                        if (p.x <= 0 || p.x + p.w >= canvas.width) p.vx *= -1;
-                    }
-                });
-
-                // Coin collection
-                this.coins.forEach(c => {
-                    if (!c.collected) {
-                        const dist = Math.hypot(this.player.x - c.x, this.player.y - c.y);
-                        if (dist < this.player.radius + c.r) {
-                            c.collected = true;
-                            this.coinsCollected++;
-                            sounds.playCoin();
-                            this.createParticles(c.x, c.y, '#f59e0b', 6);
-                        }
-                    }
-                });
-
-                // Cleanup offscreen objects
-                this.platforms = this.platforms.filter(p => p.y < canvas.height + 50);
-                this.coins = c => c.y < canvas.height + 50 && !c.collected;
-
-                // BOSS MECHANICS
-                const bossHud = document.getElementById('boss-hud');
-
-                if (this.score >= 100 && this.score <= 500) {
-                    this.boss.active = true;
-                    bossHud.classList.remove('opacity-0', '-translate-y-4');
-                    
-                    // Smoothly position boss on screen
-                    if (this.boss.y < this.boss.targetY) {
-                        this.boss.y += 2;
-                    }
-
-                    // Dynamic Laser Attack AI
-                    this.boss.laserTimer++;
-
-                    // State 1: Idle -> Warning
-                    if (this.boss.laserState === 'idle' && this.boss.laserTimer > 120) {
-                        this.boss.laserState = 'warning';
-                        this.boss.laserTimer = 0;
-                    }
-                    // State 2: Warning -> Laser Firing
-                    else if (this.boss.laserState === 'warning') {
-                        // Smoothly track/follow player X position
-                        this.boss.laserX += (this.player.x - this.boss.laserX) * 0.08;
-
-                        if (this.boss.laserTimer > 90) {
-                            this.boss.laserState = 'laser';
-                            this.boss.laserTimer = 0;
-                            this.boss.laserWidth = 5;
-                            sounds.playBossLaser();
-                        }
-                    }
-                    // State 3: Laser active with tracking
-                    else if (this.boss.laserState === 'laser') {
-                        // Continue tracking player X during fire for dynamic challenge!
-                        this.boss.laserX += (this.player.x - this.boss.laserX) * 0.04;
-                        
-                        if (this.boss.laserWidth < this.boss.maxLaserWidth) {
-                            this.boss.laserWidth += 2;
-                        }
-
-                        // Laser hit check
-                        if (Math.abs(this.player.x - this.boss.laserX) < (this.boss.laserWidth / 2 + this.player.radius - 4)) {
-                            this.gameOver("Уничтожен лазером босса!");
-                        }
-
-                        if (this.boss.laserTimer > 80) {
-                            this.boss.laserState = 'idle';
-                            this.boss.laserTimer = 0;
-                        }
-                    }
-
-                    // Update Boss HP bar as remaining height percentage
-                    const remainingM = 500 - this.score;
-                    const hpPercent = Math.max(0, (remainingM / 400) * 100);
-                    document.getElementById('boss-hp-bar').style.width = hpPercent + '%';
-                    document.getElementById('boss-distance').innerText = 'Осталось: ' + Math.max(0, remainingM) + 'M';
-
-                } else if (this.score > 500 && this.boss.active) {
-                    // Boss despawns after 500M!
-                    this.boss.active = false;
-                    this.boss.despawned = true;
-                    bossHud.classList.add('opacity-0', '-translate-y-4');
-                    sounds.playDefeat();
-                    this.createParticles(this.boss.x, this.boss.y, '#ef4444', 30);
-                    showToast("БОСС ПОВЕРЖЕН! Вы поднялись выше 500M!");
-                }
-
-                // Check Game Over (Falling)
-                if (this.player.y > canvas.height + 100) {
-                    this.gameOver("Вы упали в пропасть!");
-                }
-
-                // Update HUD
-                document.getElementById('hud-score').innerText = this.score + ' M';
-                document.getElementById('hud-coins').innerText = userData.coins + this.coinsCollected;
-
-                // Update particles
-                this.particles.forEach((p, idx) => {
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.alpha -= 0.02;
-                    if (p.alpha <= 0) this.particles.splice(idx, 1);
-                });
-            }
-
-            createParticles(x, y, color, count = 10) {
-                for (let i = 0; i < count; i++) {
-                    this.particles.push({
-                        x: x,
-                        y: y,
-                        vx: (Math.random() - 0.5) * 6,
-                        vy: (Math.random() - 0.5) * 6,
-                        color: color,
-                        alpha: 1
-                    });
-                }
-            }
-
-            async gameOver(reason = "Игра окончена!") {
-                this.active = false;
-                sounds.playDefeat();
-
-                const totalCoinsGained = this.coinsCollected;
-                const newHighScore = Math.max(userData.highScore, this.score);
-
-                userData.coins += totalCoinsGained;
-                userData.highScore = newHighScore;
-
-                // Sync to Firestore
-                if (currentUser) {
-                    const pRef = getProfileDoc(currentUser.uid);
-                    await updateDoc(pRef, {
-                        coins: userData.coins,
-                        highScore: userData.highScore
-                    }).catch(e => console.error("Error updating scores:", e));
-                }
-
-                document.getElementById('gameover-reason').innerText = reason;
-                document.getElementById('go-score').innerText = this.score + ' M';
-                document.getElementById('go-coins').innerText = '+' + totalCoinsGained;
-                document.getElementById('go-best').innerText = newHighScore + ' M';
-
-                document.getElementById('gameover-modal').classList.remove('hidden');
-            }
-
-            draw() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                // Background grid pattern
-                ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-                ctx.lineWidth = 1;
-                for (let x = 0; x < canvas.width; x += 40) {
-                    ctx.beginPath();
-                    ctx.moveTo(x, 0);
-                    ctx.lineTo(x, canvas.height);
-                    ctx.stroke();
-                }
-
-                // Draw Platforms
-                this.platforms.forEach(p => {
-                    ctx.save();
-                    if (p.type === 'normal') {
-                        ctx.fillStyle = '#10b981';
-                    } else if (p.type === 'moving') {
-                        ctx.fillStyle = '#06b6d4';
-                    } else if (p.type === 'spring') {
-                        ctx.fillStyle = '#f59e0b';
-                    }
-                    ctx.shadowColor = ctx.fillStyle;
-                    ctx.shadowBlur = 8;
-                    ctx.beginPath();
-                    ctx.roundRect(p.x, p.y, p.w, p.h, 8);
-                    ctx.fill();
-                    ctx.restore();
-                });
-
-                // Draw Coins
-                this.coins.forEach(c => {
-                    if (!c.collected) {
-                        ctx.save();
-                        ctx.fillStyle = '#f59e0b';
-                        ctx.shadowColor = '#f59e0b';
-                        ctx.shadowBlur = 10;
-                        ctx.beginPath();
-                        ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.fillStyle = '#fff';
-                        ctx.font = 'bold 10px sans-serif';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText('$', c.x, c.y);
-                        ctx.restore();
-                    }
-                });
-
-                // Draw Boss & Laser
-                if (this.boss.active) {
-                    // Draw Boss Head
-                    ctx.save();
-                    ctx.fillStyle = '#ef4444';
-                    ctx.shadowColor = '#ef4444';
-                    ctx.shadowBlur = 20;
-                    ctx.beginPath();
-                    ctx.arc(this.boss.x, this.boss.y, 45, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    // Boss Eyes
-                    ctx.fillStyle = '#000';
-                    ctx.beginPath();
-                    ctx.arc(this.boss.x - 15, this.boss.y - 5, 8, 0, Math.PI * 2);
-                    ctx.arc(this.boss.x + 15, this.boss.y - 5, 8, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.restore();
-
-                    // Boss Laser Laser Targeting / Firing
-                    if (this.boss.laserState === 'warning') {
-                        // Dynamic warning tracking beam
-                        ctx.save();
-                        ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
-                        ctx.lineWidth = 3;
-                        ctx.setLineDash([8, 8]);
-                        ctx.beginPath();
-                        ctx.moveTo(this.boss.x, this.boss.y + 40);
-                        ctx.lineTo(this.boss.laserX, canvas.height);
-                        ctx.stroke();
-
-                        // Target Indicator on floor
-                        ctx.fillStyle = 'rgba(239, 68, 68, 0.5)';
-                        ctx.beginPath();
-                        ctx.arc(this.boss.laserX, canvas.height - 20, 25, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.restore();
-
-                    } else if (this.boss.laserState === 'laser') {
-                        // Dynamic Firing Energy Beam
-                        ctx.save();
-                        ctx.fillStyle = 'rgba(239, 68, 68, 0.8)';
-                        ctx.shadowColor = '#ef4444';
-                        ctx.shadowBlur = 30;
-                        
-                        ctx.beginPath();
-                        ctx.moveTo(this.boss.x - this.boss.laserWidth / 2, this.boss.y + 40);
-                        ctx.lineTo(this.boss.laserX - this.boss.laserWidth / 2, canvas.height);
-                        ctx.lineTo(this.boss.laserX + this.boss.laserWidth / 2, canvas.height);
-                        ctx.lineTo(this.boss.x + this.boss.laserWidth / 2, this.boss.y + 40);
-                        ctx.closePath();
-                        ctx.fill();
-
-                        // Bright inner core
-                        ctx.fillStyle = '#ffffff';
-                        ctx.beginPath();
-                        ctx.moveTo(this.boss.x - 4, this.boss.y + 40);
-                        ctx.lineTo(this.boss.laserX - 4, canvas.height);
-                        ctx.lineTo(this.boss.laserX + 4, canvas.height);
-                        ctx.lineTo(this.boss.x + 4, this.boss.y + 40);
-                        ctx.closePath();
-                        ctx.fill();
-                        ctx.restore();
-                    }
-                }
-
-                // Draw Slime Player
-                this.drawSlime(ctx, this.player.x, this.player.y, this.player.radius, userData.equippedSkin, userData.equippedAccessory);
-
-                // Draw Particles
-                this.particles.forEach(p => {
-                    ctx.save();
-                    ctx.globalAlpha = p.alpha;
-                    ctx.fillStyle = p.color;
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.restore();
-                });
-            }
-
-            drawSlime(targetCtx, x, y, radius, skinId, accId) {
-                const skin = SKINS[skinId] || SKINS.green;
-                const acc = ACCESSORIES[accId] || ACCESSORIES.none;
-
-                targetCtx.save();
-                targetCtx.fillStyle = skin.color;
-                targetCtx.shadowColor = skin.color;
-                targetCtx.shadowBlur = 12;
-
-                // Slime Body
-                targetCtx.beginPath();
-                targetCtx.arc(x, y, radius, 0, Math.PI * 2);
-                targetCtx.fill();
-
-                // Eyes
-                targetCtx.fillStyle = skin.eyes;
-                targetCtx.beginPath();
-                targetCtx.arc(x - 6, y - 4, 4, 0, Math.PI * 2);
-                targetCtx.arc(x + 6, y - 4, 4, 0, Math.PI * 2);
-                targetCtx.fill();
-
-                targetCtx.fillStyle = '#000';
-                targetCtx.beginPath();
-                targetCtx.arc(x - 5, y - 4, 2, 0, Math.PI * 2);
-                targetCtx.arc(x + 7, y - 4, 2, 0, Math.PI * 2);
-                targetCtx.fill();
-
-                // Accessory Icon Overlay
-                if (acc.id !== 'none') {
-                    targetCtx.font = `${radius * 1.1}px sans-serif`;
-                    targetCtx.textAlign = 'center';
-                    targetCtx.textBaseline = 'middle';
-                    targetCtx.fillText(acc.icon, x, y - radius * 0.9);
-                }
-
-                targetCtx.restore();
-            }
+      });
+
+      // =========================================================
+      // БОСС 1: ЛАЗЕРНЫЙ СЛАЙМ (100M - 500M)
+      // =========================================================
+      if (score >= 100 && score <= 500) {
+        boss1.active = true;
+        boss1.angle += boss1.sweepSpeed;
+
+        // Корпус Босса 1
+        ctx.fillStyle = '#ff4757';
+        ctx.shadowColor = '#ff4757';
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.arc(boss1.x, boss1.y, 36, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Злой красный глаз
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.arc(boss1.x, boss1.y, 14, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ff4757';
+        ctx.beginPath();
+        ctx.arc(boss1.x, boss1.y, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // ДВИГАЮЩИЕСЯ ЛАЗЕРЫ (сканирующий луч)
+        const sweepX1 = boss1.x + Math.sin(boss1.angle) * (canvas.width / 2 - 10);
+        const sweepX2 = boss1.x - Math.sin(boss1.angle) * (canvas.width / 2 - 10);
+
+        ctx.strokeStyle = '#ff4757';
+        ctx.lineWidth = 5;
+        ctx.shadowColor = '#ff4757';
+        ctx.shadowBlur = 12;
+
+        // Луч 1
+        ctx.beginPath();
+        ctx.moveTo(boss1.x - 15, boss1.y + 20);
+        ctx.lineTo(sweepX1, canvas.height);
+        ctx.stroke();
+
+        // Луч 2
+        ctx.beginPath();
+        ctx.moveTo(boss1.x + 15, boss1.y + 20);
+        ctx.lineTo(sweepX2, canvas.height);
+        ctx.stroke();
+
+        ctx.shadowBlur = 0;
+
+        // Коллизия с лазерами
+        if ((Math.abs(player.x - sweepX1) < 22 || Math.abs(player.x - sweepX2) < 22) && player.y > boss1.y + 40) {
+          playSound('laser');
+          gameOver();
+        }
+      } else {
+        if (boss1.active) {
+          // Эффект исчезновения на 500М
+          createParticles(boss1.x, boss1.y, '#ff4757', 30);
+          boss1.active = false;
+        }
+      }
+
+      // =========================================================
+      // БОСС 2: ЛЕДЯНОЙ СЛАЙМ СО ЗЛЫМ ЛИЦОМ (600M+)
+      // =========================================================
+      if (score >= 600) {
+        boss2.active = true;
+        boss2.timer++;
+        boss2.floatOffset = Math.sin(boss2.timer * 0.05) * 8;
+
+        const bY = boss2.y + boss2.floatOffset;
+
+        // Ледяное свечение
+        ctx.fillStyle = '#00d2d3';
+        ctx.shadowColor = '#00d2d3';
+        ctx.shadowBlur = 20;
+        ctx.beginPath();
+        ctx.arc(boss2.x, bY, 42, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Ледяные шипы / Ледяная корона
+        ctx.fillStyle = '#74b9ff';
+        ctx.beginPath();
+        ctx.moveTo(boss2.x - 35, bY - 20); ctx.lineTo(boss2.x - 22, bY - 55); ctx.lineTo(boss2.x - 10, bY - 30);
+        ctx.moveTo(boss2.x - 12, bY - 30); ctx.lineTo(boss2.x, bY - 60); ctx.lineTo(boss2.x + 12, bY - 30);
+        ctx.moveTo(boss2.x + 10, bY - 30); ctx.lineTo(boss2.x + 22, bY - 55); ctx.lineTo(boss2.x + 35, bY - 20);
+        ctx.fill();
+
+        // ЗЛОЕ ЛИЦО
+        // Насупленные злые брови
+        ctx.strokeStyle = '#0c1220';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(boss2.x - 24, bY - 14); ctx.lineTo(boss2.x - 6, bY - 4);
+        ctx.moveTo(boss2.x + 24, bY - 14); ctx.lineTo(boss2.x + 6, bY - 4);
+        ctx.stroke();
+
+        // Злые глаза
+        ctx.fillStyle = '#0c1220';
+        ctx.fillRect(boss2.x - 20, bY - 2, 10, 10);
+        ctx.fillRect(boss2.x + 10, bY - 2, 10, 10);
+
+        // Злая оскаленная пасть
+        ctx.beginPath();
+        ctx.moveTo(boss2.x - 14, bY + 18);
+        ctx.lineTo(boss2.x, bY + 12);
+        ctx.lineTo(boss2.x + 14, bY + 18);
+        ctx.stroke();
+
+        // Спавн СОСУЛЕК
+        if (boss2.timer % 55 === 0) {
+          playSound('icicle');
+          icicles.push({
+            x: Math.random() * (canvas.width - 30) + 15,
+            y: bY + 40,
+            vy: Math.random() * 2 + 5.5,
+            size: Math.random() * 8 + 14
+          });
+        }
+      } else {
+        boss2.active = false;
+      }
+
+      // Физика и отрисовка СОСУЛЕК
+      for (let i = icicles.length - 1; i >= 0; i--) {
+        let ic = icicles[i];
+        ic.y += ic.vy;
+
+        // Рисуем острую ледяную сосульку
+        ctx.fillStyle = '#74b9ff';
+        ctx.shadowColor = '#00d2d3';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.moveTo(ic.x, ic.y + ic.size * 2);
+        ctx.lineTo(ic.x + ic.size / 2, ic.y);
+        ctx.lineTo(ic.x - ic.size / 2, ic.y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Коллизия с игроком
+        if (Math.abs(player.x + 16 - ic.x) < 18 && Math.abs(player.y + 16 - ic.y) < 20) {
+          createParticles(player.x, player.y, '#74b9ff', 15);
+          gameOver();
         }
 
-        const game = new GameEngine();
+        if (ic.y > canvas.height) icicles.splice(i, 1);
+      }
 
-        function gameLoop() {
-            game.update();
-            game.draw();
-            requestAnimationFrame(gameLoop);
-        }
+      // Обновление частиц
+      for (let i = particles.length - 1; i >= 0; i--) {
+        let pt = particles[i];
+        pt.x += pt.vx;
+        pt.y += pt.vy;
+        pt.life--;
+        ctx.fillStyle = pt.color;
+        ctx.fillRect(pt.x, pt.y, pt.size, pt.size);
+        if (pt.life <= 0) particles.splice(i, 1);
+      }
 
-        function renderWardrobePreview() {
-            const previewCanvas = document.getElementById('wardrobePreviewCanvas');
-            if (!previewCanvas) return;
-            const pCtx = previewCanvas.getContext('2d');
-            pCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+      // Отрисовка Игрока (Слайма)
+      ctx.fillStyle = player.color;
+      ctx.shadowColor = player.color;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.roundRect(player.x, player.y, player.w, player.h, 10);
+      ctx.fill();
+      ctx.shadowBlur = 0;
 
-            game.drawSlime(
-                pCtx,
-                previewCanvas.width / 2,
-                previewCanvas.height / 2 + 10,
-                38,
-                userData.equippedSkin,
-                userData.equippedAccessory
-            );
-        }
+      // Глазки слайма
+      ctx.fillStyle = '#000';
+      ctx.fillRect(player.x + 7, player.y + 9, 5, 6);
+      ctx.fillRect(player.x + 20, player.y + 9, 5, 6);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(player.x + 8, player.y + 10, 2, 2);
+      ctx.fillRect(player.x + 21, player.y + 10, 2, 2);
 
-        let currentShopTab = 'skins';
+      // Высота
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 18px sans-serif';
+      ctx.fillText(`Высота: ${score}М`, 16, 32);
 
-        function renderShopItems() {
-            const grid = document.getElementById('shop-items-grid');
-            grid.innerHTML = '';
+      // Условие падения
+      if (player.y > canvas.height) {
+        gameOver();
+      } else {
+        requestAnimationFrame(gameLoop);
+      }
+    }
 
-            const items = currentShopTab === 'skins' ? SKINS : ACCESSORIES;
+    function gameOver() {
+      gameActive = false;
+      playSound('gameover');
+      if (score > highRecord) {
+        highRecord = score;
+        localStorage.setItem('slime_record', highRecord);
+      }
+      document.getElementById('finalScoreText').innerText = `Высота: ${score}М`;
+      document.getElementById('gameOverOverlay').style.display = 'flex';
+      updateUI();
+    }
 
-            Object.values(items).forEach(item => {
-                const isUnlocked = currentShopTab === 'skins'
-                    ? userData.unlockedSkins.includes(item.id)
-                    : userData.unlockedAccessories.includes(item.id);
-
-                const isEquipped = currentShopTab === 'skins'
-                    ? userData.equippedSkin === item.id
-                    : userData.equippedAccessory === item.id;
-
-                const card = document.createElement('div');
-                card.className = `bg-slate-900 border ${isEquipped ? 'border-emerald-500 bg-emerald-950/20' : 'border-slate-800'} rounded-2xl p-3 flex flex-col items-center justify-between text-center transition`;
-
-                let iconDisplay = '';
-                if (currentShopTab === 'skins') {
-                    iconDisplay = `<div class="w-10 h-10 rounded-full my-2 border border-white/20" style="background-color: ${item.color}"></div>`;
-                } else {
-                    iconDisplay = `<div class="text-3xl my-1">${item.icon}</div>`;
-                }
-
-                let btnHtml = '';
-                if (isEquipped) {
-                    btnHtml = `<span class="text-xs font-bold text-emerald-400 py-1.5"><i class="fa-solid fa-check"></i> Надето</span>`;
-                } else if (isUnlocked) {
-                    btnHtml = `<button class="btn-equip w-full py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl border border-slate-700">Надеть</button>`;
-                } else {
-                    btnHtml = `<button class="btn-buy w-full py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold rounded-xl flex items-center justify-center space-x-1">
-                        <i class="fa-solid fa-coins text-[10px]"></i>
-                        <span>${item.price}</span>
-                    </button>`;
-                }
-
-                card.innerHTML = `
-                    <span class="text-xs font-bold text-slate-200">${item.name}</span>
-                    ${iconDisplay}
-                    ${btnHtml}
-                `;
-
-                // Handle Equip / Buy click events
-                const equipBtn = card.querySelector('.btn-equip');
-                if (equipBtn) {
-                    equipBtn.onclick = async () => {
-                        if (currentShopTab === 'skins') userData.equippedSkin = item.id;
-                        else userData.equippedAccessory = item.id;
-
-                        updateUI();
-                        renderShopItems();
-
-                        if (currentUser) {
-                            await updateDoc(getProfileDoc(currentUser.uid), {
-                                equippedSkin: userData.equippedSkin,
-                                equippedAccessory: userData.equippedAccessory
-                            });
-                        }
-                    };
-                }
-
-                const buyBtn = card.querySelector('.btn-buy');
-                if (buyBtn) {
-                    buyBtn.onclick = async () => {
-                        if (userData.coins < item.price) {
-                            showToast('Недостаточно монет!');
-                            return;
-                        }
-
-                        userData.coins -= item.price;
-                        if (currentShopTab === 'skins') {
-                            userData.unlockedSkins.push(item.id);
-                            userData.equippedSkin = item.id;
-                        } else {
-                            userData.unlockedAccessories.push(item.id);
-                            userData.equippedAccessory = item.id;
-                        }
-
-                        updateUI();
-                        renderShopItems();
-                        showToast('Куплено!');
-
-                        if (currentUser) {
-                            await updateDoc(getProfileDoc(currentUser.uid), {
-                                coins: userData.coins,
-                                unlockedSkins: userData.unlockedSkins,
-                                unlockedAccessories: userData.unlockedAccessories,
-                                equippedSkin: userData.equippedSkin,
-                                equippedAccessory: userData.equippedAccessory
-                            });
-                        }
-                    };
-                }
-
-                grid.appendChild(card);
-            });
-        }
-
-        async function loadLeaderboard() {
-            const listEl = document.getElementById('leaderboard-list');
-            listEl.innerHTML = `<p class="text-center text-xs text-slate-500 py-6">Загрузка данных...</p>`;
-
-            try {
-                const snap = await getDocs(getPublicProfilesCol());
-                let users = [];
-                snap.forEach(docSnap => users.push(docSnap.data()));
-
-                // Sort JS side to strictly follow Rule 2 (No compound Firestore queries)
-                users.sort((a, b) => (b.highScore || 0) - (a.highScore || 0));
-
-                listEl.innerHTML = '';
-                users.forEach((u, idx) => {
-                    const row = document.createElement('div');
-                    row.className = 'flex items-center justify-between p-3 bg-slate-950/60 rounded-xl border border-slate-800/80 text-xs';
-                    row.innerHTML = `
-                        <div class="flex items-center space-x-3">
-                            <span class="font-black ${idx === 0 ? 'text-amber-400 text-sm' : idx === 1 ? 'text-slate-300' : idx === 2 ? 'text-amber-600' : 'text-slate-500'}">#${idx + 1}</span>
-                            <span class="font-bold text-white flex items-center space-x-1">
-                                <span>${u.username || 'Игрок'}</span>
-                                ${u.isVerified ? '<i class="fa-solid fa-circle-check text-emerald-400 text-[10px]"></i>' : ''}
-                            </span>
-                        </div>
-                        <span class="font-black text-emerald-400">${u.highScore || 0} M</span>
-                    `;
-                    listEl.appendChild(row);
-                });
-            } catch (err) {
-                console.error("Leaderboard load err:", err);
-                listEl.innerHTML = `<p class="text-center text-xs text-red-400 py-6">Ошибка загрузки</p>`;
-            }
-        }
-
-        async function loadAdminUsersList() {
-            const listContainer = document.getElementById('admin-users-list');
-            listContainer.innerHTML = `<p class="text-center text-slate-500">Загрузка...</p>`;
-
-            try {
-                const snap = await getDocs(getPublicProfilesCol());
-                listContainer.innerHTML = '';
-                snap.forEach(docSnap => {
-                    const u = docSnap.data();
-                    const item = document.createElement('div');
-                    item.className = 'flex items-center justify-between p-2 bg-slate-900 rounded-lg border border-slate-800';
-                    item.innerHTML = `
-                        <div>
-                            <span class="font-bold text-white">${u.username || 'Без ника'}</span>
-                            <span class="text-[10px] text-slate-400 block">${u.isBanned ? '❌ Забанен' : '✅ Активен'}</span>
-                        </div>
-                        <button class="btn-quick-fill-target text-[10px] bg-purple-900/60 text-purple-300 px-2 py-1 rounded border border-purple-700">Выбрать</button>
-                    `;
-                    item.querySelector('.btn-quick-fill-target').onclick = () => {
-                        document.getElementById('admin-target-nickname').value = u.username;
-                    };
-                    listContainer.appendChild(item);
-                });
-            } catch (e) {
-                console.error("Admin user list error:", e);
-            }
-        }
-
-        async function setBanByNickname(nickname, banState) {
-            if (!nickname) {
-                showToast('Введите никнейм!');
-                return;
-            }
-
-            try {
-                const snap = await getDocs(getPublicProfilesCol());
-                let foundDocId = null;
-
-                snap.forEach(docSnap => {
-                    if (docSnap.data().username === nickname) {
-                        foundDocId = docSnap.id;
-                    }
-                });
-
-                if (foundDocId) {
-                    await updateDoc(getProfileDoc(foundDocId), { isBanned: banState });
-                    showToast(banState ? `Пользователь ${nickname} забанен!` : `Пользователь ${nickname} разбанен!`);
-                    loadAdminUsersList();
-                } else {
-                    showToast('Игрок с таким ником не найден!');
-                }
-            } catch (err) {
-                console.error("Ban update error:", err);
-                showToast('Ошибка при изменении статуса бана');
-            }
-        }
-
-        window.onload = function () {
-            initAuth();
-
-            // Navigation / Dialog Modals
-            const modals = ['auth-modal', 'wardrobe-modal', 'leaderboard-modal', 'settings-modal', 'admin-modal'];
-            const closeModal = () => modals.forEach(m => document.getElementById(m).classList.add('hidden'));
-
-            document.querySelectorAll('.btn-close-modal').forEach(btn => btn.onclick = closeModal);
-
-            document.getElementById('btn-open-auth').onclick = () => document.getElementById('auth-modal').classList.remove('hidden');
-            document.getElementById('btn-open-wardrobe').onclick = () => {
-                renderShopItems();
-                document.getElementById('wardrobe-modal').classList.remove('hidden');
-            };
-            document.getElementById('btn-open-leaderboard').onclick = () => {
-                loadLeaderboard();
-                document.getElementById('leaderboard-modal').classList.remove('hidden');
-            };
-            document.getElementById('btn-open-settings').onclick = () => document.getElementById('settings-modal').classList.remove('hidden');
-            
-            const openAdmin = () => {
-                loadAdminUsersList();
-                document.getElementById('admin-modal').classList.remove('hidden');
-            };
-
-            document.getElementById('btn-open-admin').onclick = openAdmin;
-            document.getElementById('btn-admin-shortcut').onclick = openAdmin;
-
-            // Wardrobe Tabs
-            document.getElementById('tab-skins').onclick = (e) => {
-                currentShopTab = 'skins';
-                e.target.className = "flex-1 py-2 text-xs font-bold rounded-lg bg-emerald-500 text-slate-950 transition";
-                document.getElementById('tab-accessories').className = "flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 transition";
-                renderShopItems();
-            };
-            document.getElementById('tab-accessories').onclick = (e) => {
-                currentShopTab = 'accessories';
-                e.target.className = "flex-1 py-2 text-xs font-bold rounded-lg bg-emerald-500 text-slate-950 transition";
-                document.getElementById('tab-skins').className = "flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 transition";
-                renderShopItems();
-            };
-
-            // Auth Logic
-            document.getElementById('btn-auth-login').onclick = async () => {
-                const name = document.getElementById('auth-username').value.trim();
-                if (!name) return showToast('Введите никнейм!');
-
-                if (currentUser) {
-                    userData.username = name;
-                    await setDoc(getProfileDoc(currentUser.uid), userData, { merge: true });
-                    updateUI();
-                    closeModal();
-                    showToast('Вы вошли как ' + name);
-                }
-            };
-
-            document.getElementById('btn-auth-register').onclick = async () => {
-                const name = document.getElementById('auth-username').value.trim();
-                if (!name) return showToast('Придумайте никнейм!');
-
-                if (currentUser) {
-                    userData.username = name;
-                    await setDoc(getProfileDoc(currentUser.uid), userData, { merge: true });
-                    updateUI();
-                    closeModal();
-                    showToast('Аккаунт зарегистрирован!');
-                }
-            };
-
-            // Admin Controls
-            document.getElementById('btn-admin-add-coins').onclick = async () => {
-                userData.coins += 1000;
-                updateUI();
-                showToast('+1000 Монет добавлено!');
-                if (currentUser) await updateDoc(getProfileDoc(currentUser.uid), { coins: userData.coins });
-            };
-
-            document.getElementById('btn-admin-toggle-verify').onclick = async () => {
-                userData.isVerified = !userData.isVerified;
-                updateUI();
-                showToast(userData.isVerified ? 'Галочка выдана!' : 'Галочка убрана!');
-                if (currentUser) await updateDoc(getProfileDoc(currentUser.uid), { isVerified: userData.isVerified });
-            };
-
-            document.getElementById('btn-admin-ban-user').onclick = () => {
-                const nick = document.getElementById('admin-target-nickname').value.trim();
-                setBanByNickname(nick, true);
-            };
-
-            document.getElementById('btn-admin-unban-user').onclick = () => {
-                const nick = document.getElementById('admin-target-nickname').value.trim();
-                setBanByNickname(nick, false);
-            };
-
-            document.getElementById('btn-ban-logout').onclick = () => {
-                signOut(auth);
-                location.reload();
-            };
-
-            // Controls & Keyboard
-            window.addEventListener('keydown', e => {
-                if (e.key === 'ArrowLeft' || e.key === 'a') game.keys.left = true;
-                if (e.key === 'ArrowRight' || e.key === 'd') game.keys.right = true;
-            });
-
-            window.addEventListener('keyup', e => {
-                if (e.key === 'ArrowLeft' || e.key === 'a') game.keys.left = false;
-                if (e.key === 'ArrowRight' || e.key === 'd') game.keys.right = false;
-            });
-
-            // Touch controls
-            const btnLeft = document.getElementById('btn-touch-left');
-            const btnRight = document.getElementById('btn-touch-right');
-
-            btnLeft.addEventListener('touchstart', (e) => { e.preventDefault(); game.keys.left = true; });
-            btnLeft.addEventListener('touchend', (e) => { e.preventDefault(); game.keys.left = false; });
-            btnRight.addEventListener('touchstart', (e) => { e.preventDefault(); game.keys.right = true; });
-            btnRight.addEventListener('touchend', (e) => { e.preventDefault(); game.keys.right = false; });
-
-            // Start & Restart Game
-            document.getElementById('btn-start-game').onclick = () => game.start();
-            document.getElementById('btn-restart-game').onclick = () => game.start();
-            document.getElementById('btn-return-menu').onclick = () => {
-                document.getElementById('gameover-modal').classList.add('hidden');
-                document.getElementById('menu-overlay').classList.remove('hidden');
-            };
-
-            // Start animation Loop
-            gameLoop();
-        };
-    </script>
+    // Инициализация при старте
+    updateUI();
+  </script>
 </body>
 </html>
