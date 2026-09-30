@@ -52,7 +52,6 @@
             display: block;
         }
 
-        /* Верхняя панель (скрыта до входа) */
         .top-bar {
             position: absolute;
             top: 15px;
@@ -123,7 +122,6 @@
             font-weight: 900;
         }
 
-        /* Экраны */
         .screen {
             position: absolute;
             top: 0;
@@ -220,7 +218,6 @@
             text-align: center;
         }
 
-        /* Кнопки Управления */
         #touch-controls {
             position: absolute;
             bottom: 25px;
@@ -313,7 +310,6 @@
 <body>
 
 <div id="game-container">
-    <!-- Верхняя шапка -->
     <div class="top-bar hidden">
         <div class="user-badge">
             <span>🧪</span>
@@ -356,7 +352,7 @@
         <button class="btn" id="btn-start">🎮 Играть</button>
         <button class="btn" id="btn-wardrobe">👕 Гардероб и Аксессуары</button>
         <button class="btn" id="btn-leaderboard">🏆 Рейтинг Игроков</button>
-        <button class="btn" id="btn-settings">⚙️️ Настройки</button>
+        <button class="btn" id="btn-settings">⚙ Настройки</button>
         <button class="btn btn-admin hidden" id="btn-admin-panel">👑 Панель Админа</button>
     </div>
 
@@ -431,7 +427,7 @@
             db = firebase.database();
         }
     } catch (e) {
-        console.log("Firebase офлайн");
+        console.log("Firebase недоступен");
     }
 
     /* --- ЗВУКИ --- */
@@ -484,6 +480,10 @@
 
     let currentUser = null;
 
+    function cleanNick(nick) {
+        return nick.replace(/[.#$\[\]\/]/g, "").trim();
+    }
+
     function saveLocalDB() {
         localStorage.setItem('slime_jumper_users', JSON.stringify(localDB));
     }
@@ -515,10 +515,9 @@
             document.getElementById('btn-admin-panel').classList.remove('hidden');
         } else {
             document.getElementById('display-role').innerText = 'ИГРОК';
-            document.getElementById('btn-admin-panel').classList.add('hidden');
+            document.getElementById('btn-admin-panel').add ? document.getElementById('btn-admin-panel').classList.add('hidden') : null;
         }
 
-        // Сохраняем и локально, и отправляем в Firebase
         saveLocalDB();
         if (db) {
             try { db.ref('users/' + username).set(u); } catch(e){}
@@ -553,7 +552,6 @@
         cap: { name: "Кепка", price: 300 }
     };
 
-    /* --- ОТРИСОВКА СЛАЙМА И АКСЕССУАРОВ --- */
     function drawSlime(ctx, x, y, radius, skinKey, accKey, scaleX = 1, scaleY = 1) {
         ctx.save();
         ctx.translate(x, y);
@@ -636,8 +634,8 @@
             ctx.shadowBlur = 8;
             ctx.shadowColor = '#ff0055';
             ctx.beginPath();
-            ctx.roundRect(-radius * 1.15, -radius * 0.3, radius * 0.28, radius * 0.6, 6);
-            ctx.roundRect(radius * 0.87, -radius * 0.3, radius * 0.28, radius * 0.6, 6);
+            ctx.fillRect(-radius * 1.15, -radius * 0.3, radius * 0.28, radius * 0.6);
+            ctx.fillRect(radius * 0.87, -radius * 0.3, radius * 0.28, radius * 0.6);
             ctx.fill();
         } 
         else if (accKey === 'glasses') {
@@ -663,42 +661,6 @@
             ctx.beginPath();
             ctx.ellipse(0, -radius * 1.35, radius * 0.65, radius * 0.2, 0, 0, Math.PI * 2);
             ctx.stroke();
-        }
-        else if (accKey === 'cat_ears') {
-            ctx.fillStyle = '#ff758c';
-            ctx.beginPath();
-            ctx.moveTo(-radius * 0.8, -radius * 0.4);
-            ctx.lineTo(-radius * 0.5, -radius * 1.25);
-            ctx.lineTo(-radius * 0.1, -radius * 0.85);
-            ctx.moveTo(radius * 0.8, -radius * 0.4);
-            ctx.lineTo(radius * 0.5, -radius * 1.25);
-            ctx.lineTo(radius * 0.1, -radius * 0.85);
-            ctx.fill();
-        }
-        else if (accKey === 'bow') {
-            ctx.fillStyle = '#ff0055';
-            let bx = radius * 0.5, by = -radius * 0.75;
-            ctx.beginPath();
-            ctx.moveTo(bx, by);
-            ctx.lineTo(bx + 12, by - 8);
-            ctx.lineTo(bx + 12, by + 8);
-            ctx.closePath();
-            ctx.moveTo(bx, by);
-            ctx.lineTo(bx - 12, by - 8);
-            ctx.lineTo(bx - 12, by + 8);
-            ctx.closePath();
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(bx, by, 4, 0, Math.PI * 2);
-            ctx.fillStyle = '#fff';
-            ctx.fill();
-        }
-        else if (accKey === 'cap') {
-            ctx.fillStyle = '#0072ff';
-            ctx.beginPath();
-            ctx.arc(0, -radius * 0.7, radius * 0.55, Math.PI, 0);
-            ctx.fill();
-            ctx.fillRect(-radius * 0.8, -radius * 0.7, radius * 1.1, 5);
         }
 
         ctx.restore();
@@ -889,7 +851,7 @@
             ctx.shadowBlur = 12;
             ctx.shadowColor = ctx.fillStyle;
             ctx.beginPath();
-            ctx.roundRect(p.x, p.y, p.w, p.h, 7);
+            ctx.fillRect(p.x, p.y, p.w, p.h);
             ctx.fill();
             if (p.type === 'spring') {
                 ctx.fillStyle = '#fff';
@@ -968,16 +930,21 @@
         requestAnimationFrame(gameLoop);
     }
 
-    /* --- ЛОГИКА ЭКРАНОВ И АВТОРИЗАЦИИ (С СИНХРОНИЗАЦИЕЙ FIREBASE) --- */
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
         if (id) document.getElementById(id).classList.remove('hidden');
     }
 
-    document.getElementById('btn-login').addEventListener('click', () => {
-        const nick = document.getElementById('auth-nick').value.trim();
+    /* --- ИСПРАВЛЕННАЯ ЛОГИКА АВТОРИЗАЦИИ И РЕГИСТРАЦИИ --- */
+    document.getElementById('btn-login').addEventListener('click', async () => {
+        let nick = document.getElementById('auth-nick').value;
         const pass = document.getElementById('auth-pass').value.trim();
-        if (!nick || !pass) return alert('Заполните все поля!');
+        
+        nick = cleanNick(nick);
+
+        if (!nick || !pass) {
+            return alert('Заполните все поля!');
+        }
 
         const processLogin = (userData) => {
             if (userData.pass === pass) {
@@ -990,36 +957,57 @@
             }
         };
 
-        // Сначала пробуем подтянуть из Firebase, если подключена сеть
+        // 1. Быстрый вход, если пользователь уже есть в локальной базе
+        if (localDB[nick]) {
+            processLogin(localDB[nick]);
+            return;
+        }
+
+        // 2. Если локально нет — проверяем Firebase с ограничением по времени (2 сек)
         if (db) {
-            db.ref('users/' + nick).once('value').then(snap => {
-                const val = snap.val();
-                if (val) {
-                    processLogin(val);
-                } else if (localDB[nick]) {
-                    processLogin(localDB[nick]);
+            try {
+                const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000));
+                const firebaseFetch = db.ref('users/' + nick).once('value');
+                const snap = await Promise.race([firebaseFetch, timeout]);
+
+                if (snap && snap.exists()) {
+                    processLogin(snap.val());
                 } else {
                     alert('Игрок не найден!');
                 }
-            }).catch(() => {
-                if (localDB[nick]) processLogin(localDB[nick]);
-                else alert('Игрок не найден!');
-            });
+            } catch (e) {
+                alert('Игрок не найден или база данных недоступна!');
+            }
         } else {
-            if (localDB[nick]) processLogin(localDB[nick]);
-            else alert('Игрок не найден!');
+            alert('Игрок не найден!');
         }
     });
 
-    document.getElementById('btn-register').addEventListener('click', () => {
-        const nick = document.getElementById('auth-nick').value.trim();
+    document.getElementById('btn-register').addEventListener('click', async () => {
+        let nick = document.getElementById('auth-nick').value;
         const pass = document.getElementById('auth-pass').value.trim();
-        if (!nick || !pass) return alert('Заполните все поля!');
+
+        nick = cleanNick(nick);
+
+        if (!nick || !pass) {
+            return alert('Заполните все поля!');
+        }
+
+        if (localDB[nick]) {
+            return alert('Имя уже занято!');
+        }
 
         const createAccount = () => {
             const newUser = {
-                pass, coins: 0, record: 0, skin: 'classic', accessory: 'none',
-                skins: ['classic'], accessories: ['none'], isVerified: false, isAdmin: false
+                pass: pass,
+                coins: 0,
+                record: 0,
+                skin: 'classic',
+                accessory: 'none',
+                skins: ['classic'],
+                accessories: ['none'],
+                isVerified: false,
+                isAdmin: false
             };
             localDB[nick] = newUser;
             currentUser = nick;
@@ -1027,21 +1015,22 @@
             showScreen('menu-screen');
         };
 
+        // Проверяем занятость в Firebase с ограничением в 2 секунды
         if (db) {
-            db.ref('users/' + nick).once('value').then(snap => {
-                if (snap.val() || localDB[nick]) {
-                    alert('Имя уже занято!');
-                } else {
-                    createAccount();
+            try {
+                const timeout = new Promise((resolve) => setTimeout(() => resolve(null), 2000));
+                const firebaseFetch = db.ref('users/' + nick).once('value');
+                const snap = await Promise.race([firebaseFetch, timeout]);
+
+                if (snap && snap.exists()) {
+                    return alert('Имя уже занято!');
                 }
-            }).catch(() => {
-                if (localDB[nick]) alert('Имя уже занято!');
-                else createAccount();
-            });
-        } else {
-            if (localDB[nick]) alert('Имя уже занято!');
-            else createAccount();
+            } catch (e) {
+                // Если произошел таймаут, регистрируем локально
+            }
         }
+
+        createAccount();
     });
 
     document.getElementById('btn-start').addEventListener('click', () => { showScreen(null); initGame(); });
@@ -1142,7 +1131,7 @@
     /* --- РЕЙТИНГ --- */
     document.getElementById('btn-leaderboard').addEventListener('click', () => {
         const list = document.getElementById('leaderboard-list');
-        list.innerHTML = '<div style="text-align:center;">Загрузка игроков из сети...</div>';
+        list.innerHTML = '<div style="text-align:center;">Загрузка игроков...</div>';
 
         const displayPlayers = (data) => {
             list.innerHTML = '';
@@ -1167,8 +1156,9 @@
         };
 
         if (db) {
-            db.ref('users').once('value')
-                .then(snap => displayPlayers(snap.val() || localDB))
+            const timeout = new Promise((resolve) => setTimeout(() => resolve(null), 2000));
+            Promise.race([db.ref('users').once('value'), timeout])
+                .then(snap => displayPlayers(snap ? snap.val() : localDB))
                 .catch(() => displayPlayers(localDB));
         } else {
             displayPlayers(localDB);
@@ -1179,13 +1169,13 @@
 
     document.getElementById('btn-back-leaderboard').addEventListener('click', () => showScreen('menu-screen'));
 
-    /* --- НАСТРОЙКИ & АДМИНКА --- */
+    /* --- НАСТРОЙКИ И АДМИНКА --- */
     document.getElementById('btn-settings').addEventListener('click', () => {
         document.getElementById('new-nick-input').value = currentUser;
         showScreen('settings-screen');
     });
     document.getElementById('btn-change-nick').addEventListener('click', () => {
-        const newNick = document.getElementById('new-nick-input').value.trim();
+        let newNick = cleanNick(document.getElementById('new-nick-input').value);
         if (!newNick || newNick === currentUser) return;
         if (localDB[newNick]) return alert('Имя уже занято!');
         
@@ -1209,11 +1199,11 @@
     document.getElementById('btn-back-admin').addEventListener('click', () => showScreen('menu-screen'));
 
     document.getElementById('btn-admin-give-coins').addEventListener('click', () => {
-        const t = document.getElementById('admin-target-user').value.trim();
+        const t = cleanNick(document.getElementById('admin-target-user').value);
         if (localDB[t]) { localDB[t].coins += 1000; syncUserData(currentUser); alert('+1000 монет выдано игроку ' + t); }
     });
     document.getElementById('btn-admin-toggle-badge').addEventListener('click', () => {
-        const t = document.getElementById('admin-target-user').value.trim();
+        const t = cleanNick(document.getElementById('admin-target-user').value);
         if (localDB[t]) { localDB[t].isVerified = !localDB[t].isVerified; syncUserData(currentUser); alert('Галочка изменена игроку ' + t); }
     });
 
