@@ -418,7 +418,7 @@
       </div>
 
       <div class="lobby-menu" id="lobbyBox">
-        <button class="btn-action btn-yellow" onclick="startGame()">▶ ИГРАТЬ</button>
+        <button type="button" class="btn-action btn-yellow" onclick="window.startGame()">▶ ИГРАТЬ</button>
         <button class="btn-action btn-pass" onclick="openModal('passModal')">🎫 SLIME PASS / КВЕСТЫ</button>
         
         <div class="grid-2">
@@ -446,7 +446,7 @@
       <p style="font-size: 19px; color: #fff; margin-bottom: 4px;" id="finalScoreText">Высота: 0М</p>
       <p style="font-size: 14px; color: #ffcc00; margin-bottom: 22px;" id="finalCoinsText">+0 Монет собрано</p>
 
-      <button class="btn-action btn-yellow" style="width: 220px;" onclick="startGame()">🔄 Играть снова</button>
+      <button type="button" class="btn-action btn-yellow" style="width: 220px;" onclick="window.startGame()">🔄 Играть снова</button>
       <button class="btn-action btn-dark" style="width: 220px;" onclick="quitToMenu()">🏠 Главное меню</button>
     </div>
 
@@ -1035,7 +1035,17 @@
 
     function startGame() {
       if (isBanned) return; // Запрещаем старт, если бан
-      audioEngine.init();
+
+      // Звук не должен мешать запуску игры.
+      try {
+        audioEngine.init();
+        if (audioEngine.ctx && audioEngine.ctx.state === 'suspended') {
+          audioEngine.ctx.resume().catch(() => {});
+        }
+      } catch (e) {
+        console.warn('AudioContext недоступен, игра запускается без звука:', e);
+      }
+
       document.getElementById('authScreen').style.display = 'none';
       document.getElementById('gameOverOverlay').style.display = 'none';
 
@@ -1051,6 +1061,9 @@
       for (let i = 0; i < 8; i++) spawnPlatform(canvas.height - 120 - i * 90);
       gameState = 'PLAYING';
     }
+
+    // Делаем запуск доступным для inline onclick даже при особенностях окружения.
+    window.startGame = startGame;
 
     function spawnPlatform(yPos) {
       const pX = Math.random() * (canvas.width - 80);
@@ -1098,6 +1111,12 @@
           drawGlossySlime(ctx, canvas.width / 2, menuSlimeY, 44, idleScaleX, idleScaleY, activeSkin, activeHat, activeAura, Math.sin(menuTimer) * 4);
         }
       } else if (gameState === 'PLAYING') {
+        if (!player || !platforms) {
+          // Защита от случайного входа в игровой цикл до инициализации.
+          requestAnimationFrame(mainLoop);
+          return;
+        }
+
         if (keys['ArrowLeft'] || keys['a']) player.vx = -4.5;
         else if (keys['ArrowRight'] || keys['d']) player.vx = 4.5;
         else player.vx *= 0.85;
