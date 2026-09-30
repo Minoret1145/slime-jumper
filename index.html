@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Slime Jumper</title>
+    <title>Slime Jump</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Comfortaa:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Comfortaa:wght@600;700;800;900&display=swap" rel="stylesheet">
     
     <!-- Firebase v8 SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -26,7 +26,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: #05060a;
+            background: #090412;
             color: #fff;
             display: flex;
             justify-content: center;
@@ -39,7 +39,7 @@
             max-width: 450px;
             height: 100%;
             max-height: 920px;
-            background: linear-gradient(180deg, #0b0d1b 0%, #040508 100%);
+            background: radial-gradient(circle at center, #2e124d 0%, #120721 80%, #090412 100%);
             box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
             overflow: hidden;
             display: flex;
@@ -52,6 +52,7 @@
             display: block;
         }
 
+        /* --- ВЕРХНЯЯ ПАНЕЛЬ С МОНЕТАМИ И НИКОМ --- */
         .top-bar {
             position: absolute;
             top: 15px;
@@ -69,21 +70,21 @@
         }
 
         .user-badge {
-            background: rgba(18, 22, 38, 0.88);
+            background: rgba(25, 12, 45, 0.85);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 242, 254, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 20px;
-            padding: 8px 14px;
+            padding: 6px 12px;
             display: flex;
             align-items: center;
             gap: 8px;
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
         .user-role {
-            font-size: 0.62rem;
+            font-size: 0.6rem;
             color: #ff3366;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -96,17 +97,19 @@
             gap: 8px;
         }
 
-        .stat-chip {
-            background: rgba(18, 22, 38, 0.88);
+        .stat-chip-top {
+            background: rgba(35, 16, 60, 0.9);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 1.5px solid #ffca28;
             border-radius: 20px;
-            padding: 8px 12px;
-            font-weight: 700;
-            font-size: 0.85rem;
+            padding: 6px 14px;
+            font-weight: 800;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
             gap: 6px;
+            color: #fff;
+            box-shadow: 0 0 10px rgba(255, 202, 40, 0.3);
         }
 
         .verified-icon {
@@ -122,13 +125,14 @@
             font-weight: 900;
         }
 
+        /* --- ЭКРАНЫ --- */
         .screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(8, 10, 18, 0.95);
+            background: radial-gradient(circle at center, rgba(46, 18, 77, 0.96) 0%, rgba(18, 7, 33, 0.98) 100%);
             backdrop-filter: blur(12px);
             display: flex;
             flex-direction: column;
@@ -142,18 +146,224 @@
             display: none !important;
         }
 
-        .game-title {
-            font-family: 'Caveat', cursive;
-            font-size: 4.2rem;
-            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px rgba(0, 242, 254, 0.5);
-            margin-bottom: 20px;
-            text-align: center;
-            line-height: 1;
+        /* --- ГЛАВНОЕ МЕНЮ В СТИЛЕ СКРИНШОТА --- */
+        #menu-screen {
+            justify-content: flex-start;
+            padding-top: 55px;
+            overflow-y: auto;
         }
 
+        .menu-hero-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        #menu-preview-canvas {
+            width: 150px;
+            height: 120px;
+            background: transparent;
+            margin-bottom: -15px;
+            z-index: 2;
+        }
+
+        .hero-title-wrapper {
+            position: relative;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .main-game-title {
+            font-family: 'Comfortaa', cursive;
+            font-size: 3.2rem;
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 
+                0 4px 0 #3b1800,
+                0 0 20px rgba(255, 200, 50, 0.6),
+                -2px -2px 0 #ffd54f,
+                 2px -2px 0 #ffd54f,
+                -2px  2px 0 #ffd54f,
+                 2px  2px 0 #ffd54f;
+            line-height: 1;
+            letter-spacing: -1px;
+        }
+
+        .badge-remastered {
+            position: absolute;
+            right: -15px;
+            bottom: -8px;
+            background: linear-gradient(135deg, #ffee55, #ffaa00);
+            color: #2b1200;
+            font-weight: 900;
+            font-size: 0.85rem;
+            padding: 3px 10px;
+            border-radius: 12px;
+            transform: rotate(-8deg);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.6);
+            border: 2px solid #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stats-pills-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .pill-btn {
+            background: rgba(30, 12, 55, 0.8);
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            border-radius: 18px;
+            padding: 6px 14px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: #f1e6ff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .pill-btn span {
+            color: #ffca28;
+        }
+
+        /* Карточка Slime Pass */
+        .pass-card {
+            width: 100%;
+            max-width: 340px;
+            background: linear-gradient(135deg, #2b114d 0%, #1e0a38 100%);
+            border: 2px solid #6b2da8;
+            border-radius: 20px;
+            padding: 10px 16px;
+            margin-bottom: 10px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+
+        .pass-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 900;
+            font-size: 0.95rem;
+            color: #ff9e00;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .pass-bar-track {
+            width: 100%;
+            height: 8px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .pass-bar-fill {
+            width: 15%;
+            height: 100%;
+            background: linear-gradient(90deg, #ff007f, #ff9e00);
+            border-radius: 10px;
+        }
+
+        /* Карточка Сезона */
+        .season-card {
+            width: 100%;
+            max-width: 340px;
+            background: linear-gradient(135deg, #125175 0%, #0a3149 100%);
+            border: 2px solid #1f8cb0;
+            border-radius: 20px;
+            padding: 10px 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+
+        .season-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 900;
+            font-size: 0.9rem;
+            color: #00f2fe;
+            margin-bottom: 4px;
+        }
+
+        .season-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: #b0e5ff;
+            font-weight: 700;
+        }
+
+        /* КНОПКИ МЕНЮ */
+        .btn-play-main {
+            width: 100%;
+            max-width: 340px;
+            padding: 16px;
+            background: linear-gradient(180deg, #ffd54f 0%, #ff9800 100%);
+            border: 3px solid #fff;
+            border-radius: 28px;
+            color: #3e1f00;
+            font-size: 1.4rem;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(255, 152, 0, 0.5), inset 0 2px 0 rgba(255,255,255,0.8);
+            text-align: center;
+            margin-bottom: 12px;
+            transition: transform 0.1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-play-main:active {
+            transform: scale(0.96);
+        }
+
+        .menu-grid-btns {
+            width: 100%;
+            max-width: 340px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn-menu-secondary {
+            padding: 12px;
+            background: linear-gradient(180deg, #ffe082 0%, #ffb74d 100%);
+            border: 2px solid #fff;
+            border-radius: 20px;
+            color: #3e2723;
+            font-size: 0.95rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-align: center;
+            transition: transform 0.1s;
+        }
+
+        .btn-menu-secondary:active {
+            transform: scale(0.95);
+        }
+
+        .btn-admin-pill {
+            grid-column: span 2;
+            background: linear-gradient(180deg, #ff5252 0%, #d50000 100%);
+            color: #fff;
+        }
+
+        /* Кнопки общие */
         .btn {
             width: 100%;
             max-width: 270px;
@@ -167,7 +377,7 @@
             font-weight: 700;
             cursor: pointer;
             box-shadow: 0 6px 20px rgba(0, 114, 255, 0.35);
-            transition: transform 0.1s, box-shadow 0.1s;
+            transition: transform 0.1s;
             text-align: center;
             flex-shrink: 0;
         }
@@ -182,11 +392,6 @@
             border: 1px solid rgba(255,255,255,0.12);
         }
 
-        .btn-admin {
-            background: linear-gradient(135deg, #ff416c, #ff4b2b);
-            box-shadow: 0 6px 20px rgba(255, 75, 43, 0.4);
-        }
-
         .tab-btn {
             flex: 1;
             padding: 10px;
@@ -199,9 +404,9 @@
             cursor: pointer;
         }
         .tab-btn.active {
-            background: #00f2fe;
+            background: #ffca28;
             color: #000;
-            border-color: #00f2fe;
+            border-color: #ffca28;
         }
 
         input {
@@ -210,8 +415,8 @@
             padding: 12px 18px;
             margin: 8px 0;
             border-radius: 20px;
-            border: 2px solid rgba(0, 242, 254, 0.5);
-            background: #121526;
+            border: 2px solid rgba(255, 202, 40, 0.5);
+            background: #190a2a;
             color: #fff;
             font-size: 0.95rem;
             outline: none;
@@ -233,9 +438,9 @@
         .touch-btn {
             width: 44%;
             height: 60px;
-            background: rgba(20, 25, 45, 0.8);
+            background: rgba(25, 12, 45, 0.85);
             backdrop-filter: blur(8px);
-            border: 2px solid rgba(0, 242, 254, 0.4);
+            border: 2px solid rgba(255, 202, 40, 0.4);
             border-radius: 20px;
             display: flex;
             justify-content: center;
@@ -249,8 +454,8 @@
         }
 
         .touch-btn:active {
-            background: rgba(0, 242, 254, 0.35);
-            border-color: #00f2fe;
+            background: rgba(255, 202, 40, 0.35);
+            border-color: #ffca28;
             transform: scale(0.96);
         }
 
@@ -259,8 +464,9 @@
             top: 22%;
             width: 100%;
             text-align: center;
-            font-family: 'Caveat', cursive;
-            font-size: 3.2rem;
+            font-family: 'Comfortaa', cursive;
+            font-size: 2.2rem;
+            font-weight: 900;
             color: #ff0055;
             text-shadow: 0 0 25px #ff0055;
             animation: pulse 0.5s infinite alternate;
@@ -275,8 +481,8 @@
 
         .scroll-list {
             width: 100%;
-            max-width: 330px;
-            max-height: 32vh;
+            max-width: 340px;
+            max-height: 35vh;
             overflow-y: auto;
             margin: 10px 0;
             display: flex;
@@ -287,21 +493,21 @@
         }
 
         .list-item {
-            background: rgba(20, 24, 42, 0.9);
+            background: rgba(30, 14, 52, 0.9);
             padding: 12px 16px;
             border-radius: 18px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        #preview-canvas {
+        #preview-canvas-wardrobe {
             width: 140px;
             height: 140px;
-            background: rgba(20, 25, 45, 0.5);
+            background: rgba(30, 12, 50, 0.5);
             border-radius: 20px;
-            border: 1px solid rgba(0, 242, 254, 0.3);
+            border: 1.5px solid rgba(255, 202, 40, 0.4);
             margin-bottom: 10px;
             flex-shrink: 0;
         }
@@ -310,6 +516,7 @@
 <body>
 
 <div id="game-container">
+    <!-- ВЕРХНЯЯ ПАНЕЛЬ С МОНЕТАМИ -->
     <div class="top-bar hidden">
         <div class="user-badge">
             <span>🧪</span>
@@ -323,8 +530,7 @@
         </div>
 
         <div class="stats-group">
-            <div class="stat-chip">🪙 <span id="display-coins">0</span></div>
-            <div class="stat-chip">🏆 <span id="display-record">0м</span></div>
+            <div class="stat-chip-top">🪙 <span id="display-coins">0</span></div>
         </div>
     </div>
 
@@ -337,31 +543,76 @@
         <div class="touch-btn" id="btn-right">Направо ►</div>
     </div>
 
-    <!-- Экран Авторизации -->
+    <!-- ЭКРАН АВТОРИЗАЦИИ -->
     <div id="auth-screen" class="screen">
-        <h1 class="game-title">Slime Jumper</h1>
+        <h1 class="main-game-title" style="margin-bottom:20px; font-size:2.8rem;">Slime Jump</h1>
         <input type="text" id="auth-nick" placeholder="Введите Ник" maxlength="15">
         <input type="password" id="auth-pass" placeholder="Введите Пароль">
-        <button class="btn" id="btn-login">Войти</button>
+        <button class="btn" id="btn-login" style="background: linear-gradient(180deg, #ffd54f 0%, #ff9800 100%); color:#3e1f00; font-weight:900;">Войти</button>
         <button class="btn btn-secondary" id="btn-register">Зарегистрироваться</button>
     </div>
 
-    <!-- Главное Меню -->
+    <!-- ГЛАВНОЕ МЕНЮ (ПО СКРИНШОТУ) -->
     <div id="menu-screen" class="screen hidden">
-        <h1 class="game-title">Slime Jumper</h1>
-        <button class="btn" id="btn-start">🎮 Играть</button>
-        <button class="btn" id="btn-wardrobe">👕 Гардероб и Аксессуары</button>
-        <button class="btn" id="btn-leaderboard">🏆 Рейтинг Игроков</button>
-        <button class="btn" id="btn-settings">⚙ Настройки</button>
-        <button class="btn btn-admin hidden" id="btn-admin-panel">👑 Панель Админа</button>
+        
+        <div class="menu-hero-container">
+            <!-- Платформа + Слайм -->
+            <canvas id="menu-preview-canvas" width="150" height="120"></canvas>
+            
+            <div class="hero-title-wrapper">
+                <h1 class="main-game-title">Slime Jump!</h1>
+                <div class="badge-remastered">Remastered</div>
+            </div>
+
+            <div class="stats-pills-row">
+                <div class="pill-btn">🏆 Рекорд <span id="menu-record">0</span></div>
+                <div class="pill-btn">👾 Боссы <span>0 ›</span></div>
+            </div>
+        </div>
+
+        <!-- SLIME PASS -->
+        <div class="pass-card">
+            <div class="pass-header">
+                <span>SLIME PASS</span>
+                <span style="color:#fff; font-size:0.85rem;">0 / 30</span>
+            </div>
+            <div class="pass-bar-track">
+                <div class="pass-bar-fill"></div>
+            </div>
+        </div>
+
+        <!-- СЕЗОН 1 -->
+        <div class="season-card">
+            <div class="season-top">
+                <span>СЕЗОН 1</span>
+                <span style="font-size:0.75rem; color:#80d8ff;">осталось 32 дн.</span>
+            </div>
+            <div class="season-bottom">
+                <span>Неделя боссов · осталось 5 дн.</span>
+                <span>рекорд <strong id="season-record" style="color:#fff;">0</strong></span>
+            </div>
+        </div>
+
+        <!-- КНОПКА ИГРАТЬ -->
+        <button class="btn-play-main" id="btn-start">
+            <span>► Играть</span>
+        </button>
+
+        <!-- ВСПЕДОМАТЕЛЬНЫЕ КНОПКИ -->
+        <div class="menu-grid-btns">
+            <button class="btn-menu-secondary" id="btn-wardrobe">Гардероб</button>
+            <button class="btn-menu-secondary" id="btn-leaderboard">Рейтинг</button>
+            <button class="btn-menu-secondary" id="btn-settings">Настройки</button>
+            <button class="btn-menu-secondary btn-admin-pill hidden" id="btn-admin-panel">👑 Панель Админа</button>
+        </div>
     </div>
 
-    <!-- Гардероб -->
+    <!-- ГАРДЕРОБ -->
     <div id="wardrobe-screen" class="screen hidden">
-        <h1 class="game-title" style="font-size: 2.5rem; margin-bottom: 5px;">Примерка</h1>
-        <canvas id="preview-canvas" width="140" height="140"></canvas>
+        <h1 class="main-game-title" style="font-size: 2.2rem; margin-bottom: 5px;">Примерка</h1>
+        <canvas id="preview-canvas-wardrobe" width="140" height="140"></canvas>
         
-        <div style="display: flex; gap: 10px; width: 100%; max-width: 330px; margin-bottom: 5px;">
+        <div style="display: flex; gap: 10px; width: 100%; max-width: 340px; margin-bottom: 5px;">
             <button class="tab-btn active" id="tab-skins">Скины</button>
             <button class="tab-btn" id="tab-accessories">Аксессуары</button>
         </div>
@@ -370,40 +621,40 @@
         <button class="btn btn-secondary" id="btn-back-wardrobe">Назад</button>
     </div>
 
-    <!-- Рейтинг -->
+    <!-- РЕЙТИНГ -->
     <div id="leaderboard-screen" class="screen hidden">
-        <h1 class="game-title">Рейтинг</h1>
+        <h1 class="main-game-title" style="font-size: 2.4rem; margin-bottom:10px;">Рейтинг</h1>
         <div class="scroll-list" id="leaderboard-list"></div>
         <button class="btn btn-secondary" id="btn-back-leaderboard">Назад</button>
     </div>
 
-    <!-- Настройки -->
+    <!-- НАСТРОЙКИ -->
     <div id="settings-screen" class="screen hidden">
-        <h1 class="game-title">Настройки</h1>
+        <h1 class="main-game-title" style="font-size: 2.2rem; margin-bottom:10px;">Настройки</h1>
         <p style="font-size: 0.85rem; margin-bottom: 4px;">Сменить Никнейм:</p>
         <input type="text" id="new-nick-input" placeholder="Новый ник">
-        <button class="btn" id="btn-change-nick">Сохранить ник</button>
+        <button class="btn" id="btn-change-nick" style="background: linear-gradient(180deg, #ffd54f 0%, #ff9800 100%); color:#3e1f00; font-weight:900;">Сохранить ник</button>
         <br>
         <button class="btn btn-secondary" id="btn-toggle-sound">🔊 Звук: Включен</button>
-        <button class="btn btn-admin" id="btn-logout">Выйти из аккаунта</button>
+        <button class="btn" style="background:linear-gradient(135deg, #ff416c, #ff4b2b);" id="btn-logout">Выйти из аккаунта</button>
         <button class="btn btn-secondary" id="btn-back-settings">Назад</button>
     </div>
 
-    <!-- Админка -->
+    <!-- АДМИНКА -->
     <div id="admin-screen" class="screen hidden">
-        <h1 class="game-title">Панель Админа</h1>
+        <h1 class="main-game-title" style="font-size: 2rem; margin-bottom:10px;">Панель Админа</h1>
         <input type="text" id="admin-target-user" placeholder="Никнейм игрока">
         <button class="btn" id="btn-admin-give-coins">+1000 Монет</button>
         <button class="btn" id="btn-admin-toggle-badge">Выдать / Снять Галочку</button>
         <button class="btn btn-secondary" id="btn-back-admin">Назад</button>
     </div>
 
-    <!-- Конец Игры -->
+    <!-- КОНЕЦ ИГРЫ -->
     <div id="gameover-screen" class="screen hidden">
-        <h1 class="game-title" style="background: linear-gradient(135deg, #ff0055, #ff5e62); -webkit-background-clip: text;">ВЫ УПАЛИ!</h1>
+        <h1 class="main-game-title" style="color:#ff3366; text-shadow:0 0 20px #ff0055; font-size:2.8rem;">ВЫ УПАЛИ!</h1>
         <p style="font-size: 1.2rem; margin-bottom: 8px;">Высота: <span id="final-score">0</span> м</p>
         <p style="font-size: 1.2rem; margin-bottom: 25px;">Собрано монет: <span id="final-coins">0</span> 🪙</p>
-        <button class="btn" id="btn-restart">🎮 Играть снова</button>
+        <button class="btn-play-main" id="btn-restart" style="max-width:270px;">🎮 Играть снова</button>
         <button class="btn btn-secondary" id="btn-to-menu">🏠 В меню</button>
     </div>
 </div>
@@ -473,10 +724,9 @@
         }
     }
 
-    /* --- ДАННЫЕ ПОЛЬЗОВАТЕЛЯ И АВТО-АДМИНКА --- */
+    /* --- ДАННЫЕ ПОЛЬЗОВАТЕЛЯ И АДМИНКА --- */
     let localDB = JSON.parse(localStorage.getItem('slime_jumper_users')) || {};
 
-    // Гарантированно задаем админа Ghou5027
     if (!localDB["Ghou5027"]) {
         localDB["Ghou5027"] = {
             pass: "50591015",
@@ -506,7 +756,6 @@
         return (nick || "").replace(/[.#$\[\]\/]/g, "").trim();
     }
 
-    // Сохранение изменений пользователя в память + локальное хранилище + Firebase
     function saveAndSyncUser(targetNick) {
         saveLocalDB();
         if (!targetNick || !localDB[targetNick]) return;
@@ -533,7 +782,8 @@
         
         document.getElementById('display-name').innerText = username;
         document.getElementById('display-coins').innerText = u.coins;
-        document.getElementById('display-record').innerText = (u.record || 0) + 'м';
+        document.getElementById('menu-record').innerText = (u.record || 0) + 'м';
+        document.getElementById('season-record').innerText = (u.record || 0) + 'м';
         
         if (u.isVerified) {
             document.getElementById('display-badge').classList.remove('hidden');
@@ -551,7 +801,7 @@
         }
 
         saveAndSyncUser(username);
-        drawPreview();
+        drawPreviews();
     }
 
     /* --- СКИНЫ И АКСЕССУАРЫ --- */
@@ -695,14 +945,37 @@
         ctx.restore();
     }
 
-    const prevCanvas = document.getElementById('preview-canvas');
-    const prevCtx = prevCanvas.getContext('2d');
-    function drawPreview() {
-        if (!prevCtx) return;
-        prevCtx.clearRect(0, 0, prevCanvas.width, prevCanvas.height);
+    /* --- ОТРРИСОВКА ПРЕВЬЮ В МЕНЮ И ГАРДЕРОБЕ --- */
+    const menuCanvas = document.getElementById('menu-preview-canvas');
+    const menuCtx = menuCanvas ? menuCanvas.getContext('2d') : null;
+
+    const wardrobeCanvas = document.getElementById('preview-canvas-wardrobe');
+    const wardrobeCtx = wardrobeCanvas ? wardrobeCanvas.getContext('2d') : null;
+
+    function drawPreviews() {
         if (!currentUser || !localDB[currentUser]) return;
         const u = localDB[currentUser];
-        drawSlime(prevCtx, 70, 78, 36, u.skin || 'classic', u.accessory || 'none');
+
+        // Отрисовка на главной (Слайм на платформочке)
+        if (menuCtx) {
+            menuCtx.clearRect(0, 0, menuCanvas.width, menuCanvas.height);
+            // Платформа
+            menuCtx.fillStyle = '#00ff87';
+            menuCtx.shadowBlur = 10;
+            menuCtx.shadowColor = '#00ff87';
+            menuCtx.beginPath();
+            menuCtx.fillRect(35, 92, 80, 12);
+            menuCtx.fill();
+
+            // Слайм
+            drawSlime(menuCtx, 75, 62, 28, u.skin || 'classic', u.accessory || 'none');
+        }
+
+        // Отрисовка в гардеробе
+        if (wardrobeCtx) {
+            wardrobeCtx.clearRect(0, 0, wardrobeCanvas.width, wardrobeCanvas.height);
+            drawSlime(wardrobeCtx, 70, 78, 36, u.skin || 'classic', u.accessory || 'none');
+        }
     }
 
     /* --- CANVAS ДЛЯ ИГРЫ --- */
@@ -966,7 +1239,7 @@
 
     function loginSuccess(nick) {
         currentUser = nick;
-        localStorage.setItem('slime_jumper_session', nick); // Сохраняем сессию
+        localStorage.setItem('slime_jumper_session', nick);
         syncUserData(currentUser);
         showScreen('menu-screen');
     }
@@ -1082,7 +1355,7 @@
                         <strong>${item.name}</strong><br>
                         <small style="color:#aaa;">${isBought ? 'Куплено' : item.price + ' 🪙'}</small>
                     </div>
-                    <button class="btn" style="width:auto; padding:8px 14px; margin:0; font-size:0.85rem;">
+                    <button class="btn" style="width:auto; padding:8px 14px; margin:0; font-size:0.85rem; background:${isEquipped ? '#ffca28' : '#00c6ff'}; color:${isEquipped ? '#000' : '#fff'}; font-weight:800;">
                         ${isEquipped ? 'Надет' : (isBought ? 'Надеть' : 'Купить')}
                     </button>
                 `;
@@ -1094,7 +1367,7 @@
                         user.skin = key;
                     } else return alert('Недостаточно монет!');
                     saveAndSyncUser(currentUser);
-                    drawPreview();
+                    drawPreviews();
                     renderShop();
                 });
                 list.appendChild(div);
@@ -1112,7 +1385,7 @@
                         <strong>${item.name}</strong><br>
                         <small style="color:#aaa;">${isBought ? 'Куплено' : item.price + ' 🪙'}</small>
                     </div>
-                    <button class="btn" style="width:auto; padding:8px 14px; margin:0; font-size:0.85rem;">
+                    <button class="btn" style="width:auto; padding:8px 14px; margin:0; font-size:0.85rem; background:${isEquipped ? '#ffca28' : '#00c6ff'}; color:${isEquipped ? '#000' : '#fff'}; font-weight:800;">
                         ${isEquipped ? 'Надет' : (isBought ? 'Надеть' : 'Купить')}
                     </button>
                 `;
@@ -1124,7 +1397,7 @@
                         user.accessory = key;
                     } else return alert('Недостаточно монет!');
                     saveAndSyncUser(currentUser);
-                    drawPreview();
+                    drawPreviews();
                     renderShop();
                 });
                 list.appendChild(div);
@@ -1134,7 +1407,7 @@
 
     document.getElementById('btn-wardrobe').addEventListener('click', () => {
         renderShop();
-        drawPreview();
+        drawPreviews();
         showScreen('wardrobe-screen');
     });
     document.getElementById('btn-back-wardrobe').addEventListener('click', () => showScreen('menu-screen'));
@@ -1156,7 +1429,7 @@
                 div.className = 'list-item';
                 div.innerHTML = `
                     <div style="display:flex; align-items:center; gap: 8px;">
-                        <span style="font-weight:800; color:#00f2fe;">#${idx + 1}</span>
+                        <span style="font-weight:800; color:#ffca28;">#${idx + 1}</span>
                         <strong>${u.name}</strong>
                         ${u.isVerified ? '<span class="verified-icon">✔</span>' : ''}
                     </div>
@@ -1209,7 +1482,6 @@
         document.getElementById('btn-toggle-sound').innerText = `🔊 Звук: ${soundEnabled ? 'Включен' : 'Выключен'}`;
     });
 
-    // ВЫХОД ИЗ АККАУНТА (Очищает сессию)
     document.getElementById('btn-logout').addEventListener('click', () => {
         localStorage.removeItem('slime_jumper_session');
         currentUser = null;
@@ -1221,12 +1493,11 @@
     document.getElementById('btn-admin-panel').addEventListener('click', () => showScreen('admin-screen'));
     document.getElementById('btn-back-admin').addEventListener('click', () => showScreen('menu-screen'));
 
-    /* --- РАБОЧИЕ АДМИН-КОМАНДЫ --- */
+    /* --- АДМИН-КОМАНДЫ --- */
     document.getElementById('btn-admin-give-coins').addEventListener('click', async () => {
         const t = cleanNick(document.getElementById('admin-target-user').value);
         if (!t) return alert('Введите никнейм игрока!');
 
-        // Если игрока нет в локальной базе, пытаемся подгрузить его из Firebase
         if (!localDB[t] && db) {
             try {
                 const snap = await db.ref('users/' + t).once('value');
@@ -1263,7 +1534,7 @@
         }
     });
 
-    /* --- ПРОВЕРКА СОХРАНЕННОЙ СЕССИИ (АВТО-ВХОД) --- */
+    /* --- АВТО-ВХОД ПРИ ПЕРЕЗАГРУЗКЕ --- */
     const savedSession = localStorage.getItem('slime_jumper_session');
     if (savedSession && localDB[savedSession]) {
         currentUser = savedSession;
