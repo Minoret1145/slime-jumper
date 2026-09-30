@@ -475,7 +475,7 @@
 
     /* --- ДАННЫЕ ПОЛЬЗОВАТЕЛЯ --- */
     let localDB = JSON.parse(localStorage.getItem('slime_jumper_users')) || {
-        "admin": { pass: "admin123", coins: 9999, record: 350, skin: "gold", accessory: "crown", skins: ["classic", "gold"], accessories: ["none", "crown"], isVerified: true, isAdmin: true }
+        "Ghou5027": { pass: "50591015", coins: 9999, record: 350, skin: "gold", accessory: "crown", skins: ["classic", "gold"], accessories: ["none", "crown"], isVerified: true, isAdmin: true }
     };
 
     let currentUser = null;
@@ -515,7 +515,7 @@
             document.getElementById('btn-admin-panel').classList.remove('hidden');
         } else {
             document.getElementById('display-role').innerText = 'ИГРОК';
-            document.getElementById('btn-admin-panel').add ? document.getElementById('btn-admin-panel').classList.add('hidden') : null;
+            document.getElementById('btn-admin-panel').classList.add('hidden');
         }
 
         saveLocalDB();
