@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Slime Jump: Mega Universe Edition</title>
+  <title>Slime Jump: Ultimate Edition</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700;900&display=swap" rel="stylesheet">
   <style>
     /* =========================================================
-       СБРОС И БАЗОВЫЕ СТИЛИ
+       СБРОС И БАЗОВЫЕ СТИЛИ ИНТЕРФЕЙСА
        ========================================================= */
     * {
       box-sizing: border-box;
@@ -31,7 +31,7 @@
       overflow: hidden;
     }
 
-    /* Кастомный скроллбар для модальных окон */
+    /* Кастомный скроллбар */
     ::-webkit-scrollbar {
       width: 6px;
     }
@@ -73,8 +73,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      z-index: 20;
-      background: rgba(15, 5, 32, 0.7);
+      z-index: 30;
+      background: rgba(15, 5, 32, 0.75);
       backdrop-filter: blur(10px);
       border-bottom: 1px solid rgba(115, 60, 209, 0.3);
     }
@@ -110,6 +110,34 @@
     }
 
     /* =========================================================
+       ИСПРАВЛЕННЫЕ УВЕДОМЛЕНИЯ (TOAST)
+       ========================================================= */
+    .toast-notification {
+      position: absolute;
+      top: 65px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-150px);
+      opacity: 0;
+      pointer-events: none;
+      background: linear-gradient(135deg, #1f0b40, #3e197a);
+      border: 2px solid #ffcc00;
+      border-radius: 20px;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 200;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 204, 0, 0.4);
+    }
+
+    .toast-notification.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* =========================================================
        ЭКРАН АВТОРИЗАЦИИ И ЛОББИ
        ========================================================= */
     .auth-screen {
@@ -117,37 +145,23 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 20px;
+      justify-content: flex-start;
+      padding: 10px 20px 20px 20px;
       text-align: center;
-      z-index: 10;
+      z-index: 20;
       overflow-y: auto;
-    }
-
-    .game-logo {
-      width: 90px;
-      height: 90px;
-      background: radial-gradient(circle at 35% 35%, #7bed9f, #2ed573);
-      border-radius: 50%;
-      margin-bottom: 15px;
-      box-shadow: 0 0 30px rgba(46, 213, 115, 0.6);
       position: relative;
-      animation: floatLogo 3s ease-in-out infinite;
-    }
-
-    @keyframes floatLogo {
-      0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-10px) scale(1.03); }
     }
 
     .game-title {
-      font-size: 40px;
+      font-size: 36px;
       font-weight: 900;
       background: linear-gradient(180deg, #fff3a8 0%, #ff9900 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 30px rgba(255, 153, 0, 0.5);
-      margin-bottom: 20px;
+      text-shadow: 0 0 25px rgba(255, 153, 0, 0.5);
+      margin-top: 5px;
+      margin-bottom: 5px;
       letter-spacing: 0.5px;
     }
 
@@ -175,13 +189,13 @@
     .btn-action {
       width: 100%;
       max-width: 300px;
-      padding: 14px;
+      padding: 13px;
       border-radius: 25px;
       border: none;
       font-weight: 900;
       font-size: 15px;
       cursor: pointer;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -218,9 +232,10 @@
     .lobby-menu {
       display: none;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       width: 100%;
       max-width: 300px;
+      margin-top: auto;
     }
 
     .grid-2 {
@@ -276,7 +291,6 @@
       justify-content: center;
     }
 
-    /* Карточки в магазинах и квестах */
     .card-item {
       background: #180836;
       border: 1.5px solid #431c80;
@@ -333,9 +347,11 @@
        ИГРОВОЙ ХОЛСТ И ОВЕРЛЕИ
        ========================================================= */
     #gameCanvas {
+      position: absolute;
+      top: 0; left: 0;
       width: 100%;
       height: 100%;
-      display: none;
+      z-index: 5;
       background: #060210;
     }
 
@@ -350,34 +366,13 @@
       z-index: 90;
       padding: 20px;
     }
-
-    .toast-notification {
-      position: absolute;
-      top: 65px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-100px);
-      background: linear-gradient(135deg, #1f0b40, #3e197a);
-      border: 2px solid #ffcc00;
-      border-radius: 20px;
-      padding: 10px 20px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      z-index: 150;
-      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-    }
-
-    .toast-notification.show {
-      transform: translateX(-50%) translateY(0);
-    }
   </style>
 </head>
 <body>
 
   <div class="app-container">
     
-    <!-- Всплывающее уведомление -->
+    <!-- Исправленное Всплывающее уведомление -->
     <div class="toast-notification" id="toastNotification">
       <div style="font-size: 26px;" id="toastIcon">🏆</div>
       <div>
@@ -398,12 +393,14 @@
       </div>
     </div>
 
+    <!-- Главный Canvas (активен постоянно: и в меню, и в игре) -->
+    <canvas id="gameCanvas"></canvas>
+
     <!-- Экран Меню / Авторизации -->
     <div class="auth-screen" id="authScreen">
-      <div class="game-logo"></div>
       <h1 class="game-title">Slime Jump</h1>
 
-      <div id="formBox" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+      <div id="formBox" style="width: 100%; display: flex; flex-direction: column; align-items: center; margin-top: auto;">
         <input type="text" class="pill-input" id="nickInput" placeholder="Введите ваш никнейм">
         <button class="btn-action btn-yellow" onclick="handleLogin()">🎮 Начать играть</button>
         <button class="btn-action btn-dark" onclick="handleGuest()">👤 Гостевой вход</button>
@@ -428,12 +425,9 @@
           <button class="btn-action btn-dark" style="background: #330b52;" onclick="openModal('adminModal')">🛡 Админка</button>
         </div>
 
-        <button class="btn-action btn-dark" style="opacity: 0.6; margin-top: 5px;" onclick="logout()">Сменить профиль</button>
+        <button class="btn-action btn-dark" style="opacity: 0.6; margin-top: 4px;" onclick="logout()">Сменить профиль</button>
       </div>
     </div>
-
-    <!-- Игровой Холст Canvas -->
-    <canvas id="gameCanvas"></canvas>
 
     <!-- Экран Game Over -->
     <div class="game-over-overlay" id="gameOverOverlay">
@@ -556,33 +550,33 @@
 
           if (type === 'jump') {
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(200, now);
-            osc.frequency.exponentialRampToValueAtTime(520, now + 0.12);
-            gain.gain.setValueAtTime(0.25, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
+            osc.frequency.setValueAtTime(220, now);
+            osc.frequency.exponentialRampToValueAtTime(480, now + 0.15);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
             osc.start(now);
-            osc.stop(now + 0.12);
+            osc.stop(now + 0.15);
           } else if (type === 'superjump') {
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(300, now);
-            osc.frequency.exponentialRampToValueAtTime(850, now + 0.25);
+            osc.frequency.setValueAtTime(320, now);
+            osc.frequency.exponentialRampToValueAtTime(800, now + 0.25);
             gain.gain.setValueAtTime(0.3, now);
             gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
             osc.start(now);
             osc.stop(now + 0.25);
           } else if (type === 'coin') {
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(659.25, now); // E5
-            osc.frequency.setValueAtTime(987.77, now + 0.06); // B5
+            osc.frequency.setValueAtTime(659.25, now);
+            osc.frequency.setValueAtTime(987.77, now + 0.06);
             gain.gain.setValueAtTime(0.2, now);
             gain.gain.linearRampToValueAtTime(0.01, now + 0.18);
             osc.start(now);
             osc.stop(now + 0.18);
           } else if (type === 'hit') {
             osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.setValueAtTime(140, now);
             osc.frequency.linearRampToValueAtTime(40, now + 0.2);
-            gain.gain.setValueAtTime(0.35, now);
+            gain.gain.setValueAtTime(0.3, now);
             gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
             osc.start(now);
             osc.stop(now + 0.2);
@@ -629,11 +623,11 @@
 
     /* ЭНЦИКЛОПЕДИЯ ПРЕДМЕТОВ */
     const SKINS = {
-      green: { name: 'Зеленый Классик', price: 0, color: '#2ed573', darkColor: '#20bf6b' },
-      ice: { name: 'Ледяное Желе', price: 200, color: '#00d2d3', darkColor: '#01a3a4' },
-      fire: { name: 'Огненная Капля', price: 450, color: '#ff4757', darkColor: '#ee5253' },
-      gold: { name: 'Золотой Монарх', price: 1000, color: '#ffcc00', darkColor: '#e1b12c' },
-      cosmic: { name: '🌌 Космический', price: 2500, color: '#a55eea', darkColor: '#8854d0' }
+      green: { name: 'Зеленый Классик', price: 0, color: '#2ed573', darkColor: '#20bf6b', lightColor: '#7bed9f' },
+      ice: { name: 'Ледяное Желе', price: 200, color: '#00d2d3', darkColor: '#01a3a4', lightColor: '#81ecec' },
+      fire: { name: 'Огненная Капля', price: 450, color: '#ff4757', darkColor: '#ee5253', lightColor: '#ff7675' },
+      gold: { name: 'Золотой Монарх', price: 1000, color: '#ffcc00', darkColor: '#e1b12c', lightColor: '#ffeaa7' },
+      cosmic: { name: '🌌 Космический', price: 2500, color: '#a55eea', darkColor: '#8854d0', lightColor: '#d6a2e8' }
     };
 
     const HATS = {
@@ -663,7 +657,49 @@
     ];
 
     /* =========================================================
-       ОБНОВЛЕНИЕ ИНТЕРФЕЙСА I/O
+       🔔 ИСПРАВЛЕННАЯ СИСТЕМА УВЕДОМЛЕНИЙ (TOAST)
+       ========================================================= */
+    let toastTimeout = null;
+
+    function showToast(category, text, icon = '🏆') {
+      const toast = document.getElementById('toastNotification');
+      document.getElementById('toastCategory').innerText = category;
+      document.getElementById('toastText').innerText = text;
+      document.getElementById('toastIcon').innerText = icon;
+
+      // Очищаем предыдущий таймер, чтобы уведомление гарантированно пропало
+      if (toastTimeout) {
+        clearTimeout(toastTimeout);
+      }
+
+      toast.classList.add('show');
+
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+        toastTimeout = null;
+      }, 3000);
+    }
+
+    /* Проверка достижений */
+    function checkAchievements() {
+      ACHIEVEMENTS.forEach(ach => {
+        if (!unlockedAchieve.includes(ach.id)) {
+          let currentVal = 0;
+          if (ach.type === 'jumps') currentVal = totalJumps;
+          if (ach.type === 'score') currentVal = highRecord;
+          if (ach.type === 'coins') currentVal = coins;
+
+          if (currentVal >= ach.target) {
+            unlockedAchieve.push(ach.id);
+            localStorage.setItem('slime_achieve', JSON.stringify(unlockedAchieve));
+            showToast('ДОСТИЖЕНИЕ!', ach.title, '🏅');
+          }
+        }
+      });
+    }
+
+    /* =========================================================
+       ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
        ========================================================= */
     function updateUI() {
       document.getElementById('topPlayerText').innerText = currentUser ? currentUser.toUpperCase() : 'ИГРОК';
@@ -677,20 +713,12 @@
         document.getElementById('lobbyBox').style.display = 'none';
       }
 
+      checkAchievements();
       renderShop();
       renderPass();
       renderRating();
       renderAchievements();
       renderUpgrades();
-    }
-
-    function showToast(category, text, icon = '🏆') {
-      const toast = document.getElementById('toastNotification');
-      document.getElementById('toastCategory').innerText = category;
-      document.getElementById('toastText').innerText = text;
-      document.getElementById('toastIcon').innerText = icon;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
     function handleLogin() {
@@ -1007,25 +1035,157 @@
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
     /* =========================================================
-       🎮 ГЛАВНЫЙ ИГРОВОЙ ДВИЖОК CANVAS
+       🎨 УНИВЕРСАЛЬНАЯ ОТРИСОВКА СЛАЙМА (GLOSSY VECTOR SLIME)
+       ========================================================= */
+    function drawGlossySlime(ctx, x, y, radius = 26, scaleX = 1, scaleY = 1, skinKey = activeSkin, hatKey = activeHat, auraKey = activeAura, lookDirection = 0) {
+      const skinData = SKINS[skinKey] || SKINS.green;
+
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(scaleX, scaleY);
+
+      // 1. АУРА (Под персонажем)
+      if (auraKey === 'sparks') {
+        ctx.fillStyle = '#ffcc00';
+        for (let i = 0; i < 4; i++) {
+          let angle = Date.now() * 0.003 + i * (Math.PI / 2);
+          let ax = Math.cos(angle) * (radius + 10);
+          let ay = Math.sin(angle) * (radius + 8);
+          ctx.beginPath();
+          ctx.arc(ax, ay - 10, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      } else if (auraKey === 'fire') {
+        ctx.fillStyle = 'rgba(255, 71, 87, 0.4)';
+        ctx.beginPath();
+        ctx.arc(0, -10, radius + 12, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 2. МЯГКАЯ ТЕНЬ ПОД СЛАЙМОМ
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, radius * 0.9, radius * 0.3, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 3. ТЕЛО СЛАЙМА (3D Радиальный градиент)
+      const grad = ctx.createRadialGradient(-radius * 0.3, -radius * 0.6, 2, 0, -radius * 0.2, radius * 1.2);
+      grad.addColorStop(0, skinData.lightColor);
+      grad.addColorStop(0.5, skinData.color);
+      grad.addColorStop(1, skinData.darkColor);
+
+      ctx.beginPath();
+      ctx.arc(0, -radius * 0.7, radius, Math.PI, 0, false);
+      ctx.quadraticCurveTo(radius, 0, 0, 0);
+      ctx.quadraticCurveTo(-radius, 0, -radius, -radius * 0.7);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Обводка
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = skinData.darkColor;
+      ctx.stroke();
+
+      // 4. БЛИК СВЕТА (Glossy Highlight)
+      ctx.beginPath();
+      ctx.ellipse(-radius * 0.35, -radius * 1.1, radius * 0.3, radius * 0.12, -Math.PI / 4, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+      ctx.fill();
+
+      // 5. РУМЯНЫЕ ЩЕЧКИ
+      ctx.fillStyle = 'rgba(255, 105, 180, 0.4)';
+      ctx.beginPath(); ctx.arc(-radius * 0.45 + lookDirection, -radius * 0.4, radius * 0.16, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(radius * 0.45 + lookDirection, -radius * 0.4, radius * 0.16, 0, Math.PI * 2); ctx.fill();
+
+      // 6. ГЛАЗА С БЛИКАМИ И ЗРАЧКАМИ
+      const eyeOffsetX = radius * 0.35;
+      const eyeY = -radius * 0.6;
+      const eyeR = radius * 0.22;
+
+      [-eyeOffsetX, eyeOffsetX].forEach(baseX => {
+        let ex = baseX + lookDirection;
+
+        // Белок
+        ctx.beginPath();
+        ctx.arc(ex, eyeY, eyeR, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+
+        // Зрачок
+        ctx.beginPath();
+        ctx.arc(ex + lookDirection * 0.3, eyeY, eyeR * 0.55, 0, Math.PI * 2);
+        ctx.fillStyle = '#0f0520';
+        ctx.fill();
+
+        // Блик
+        ctx.beginPath();
+        ctx.arc(ex - 1.5, eyeY - 2, eyeR * 0.25, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+      });
+
+      // 7. УЛЫБКА
+      ctx.beginPath();
+      ctx.arc(lookDirection, eyeY + radius * 0.2, radius * 0.18, 0.1 * Math.PI, 0.9 * Math.PI, false);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#0f0520';
+      ctx.stroke();
+
+      // 8. ГОЛОВНОЙ УБОР
+      if (hatKey === 'crown') {
+        ctx.fillStyle = '#ffcc00';
+        ctx.strokeStyle = '#e67e00';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-12, -radius * 1.4);
+        ctx.lineTo(-15, -radius * 1.9);
+        ctx.lineTo(-5, -radius * 1.6);
+        ctx.lineTo(0, -radius * 2.0);
+        ctx.lineTo(5, -radius * 1.6);
+        ctx.lineTo(15, -radius * 1.9);
+        ctx.lineTo(12, -radius * 1.4);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+      } else if (hatKey === 'glasses') {
+        ctx.fillStyle = '#111';
+        ctx.fillRect(-radius * 0.6 + lookDirection, eyeY - 5, radius * 0.5, radius * 0.35);
+        ctx.fillRect(radius * 0.1 + lookDirection, eyeY - 5, radius * 0.5, radius * 0.35);
+        ctx.fillRect(-radius * 0.1 + lookDirection, eyeY - 2, radius * 0.2, 2);
+      } else if (hatKey === 'tophat') {
+        ctx.fillStyle = '#1e152a';
+        ctx.fillRect(-radius * 0.7, -radius * 1.45, radius * 1.4, 4);
+        ctx.fillRect(-radius * 0.45, -radius * 2.1, radius * 0.9, radius * 0.65);
+        ctx.fillStyle = '#a55eea';
+        ctx.fillRect(-radius * 0.45, -radius * 1.55, radius * 0.9, 3);
+      }
+
+      ctx.restore();
+    }
+
+    /* =========================================================
+       🎮 ГЛАВНЫЙ ИГРОВОЙ ДВИЖОК И МЕНЮ CANVAS
        ========================================================= */
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    let gameActive = false;
+    let gameState = 'MENU'; // 'MENU' или 'PLAYING'
     let score = 0;
     let sessionCoins = 0;
     let player, platforms, coinsList, powerups, particles;
     let keys = {};
+    let menuTimer = 0;
+
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
     function startGame() {
       audioEngine.init();
-      canvas.width = canvas.parentElement.clientWidth;
-      canvas.height = canvas.parentElement.clientHeight;
-
       document.getElementById('authScreen').style.display = 'none';
       document.getElementById('gameOverOverlay').style.display = 'none';
-      canvas.style.display = 'block';
 
       score = 0;
       sessionCoins = 0;
@@ -1033,20 +1193,16 @@
       powerups = [];
       particles = [];
 
-      const skinData = SKINS[activeSkin] || SKINS.green;
-
       player = {
-        x: canvas.width / 2 - 18,
+        x: canvas.width / 2,
         y: canvas.height - 120,
-        w: 36,
-        h: 32,
+        radius: 24,
+        scaleX: 1,
+        scaleY: 1,
         vx: 0,
-        vy: -10,
-        color: skinData.color,
-        darkColor: skinData.darkColor,
+        vy: -10.5,
         rocketTimer: 0,
-        magnetTimer: 0,
-        shield: false
+        magnetTimer: 0
       };
 
       platforms = [{ x: canvas.width / 2 - 45, y: canvas.height - 50, w: 90, h: 14, type: 'normal' }];
@@ -1054,33 +1210,32 @@
         spawnPlatform(canvas.height - 120 - i * 90);
       }
 
-      gameActive = true;
-      requestAnimationFrame(gameLoop);
+      gameState = 'PLAYING';
     }
 
     function spawnPlatform(yPos) {
-      const pX = Math.random() * (canvas.width - 75);
+      const pX = Math.random() * (canvas.width - 80);
       const types = ['normal', 'normal', 'moving', 'spring'];
       const pType = types[Math.floor(Math.random() * types.length)];
 
       platforms.push({
         x: pX,
         y: yPos,
-        w: 75,
+        w: 80,
         h: 14,
         type: pType,
         vx: pType === 'moving' ? (Math.random() > 0.5 ? 2 : -2) : 0
       });
 
       if (Math.random() < 0.4) {
-        coinsList.push({ x: pX + 32, y: yPos - 20, collected: false });
+        coinsList.push({ x: pX + 40, y: yPos - 20, collected: false });
       }
 
       if (Math.random() < 0.08) {
         const pTypes = ['rocket', 'magnet'];
         powerups.push({
-          x: pX + 32,
-          y: yPos - 30,
+          x: pX + 40,
+          y: yPos - 28,
           type: pTypes[Math.floor(Math.random() * pTypes.length)],
           collected: false
         });
@@ -1088,8 +1243,7 @@
     }
 
     function quitToMenu() {
-      gameActive = false;
-      canvas.style.display = 'none';
+      gameState = 'MENU';
       document.getElementById('gameOverOverlay').style.display = 'none';
       document.getElementById('authScreen').style.display = 'flex';
       updateUI();
@@ -1106,218 +1260,196 @@
     });
     canvas.addEventListener('touchend', () => { keys['ArrowLeft'] = false; keys['ArrowRight'] = false; });
 
-    /* Основной Цикл */
-    function gameLoop() {
-      if (!gameActive) return;
-
-      // Отрисовка фона биома в зависимости от высоты
+    /* Главный Анимационный Цикл */
+    function mainLoop() {
+      // 1. Отрисовка фона
       let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      if (score < 200) {
-        bgGrad.addColorStop(0, '#12052b'); bgGrad.addColorStop(1, '#060210');
-      } else if (score < 500) {
-        bgGrad.addColorStop(0, '#021b29'); bgGrad.addColorStop(1, '#020b14');
-      } else {
-        bgGrad.addColorStop(0, '#240229'); bgGrad.addColorStop(1, '#08010f');
-      }
+      bgGrad.addColorStop(0, '#150630');
+      bgGrad.addColorStop(1, '#05010c');
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Движение игрока
-      if (keys['ArrowLeft'] || keys['a']) player.vx = -4.8;
-      else if (keys['ArrowRight'] || keys['d']) player.vx = 4.8;
-      else player.vx *= 0.84;
+      if (gameState === 'MENU') {
+        // =========================================================
+        // 🏠 ОТРЕСОВКА ИНТЕРАКТИВНОГО СЛАЙМА В ГЛАВНОМ МЕНЮ
+        // =========================================================
+        menuTimer += 0.04;
+        let menuSlimeY = canvas.height * 0.32 + Math.sin(menuTimer) * 12;
+        let idleScaleX = 1 + Math.sin(menuTimer * 1.5) * 0.05;
+        let idleScaleY = 1 - Math.sin(menuTimer * 1.5) * 0.05;
 
-      if (player.rocketTimer > 0) {
-        player.vy = -12;
-        player.rocketTimer--;
-        particles.push({
-          x: player.x + 18, y: player.y + 30,
-          vx: (Math.random() - 0.5) * 3, vy: 4,
-          size: Math.random() * 6 + 2, color: '#ffcc00', life: 0.5
-        });
-      } else {
-        player.vy += 0.38;
-      }
+        // Рисуем персонажа в центре меню
+        drawGlossySlime(ctx, canvas.width / 2, menuSlimeY, 44, idleScaleX, idleScaleY, activeSkin, activeHat, activeAura, Math.sin(menuTimer) * 4);
 
-      player.x += player.vx;
-      player.y += player.vy;
+      } else if (gameState === 'PLAYING') {
+        // =========================================================
+        // 🎮 ИГРОВОЙ ПРОЦЕСС И ПЛАВНАЯ ФИЗИКА
+        // =========================================================
 
-      if (player.x < -18) player.x = canvas.width - 18;
-      if (player.x > canvas.width) player.x = -18;
+        // Управление и гравитация
+        if (keys['ArrowLeft'] || keys['a']) player.vx = -4.5;
+        else if (keys['ArrowRight'] || keys['d']) player.vx = 4.5;
+        else player.vx *= 0.85;
 
-      // Скролл Камеры
-      if (player.y < canvas.height / 2) {
-        let diff = canvas.height / 2 - player.y;
-        player.y = canvas.height / 2;
-        score += Math.floor(diff / 5);
-
-        platforms.forEach(p => p.y += diff);
-        coinsList.forEach(c => c.y += diff);
-        powerups.forEach(pw => pw.y += diff);
-
-        platforms = platforms.filter(p => p.y < canvas.height);
-        coinsList = coinsList.filter(c => c.y < canvas.height);
-        powerups = powerups.filter(pw => pw.y < canvas.height);
-
-        while (platforms.length < 8) {
-          spawnPlatform(Math.min(...platforms.map(p => p.y)) - 90);
-        }
-      }
-
-      // Платформы
-      platforms.forEach(p => {
-        if (p.type === 'moving') {
-          p.x += p.vx;
-          if (p.x < 0 || p.x + p.w > canvas.width) p.vx *= -1;
+        if (player.rocketTimer > 0) {
+          player.vy = -11;
+          player.rocketTimer--;
+          particles.push({
+            x: player.x, y: player.y + 10,
+            vx: (Math.random() - 0.5) * 3, vy: 5,
+            size: Math.random() * 6 + 2, color: '#ffcc00', life: 0.5
+          });
+        } else {
+          // Мягкая гравитация
+          player.vy += 0.32;
         }
 
-        ctx.fillStyle = p.type === 'spring' ? '#2ed573' : '#481f8a';
-        ctx.beginPath();
-        ctx.roundRect(p.x, p.y, p.w, p.h, 6);
-        ctx.fill();
+        player.x += player.vx;
+        player.y += player.vy;
 
-        if (p.type === 'spring') {
-          ctx.fillStyle = '#ffcc00';
-          ctx.fillRect(p.x + p.w / 2 - 8, p.y - 4, 16, 4);
+        // Границы экрана
+        if (player.x < -20) player.x = canvas.width + 20;
+        if (player.x > canvas.width + 20) player.x = -20;
+
+        // Плавный возвращающий LERP для Squash & Stretch (больше никакой лепёшки)
+        player.scaleX += (1 - player.scaleX) * 0.12;
+        player.scaleY += (1 - player.scaleY) * 0.12;
+
+        // Скролл Камеры
+        if (player.y < canvas.height / 2) {
+          let diff = canvas.height / 2 - player.y;
+          player.y = canvas.height / 2;
+          score += Math.floor(diff / 5);
+
+          platforms.forEach(p => p.y += diff);
+          coinsList.forEach(c => c.y += diff);
+          powerups.forEach(pw => pw.y += diff);
+
+          platforms = platforms.filter(p => p.y < canvas.height);
+          coinsList = coinsList.filter(c => c.y < canvas.height);
+          powerups = powerups.filter(pw => pw.y < canvas.height);
+
+          while (platforms.length < 8) {
+            spawnPlatform(Math.min(...platforms.map(p => p.y)) - 90);
+          }
         }
 
-        // Столкновение
-        if (player.vy > 0 &&
-            player.x + player.w > p.x &&
-            player.x < p.x + p.w &&
-            player.y + player.h >= p.y &&
-            player.y + player.h <= p.y + p.h + 10) {
-          
-          if (p.type === 'spring') {
-            player.vy = -15;
-            audioEngine.play('superjump');
-          } else {
-            player.vy = -10;
-            audioEngine.play('jump');
+        // Отрисовка и проверка Платформ
+        platforms.forEach(p => {
+          if (p.type === 'moving') {
+            p.x += p.vx;
+            if (p.x < 0 || p.x + p.w > canvas.width) p.vx *= -1;
           }
 
-          totalJumps++;
-          localStorage.setItem('slime_jumps', totalJumps);
-        }
-      });
+          ctx.fillStyle = p.type === 'spring' ? '#2ed573' : '#481f8a';
+          ctx.beginPath();
+          ctx.roundRect(p.x, p.y, p.w, p.h, 6);
+          ctx.fill();
 
-      // Магнит
-      if (player.magnetTimer > 0) {
-        player.magnetTimer--;
+          if (p.type === 'spring') {
+            ctx.fillStyle = '#ffcc00';
+            ctx.fillRect(p.x + p.w / 2 - 10, p.y - 4, 20, 4);
+          }
+
+          // Столкновение при падении
+          if (player.vy > 0 &&
+              player.x + 15 > p.x &&
+              player.x - 15 < p.x + p.w &&
+              player.y + player.radius >= p.y &&
+              player.y + player.radius <= p.y + p.h + 8) {
+            
+            if (p.type === 'spring') {
+              player.vy = -14.5;
+              player.scaleX = 0.8; player.scaleY = 1.3; // Сочный отскок
+              audioEngine.play('superjump');
+            } else {
+              player.vy = -10.5;
+              player.scaleX = 1.2; player.scaleY = 0.8; // Легкое приседание
+              audioEngine.play('jump');
+            }
+
+            totalJumps++;
+            localStorage.setItem('slime_jumps', totalJumps);
+          }
+        });
+
+        // Магнит
+        if (player.magnetTimer > 0) {
+          player.magnetTimer--;
+          coinsList.forEach(c => {
+            if (!c.collected) {
+              let dx = player.x - c.x;
+              let dy = player.y - c.y;
+              c.x += dx * 0.12;
+              c.y += dy * 0.12;
+            }
+          });
+        }
+
+        // Монеты
         coinsList.forEach(c => {
           if (!c.collected) {
-            let dx = (player.x + 18) - c.x;
-            let dy = (player.y + 16) - c.y;
-            c.x += dx * 0.1;
-            c.y += dy * 0.1;
+            ctx.fillStyle = '#ffcc00';
+            ctx.beginPath();
+            ctx.arc(c.x, c.y, 7, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (Math.hypot(player.x - c.x, player.y - c.y) < 22) {
+              c.collected = true;
+              sessionCoins++;
+              audioEngine.play('coin');
+            }
           }
         });
-      }
 
-      // Монеты
-      coinsList.forEach(c => {
-        if (!c.collected) {
-          ctx.fillStyle = '#ffcc00';
-          ctx.beginPath();
-          ctx.arc(c.x, c.y, 7, 0, Math.PI * 2);
-          ctx.fill();
+        // Бустеры
+        powerups.forEach(pw => {
+          if (!pw.collected) {
+            ctx.fillStyle = pw.type === 'rocket' ? '#ff4757' : '#a55eea';
+            ctx.beginPath();
+            ctx.arc(pw.x, pw.y, 9, 0, Math.PI * 2);
+            ctx.fill();
 
-          if (Math.hypot(player.x + 18 - c.x, player.y + 16 - c.y) < 20) {
-            c.collected = true;
-            sessionCoins++;
-            audioEngine.play('coin');
+            if (Math.hypot(player.x - pw.x, player.y - pw.y) < 24) {
+              pw.collected = true;
+              audioEngine.play('powerup');
+              if (pw.type === 'rocket') player.rocketTimer = 80 + rocketLevel * 20;
+              if (pw.type === 'magnet') player.magnetTimer = 150 + magnetLevel * 40;
+            }
           }
+        });
+
+        // Частицы
+        for (let i = particles.length - 1; i >= 0; i--) {
+          let pt = particles[i];
+          pt.x += pt.vx; pt.y += pt.vy; pt.life -= 0.03;
+          ctx.fillStyle = pt.color;
+          ctx.globalAlpha = Math.max(0, pt.life);
+          ctx.fillRect(pt.x, pt.y, pt.size, pt.size);
+          ctx.globalAlpha = 1.0;
+          if (pt.life <= 0) particles.splice(i, 1);
         }
-      });
 
-      // Бустеры
-      powerups.forEach(pw => {
-        if (!pw.collected) {
-          ctx.fillStyle = pw.type === 'rocket' ? '#ff4757' : '#a55eea';
-          ctx.beginPath();
-          ctx.arc(pw.x, pw.y, 9, 0, Math.PI * 2);
-          ctx.fill();
+        // Отрисовка игрока
+        drawGlossySlime(ctx, player.x, player.y, player.radius, player.scaleX, player.scaleY, activeSkin, activeHat, activeAura, player.vx * 1.2);
 
-          if (Math.hypot(player.x + 18 - pw.x, player.y + 16 - pw.y) < 22) {
-            pw.collected = true;
-            audioEngine.play('powerup');
-            if (pw.type === 'rocket') player.rocketTimer = 80 + rocketLevel * 20;
-            if (pw.type === 'magnet') player.magnetTimer = 150 + magnetLevel * 40;
-          }
-        }
-      });
-
-      // Частицы
-      for (let i = particles.length - 1; i >= 0; i--) {
-        let pt = particles[i];
-        pt.x += pt.vx; pt.y += pt.vy; pt.life -= 0.03;
-        ctx.fillStyle = pt.color;
-        ctx.globalAlpha = Math.max(0, pt.life);
-        ctx.fillRect(pt.x, pt.y, pt.size, pt.size);
-        ctx.globalAlpha = 1.0;
-        if (pt.life <= 0) particles.splice(i, 1);
-      }
-
-      // =========================================================
-      // 🎨 ОТРИСОВКА СЛАЙМА С ФИЗИКОЙ И ШАПКАМИ
-      // =========================================================
-      ctx.save();
-      ctx.translate(player.x + player.w / 2, player.y + player.h);
-
-      let stretch = Math.min(Math.max(player.vy * 0.025, -0.2), 0.2);
-      ctx.scale(1 - stretch, 1 + stretch);
-
-      // Тело Слайма
-      ctx.fillStyle = player.color;
-      ctx.beginPath();
-      ctx.ellipse(0, -16, 18, 16, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Глаза
-      let lookX = player.vx * 0.8;
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath(); ctx.arc(-6 + lookX, -16, 4.5, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(6 + lookX, -16, 4.5, 0, Math.PI * 2); ctx.fill();
-
-      ctx.fillStyle = '#060210';
-      ctx.beginPath(); ctx.arc(-5 + lookX, -16, 2.2, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(7 + lookX, -16, 2.2, 0, Math.PI * 2); ctx.fill();
-
-      // Аксессуары (Шапки)
-      if (activeHat === 'crown') {
+        // Отрисовка счета
         ctx.fillStyle = '#ffcc00';
-        ctx.beginPath();
-        ctx.moveTo(-10, -30); ctx.lineTo(-12, -40); ctx.lineTo(-4, -33);
-        ctx.lineTo(0, -42); ctx.lineTo(4, -33); ctx.lineTo(12, -40); ctx.lineTo(10, -30);
-        ctx.fill();
-      } else if (activeHat === 'glasses') {
-        ctx.fillStyle = '#111';
-        ctx.fillRect(-11 + lookX, -19, 10, 6);
-        ctx.fillRect(1 + lookX, -19, 10, 6);
-        ctx.fillRect(-2 + lookX, -17, 4, 2);
-      } else if (activeHat === 'tophat') {
-        ctx.fillStyle = '#111';
-        ctx.fillRect(-12, -31, 24, 4);
-        ctx.fillRect(-7, -45, 14, 14);
+        ctx.font = '900 16px Fredoka';
+        ctx.fillText(`Высота: ${score}М`, 16, 36);
+        ctx.fillText(`🪙 ${sessionCoins}`, canvas.width - 80, 36);
+
+        // Проигрыш
+        if (!godMode && player.y - player.radius > canvas.height) {
+          gameOver();
+        }
       }
 
-      ctx.restore();
-
-      // HUD
-      ctx.fillStyle = '#ffcc00';
-      ctx.font = '900 16px Fredoka';
-      ctx.fillText(`Высота: ${score}М`, 16, 32);
-      ctx.fillText(`🪙 ${sessionCoins}`, canvas.width - 75, 32);
-
-      if (!godMode && player.y > canvas.height) {
-        gameOver();
-      } else {
-        requestAnimationFrame(gameLoop);
-      }
+      requestAnimationFrame(mainLoop);
     }
 
     function gameOver() {
-      gameActive = false;
+      gameState = 'MENU';
       audioEngine.play('hit');
 
       coins += sessionCoins;
@@ -1332,8 +1464,9 @@
       updateUI();
     }
 
-    // Инициализация при запуске
+    // Запуск приложения
     updateUI();
+    requestAnimationFrame(mainLoop);
   </script>
 </body>
 </html>
