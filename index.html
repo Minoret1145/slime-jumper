@@ -110,7 +110,7 @@
     }
 
     /* =========================================================
-       ИСПРАВЛЕННЫЕ УВЕДОМЛЕНИЯ (TOAST)
+       УВЕДОМЛЕНИЯ (TOAST)
        ========================================================= */
     .toast-notification {
       position: absolute;
@@ -245,7 +245,7 @@
     }
 
     /* =========================================================
-       МОДАЛЬНЫЕ ОКНА
+       МОДАЛЬНЫЕ ОКНА И ЗНАЧКИ
        ========================================================= */
     .modal {
       position: absolute;
@@ -372,7 +372,7 @@
 
   <div class="app-container">
     
-    <!-- Исправленное Всплывающее уведомление -->
+    <!-- Всплывающее уведомление -->
     <div class="toast-notification" id="toastNotification">
       <div style="font-size: 26px;" id="toastIcon">🏆</div>
       <div>
@@ -393,8 +393,19 @@
       </div>
     </div>
 
-    <!-- Главный Canvas (активен постоянно: и в меню, и в игре) -->
+    <!-- Главный Canvas -->
     <canvas id="gameCanvas"></canvas>
+
+    <!-- Экран Бана -->
+    <div class="auth-screen" id="banScreen" style="display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 25; background: rgba(10, 3, 24, 0.95); height: 100%; width: 100%; position: absolute; top: 0; left: 0;">
+      <div style="font-size: 70px; margin-bottom: 10px;">🔨</div>
+      <h1 style="font-size: 32px; color: #ff4757; font-weight: 900; margin-bottom: 5px;">ВЫ ЗАБАНЕНЫ</h1>
+      <p style="color: #a4b0be; margin-bottom: 25px; font-size: 14px;">Ваш аккаунт был заблокирован.</p>
+      
+      <!-- Админская кнопка для спасения и кнопка сброса -->
+      <button class="btn-action btn-dark" style="margin-bottom: 10px;" onclick="toggleBan()">🔓 Разбанить аккаунт</button>
+      <button class="btn-action btn-dark" style="background: #4a121a; color: #ff4757;" onclick="resetProgress()">🗑 Сбросить профиль</button>
+    </div>
 
     <!-- Экран Меню / Авторизации -->
     <div class="auth-screen" id="authScreen">
@@ -516,29 +527,33 @@
       </div>
       <button class="btn-action btn-dark" onclick="addAdminCoins(1000)">💰 Выдать +1000 Монет</button>
       <button class="btn-action btn-dark" onclick="addAdminCoins(10000)">💎 Выдать +10000 Монет</button>
-      <button class="btn-action btn-dark" id="godModeBtn" onclick="toggleGodMode()">⚡ Режим Бога: ВЫКЛ</button>
       <button class="btn-action btn-dark" onclick="unlockAllSkinsAdmin()">🔓 Открыть все скины и шапки</button>
+      <button class="btn-action btn-dark" id="godModeBtn" onclick="toggleGodMode()">⚡ Режим Бога: ВЫКЛ</button>
+      
+      <hr style="border-color: #3d1978; margin: 8px 0;">
+      
+      <!-- НОВЫЕ КНОПКИ АДМИНКИ -->
+      <button class="btn-action btn-dark" id="verifyBtn" onclick="toggleVerification()">✅ Выдать галочку: ВЫКЛ</button>
+      <button class="btn-action btn-dark" id="banBtn" style="background: #4a121a; color: #ff4757;" onclick="toggleBan()">🔨 Забанить аккаунт: ВЫКЛ</button>
     </div>
 
   </div>
 
   <script>
     /* =========================================================
-       🔊 ЗВУКОВОЙ ДВИЖОК (WEB AUDIO API)
+       🔊 ЗВУКОВОЙ ДВИЖОК
        ========================================================= */
     class SoundEngine {
       constructor() {
         this.ctx = null;
         this.enabled = true;
       }
-
       init() {
         if (!this.ctx) {
           const AudioContext = window.AudioContext || window.webkitAudioContext;
           this.ctx = new AudioContext();
         }
       }
-
       play(type) {
         if (!this.enabled || !this.ctx) return;
         try {
@@ -549,54 +564,33 @@
           gain.connect(this.ctx.destination);
 
           if (type === 'jump') {
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(220, now);
-            osc.frequency.exponentialRampToValueAtTime(480, now + 0.15);
-            gain.gain.setValueAtTime(0.2, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
-            osc.start(now);
-            osc.stop(now + 0.15);
+            osc.type = 'sine'; osc.frequency.setValueAtTime(220, now); osc.frequency.exponentialRampToValueAtTime(480, now + 0.15);
+            gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+            osc.start(now); osc.stop(now + 0.15);
           } else if (type === 'superjump') {
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(320, now);
-            osc.frequency.exponentialRampToValueAtTime(800, now + 0.25);
-            gain.gain.setValueAtTime(0.3, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
-            osc.start(now);
-            osc.stop(now + 0.25);
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(320, now); osc.frequency.exponentialRampToValueAtTime(800, now + 0.25);
+            gain.gain.setValueAtTime(0.3, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+            osc.start(now); osc.stop(now + 0.25);
           } else if (type === 'coin') {
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(659.25, now);
-            osc.frequency.setValueAtTime(987.77, now + 0.06);
-            gain.gain.setValueAtTime(0.2, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.18);
-            osc.start(now);
-            osc.stop(now + 0.18);
+            osc.type = 'sine'; osc.frequency.setValueAtTime(659.25, now); osc.frequency.setValueAtTime(987.77, now + 0.06);
+            gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.18);
+            osc.start(now); osc.stop(now + 0.18);
           } else if (type === 'hit') {
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(140, now);
-            osc.frequency.linearRampToValueAtTime(40, now + 0.2);
-            gain.gain.setValueAtTime(0.3, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
-            osc.start(now);
-            osc.stop(now + 0.2);
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(140, now); osc.frequency.linearRampToValueAtTime(40, now + 0.2);
+            gain.gain.setValueAtTime(0.3, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+            osc.start(now); osc.stop(now + 0.2);
           } else if (type === 'powerup') {
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(400, now);
-            osc.frequency.linearRampToValueAtTime(800, now + 0.2);
-            gain.gain.setValueAtTime(0.15, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
-            osc.start(now);
-            osc.stop(now + 0.2);
+            osc.type = 'square'; osc.frequency.setValueAtTime(400, now); osc.frequency.linearRampToValueAtTime(800, now + 0.2);
+            gain.gain.setValueAtTime(0.15, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+            osc.start(now); osc.stop(now + 0.2);
           }
         } catch(e) {}
       }
     }
-
     const audioEngine = new SoundEngine();
 
     /* =========================================================
-       💾 ДАННЫЕ И СОСТОЯНИЕ ИГРЫ (LOCAL STORAGE)
+       💾 ДАННЫЕ И СОСТОЯНИЕ ИГРЫ
        ========================================================= */
     let currentUser = localStorage.getItem('slime_user') || '';
     let coins = parseInt(localStorage.getItem('slime_coins') || '0');
@@ -604,11 +598,14 @@
     let totalJumps = parseInt(localStorage.getItem('slime_jumps') || '0');
     let godMode = false;
 
+    // Новые переменные админки
+    let isVerified = localStorage.getItem('slime_verified') === 'true';
+    let isBanned = localStorage.getItem('slime_banned') === 'true';
+
     // Гардероб
     let activeSkin = localStorage.getItem('slime_skin') || 'green';
     let activeHat = localStorage.getItem('slime_hat') || 'none';
     let activeAura = localStorage.getItem('slime_aura') || 'none';
-
     let ownedSkins = JSON.parse(localStorage.getItem('slime_owned_skins') || '["green"]');
     let ownedHats = JSON.parse(localStorage.getItem('slime_owned_hats') || '["none"]');
     let ownedAuras = JSON.parse(localStorage.getItem('slime_owned_auras') || '["none"]');
@@ -616,12 +613,9 @@
     // Прокачка
     let magnetLevel = parseInt(localStorage.getItem('slime_upg_magnet') || '1');
     let rocketLevel = parseInt(localStorage.getItem('slime_upg_rocket') || '1');
-
-    // Квесты и Пасс
     let passClaimed = JSON.parse(localStorage.getItem('slime_pass_claimed') || '[]');
     let unlockedAchieve = JSON.parse(localStorage.getItem('slime_achieve') || '[]');
 
-    /* ЭНЦИКЛОПЕДИЯ ПРЕДМЕТОВ */
     const SKINS = {
       green: { name: 'Зеленый Классик', price: 0, color: '#2ed573', darkColor: '#20bf6b', lightColor: '#7bed9f' },
       ice: { name: 'Ледяное Желе', price: 200, color: '#00d2d3', darkColor: '#01a3a4', lightColor: '#81ecec' },
@@ -629,19 +623,8 @@
       gold: { name: 'Золотой Монарх', price: 1000, color: '#ffcc00', darkColor: '#e1b12c', lightColor: '#ffeaa7' },
       cosmic: { name: '🌌 Космический', price: 2500, color: '#a55eea', darkColor: '#8854d0', lightColor: '#d6a2e8' }
     };
-
-    const HATS = {
-      none: { name: 'Без шапки', price: 0 },
-      crown: { name: '👑 Корона', price: 300 },
-      glasses: { name: '🕶️ Очки Крутого', price: 150 },
-      tophat: { name: '🎩 Цилиндр', price: 500 }
-    };
-
-    const AURAS = {
-      none: { name: 'Без ауры', price: 0 },
-      sparks: { name: '✨ Искры', price: 400, color: '#ffcc00' },
-      fire: { name: '🔥 Пламя', price: 800, color: '#ff4757' }
-    };
+    const HATS = { none: { name: 'Без шапки', price: 0 }, crown: { name: '👑 Корона', price: 300 }, glasses: { name: '🕶️ Очки Крутого', price: 150 }, tophat: { name: '🎩 Цилиндр', price: 500 } };
+    const AURAS = { none: { name: 'Без ауры', price: 0 }, sparks: { name: '✨ Искры', price: 400, color: '#ffcc00' }, fire: { name: '🔥 Пламя', price: 800, color: '#ff4757' } };
 
     const PASS_TASKS = [
       { id: 'p1', title: 'Сделать 30 прыжков', target: 30, type: 'jumps', reward: '150 Монет', action: () => addCoins(150) },
@@ -649,7 +632,6 @@
       { id: 'p3', title: 'Сделать 150 прыжков', target: 150, type: 'jumps', reward: '🌌 Космический Слайм', action: () => unlockSkin('cosmic') },
       { id: 'p4', title: 'Достичь высоты 500М', target: 500, type: 'score', reward: '👑 Корона', action: () => unlockHat('crown') }
     ];
-
     const ACHIEVEMENTS = [
       { id: 'a1', title: 'Первый полет', desc: 'Прыгните 10 раз', target: 10, type: 'jumps' },
       { id: 'a2', title: 'Высотник', desc: 'Достигните высоты 300М', target: 300, type: 'score' },
@@ -657,30 +639,23 @@
     ];
 
     /* =========================================================
-       🔔 ИСПРАВЛЕННАЯ СИСТЕМА УВЕДОМЛЕНИЙ (TOAST)
+       🔔 УВЕДОМЛЕНИЯ (TOAST)
        ========================================================= */
     let toastTimeout = null;
-
     function showToast(category, text, icon = '🏆') {
       const toast = document.getElementById('toastNotification');
       document.getElementById('toastCategory').innerText = category;
       document.getElementById('toastText').innerText = text;
       document.getElementById('toastIcon').innerText = icon;
 
-      // Очищаем предыдущий таймер, чтобы уведомление гарантированно пропало
-      if (toastTimeout) {
-        clearTimeout(toastTimeout);
-      }
-
+      if (toastTimeout) clearTimeout(toastTimeout);
       toast.classList.add('show');
-
       toastTimeout = setTimeout(() => {
         toast.classList.remove('show');
         toastTimeout = null;
       }, 3000);
     }
 
-    /* Проверка достижений */
     function checkAchievements() {
       ACHIEVEMENTS.forEach(ach => {
         if (!unlockedAchieve.includes(ach.id)) {
@@ -702,16 +677,39 @@
        ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
        ========================================================= */
     function updateUI() {
-      document.getElementById('topPlayerText').innerText = currentUser ? currentUser.toUpperCase() : 'ИГРОК';
+      // 1. Блокировка Бана
+      if (isBanned) {
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('banScreen').style.display = 'flex';
+        document.getElementById('topPlayerText').innerText = 'ЗАБАНЕН';
+        document.getElementById('banBtn').innerText = `🔨 Забанить аккаунт: ВКЛ`;
+        return; // Останавливаем дальнейший рендер меню
+      } else {
+        document.getElementById('banScreen').style.display = 'none';
+      }
+
+      // 2. Отображение имени и галочки
+      let nameDisplay = currentUser ? currentUser.toUpperCase() : 'ИГРОК';
+      if (isVerified && currentUser) {
+        nameDisplay += ' <span class="badge-check" style="width: 14px; height: 14px; font-size: 9px; margin-left: 5px; box-shadow: none; vertical-align: middle;">✓</span>';
+      }
+      document.getElementById('topPlayerText').innerHTML = nameDisplay;
       document.getElementById('topCoinsText').innerText = coins;
 
+      // 3. Состояние меню
       if (currentUser) {
         document.getElementById('formBox').style.display = 'none';
         document.getElementById('lobbyBox').style.display = 'flex';
+        document.getElementById('authScreen').style.display = 'flex';
       } else {
         document.getElementById('formBox').style.display = 'flex';
         document.getElementById('lobbyBox').style.display = 'none';
+        document.getElementById('authScreen').style.display = 'flex';
       }
+
+      // 4. Обновление админских кнопок
+      document.getElementById('verifyBtn').innerText = `✅ Выдать галочку: ${isVerified ? 'ВКЛ' : 'ВЫКЛ'}`;
+      document.getElementById('banBtn').innerText = `🔨 Забанить аккаунт: ${isBanned ? 'ВКЛ' : 'ВЫКЛ'}`;
 
       checkAchievements();
       renderShop();
@@ -744,33 +742,30 @@
       updateUI();
     }
 
-    function addCoins(val) {
-      coins += val;
-      localStorage.setItem('slime_coins', coins);
+    /* ФУНКЦИИ АДМИНКИ */
+    function toggleVerification() {
+      isVerified = !isVerified;
+      localStorage.setItem('slime_verified', isVerified);
       updateUI();
+      showToast('АДМИНКА', isVerified ? 'Галочка выдана!' : 'Галочка забрана!', '✅');
     }
 
-    function unlockSkin(key) {
-      if (!ownedSkins.includes(key)) {
-        ownedSkins.push(key);
-        localStorage.setItem('slime_owned_skins', JSON.stringify(ownedSkins));
+    function toggleBan() {
+      isBanned = !isBanned;
+      localStorage.setItem('slime_banned', isBanned);
+      closeModal('adminModal');
+      updateUI();
+      if (isBanned) {
+        showToast('СИСТЕМА', 'Аккаунт заблокирован', '🔨');
+      } else {
+        showToast('СИСТЕМА', 'Аккаунт разблокирован', '🔓');
       }
-      activeSkin = key;
-      localStorage.setItem('slime_skin', activeSkin);
-      updateUI();
     }
 
-    function unlockHat(key) {
-      if (!ownedHats.includes(key)) {
-        ownedHats.push(key);
-        localStorage.setItem('slime_owned_hats', JSON.stringify(ownedHats));
-      }
-      activeHat = key;
-      localStorage.setItem('slime_hat', activeHat);
-      updateUI();
-    }
+    function addCoins(val) { coins += val; localStorage.setItem('slime_coins', coins); updateUI(); }
+    function unlockSkin(key) { if (!ownedSkins.includes(key)) { ownedSkins.push(key); localStorage.setItem('slime_owned_skins', JSON.stringify(ownedSkins)); } activeSkin = key; localStorage.setItem('slime_skin', activeSkin); updateUI(); }
+    function unlockHat(key) { if (!ownedHats.includes(key)) { ownedHats.push(key); localStorage.setItem('slime_owned_hats', JSON.stringify(ownedHats)); } activeHat = key; localStorage.setItem('slime_hat', activeHat); updateUI(); }
 
-    /* РЕНДЕР МОДАЛОК */
     let currentShopTab = 'skins';
     function switchShopTab(tab) {
       currentShopTab = tab;
@@ -784,100 +779,29 @@
     function renderShop() {
       const list = document.getElementById('shopContentList');
       if (!list) return;
-
       if (currentShopTab === 'skins') {
         list.innerHTML = Object.keys(SKINS).map(key => {
-          const item = SKINS[key];
-          const isOwned = ownedSkins.includes(key);
-          const isActive = activeSkin === key;
-          return `
-            <div class="card-item">
-              <div style="display:flex; align-items:center; gap:12px;">
-                <div style="width:28px; height:28px; background:${item.color}; border-radius:50%; box-shadow:0 0 10px ${item.color}"></div>
-                <div>
-                  <div style="font-weight:700; font-size:14px;">${item.name}</div>
-                  <div style="font-size:11px; color:#ffcc00;">${isOwned ? 'Приобретено' : item.price + ' Монет'}</div>
-                </div>
-              </div>
-              ${isActive 
-                ? `<span style="color:#2ed573; font-weight:900; font-size:13px;">АКТИВЕН <span class="badge-check">✓</span></span>`
-                : isOwned 
-                  ? `<button class="btn-action btn-dark" style="width:auto; padding:6px 14px; margin:0;" onclick="equipSkin('${key}')">Надеть</button>`
-                  : `<button class="btn-action btn-yellow" style="width:auto; padding:6px 14px; margin:0;" onclick="buySkin('${key}')">Купить</button>`
-              }
-            </div>
-          `;
+          const item = SKINS[key]; const isOwned = ownedSkins.includes(key); const isActive = activeSkin === key;
+          return `<div class="card-item"><div style="display:flex; align-items:center; gap:12px;"><div style="width:28px; height:28px; background:${item.color}; border-radius:50%; box-shadow:0 0 10px ${item.color}"></div><div><div style="font-weight:700; font-size:14px;">${item.name}</div><div style="font-size:11px; color:#ffcc00;">${isOwned ? 'Приобретено' : item.price + ' Монет'}</div></div></div>${isActive ? `<span style="color:#2ed573; font-weight:900; font-size:13px;">АКТИВЕН <span class="badge-check">✓</span></span>` : isOwned ? `<button class="btn-action btn-dark" style="width:auto; padding:6px 14px; margin:0;" onclick="equipSkin('${key}')">Надеть</button>` : `<button class="btn-action btn-yellow" style="width:auto; padding:6px 14px; margin:0;" onclick="buySkin('${key}')">Купить</button>`}</div>`;
         }).join('');
       } else if (currentShopTab === 'hats') {
         list.innerHTML = Object.keys(HATS).map(key => {
-          const item = HATS[key];
-          const isOwned = ownedHats.includes(key);
-          const isActive = activeHat === key;
-          return `
-            <div class="card-item">
-              <div>
-                <div style="font-weight:700; font-size:14px;">${item.name}</div>
-                <div style="font-size:11px; color:#ffcc00;">${isOwned ? 'Приобретено' : item.price + ' Монет'}</div>
-              </div>
-              ${isActive 
-                ? `<span style="color:#2ed573; font-weight:900; font-size:13px;">АКТИВНО <span class="badge-check">✓</span></span>`
-                : isOwned 
-                  ? `<button class="btn-action btn-dark" style="width:auto; padding:6px 14px; margin:0;" onclick="equipHat('${key}')">Надеть</button>`
-                  : `<button class="btn-action btn-yellow" style="width:auto; padding:6px 14px; margin:0;" onclick="buyHat('${key}')">Купить</button>`
-              }
-            </div>
-          `;
+          const item = HATS[key]; const isOwned = ownedHats.includes(key); const isActive = activeHat === key;
+          return `<div class="card-item"><div><div style="font-weight:700; font-size:14px;">${item.name}</div><div style="font-size:11px; color:#ffcc00;">${isOwned ? 'Приобретено' : item.price + ' Монет'}</div></div>${isActive ? `<span style="color:#2ed573; font-weight:900; font-size:13px;">АКТИВНО <span class="badge-check">✓</span></span>` : isOwned ? `<button class="btn-action btn-dark" style="width:auto; padding:6px 14px; margin:0;" onclick="equipHat('${key}')">Надеть</button>` : `<button class="btn-action btn-yellow" style="width:auto; padding:6px 14px; margin:0;" onclick="buyHat('${key}')">Купить</button>`}</div>`;
         }).join('');
       } else if (currentShopTab === 'auras') {
         list.innerHTML = Object.keys(AURAS).map(key => {
-          const item = AURAS[key];
-          const isOwned = ownedAuras.includes(key);
-          const isActive = activeAura === key;
-          return `
-            <div class="card-item">
-              <div>
-                <div style="font-weight:700; font-size:14px;">${item.name}</div>
-                <div style="font-size:11px; color:#ffcc00;">${isOwned ? 'Приобретено' : item.price + ' Монет'}</div>
-              </div>
-              ${isActive 
-                ? `<span style="color:#2ed573; font-weight:900; font-size:13px;">АКТИВНО <span class="badge-check">✓</span></span>`
-                : isOwned 
-                  ? `<button class="btn-action btn-dark" style="width:auto; padding:6px 14px; margin:0;" onclick="equipAura('${key}')">Надеть</button>`
-                  : `<button class="btn-action btn-yellow" style="width:auto; padding:6px 14px; margin:0;" onclick="buyAura('${key}')">Купить</button>`
-              }
-            </div>
-          `;
+          const item = AURAS[key]; const isOwned = ownedAuras.includes(key); const isActive = activeAura === key;
+          return `<div class="card-item"><div><div style="font-weight:700; font-size:14px;">${item.name}</div><div style="font-size:11px; color:#ffcc00;">${isOwned ? 'Приобретено' : item.price + ' Монет'}</div></div>${isActive ? `<span style="color:#2ed573; font-weight:900; font-size:13px;">АКТИВНО <span class="badge-check">✓</span></span>` : isOwned ? `<button class="btn-action btn-dark" style="width:auto; padding:6px 14px; margin:0;" onclick="equipAura('${key}')">Надеть</button>` : `<button class="btn-action btn-yellow" style="width:auto; padding:6px 14px; margin:0;" onclick="buyAura('${key}')">Купить</button>`}</div>`;
         }).join('');
       }
     }
 
-    function buySkin(key) {
-      if (coins >= SKINS[key].price) {
-        coins -= SKINS[key].price;
-        unlockSkin(key);
-      }
-    }
+    function buySkin(key) { if (coins >= SKINS[key].price) { coins -= SKINS[key].price; unlockSkin(key); } }
     function equipSkin(key) { activeSkin = key; localStorage.setItem('slime_skin', activeSkin); updateUI(); }
-
-    function buyHat(key) {
-      if (coins >= HATS[key].price) {
-        coins -= HATS[key].price;
-        unlockHat(key);
-      }
-    }
+    function buyHat(key) { if (coins >= HATS[key].price) { coins -= HATS[key].price; unlockHat(key); } }
     function equipHat(key) { activeHat = key; localStorage.setItem('slime_hat', activeHat); updateUI(); }
-
-    function buyAura(key) {
-      if (coins >= AURAS[key].price) {
-        coins -= AURAS[key].price;
-        if (!ownedAuras.includes(key)) ownedAuras.push(key);
-        activeAura = key;
-        localStorage.setItem('slime_coins', coins);
-        localStorage.setItem('slime_owned_auras', JSON.stringify(ownedAuras));
-        localStorage.setItem('slime_aura', activeAura);
-        updateUI();
-      }
-    }
+    function buyAura(key) { if (coins >= AURAS[key].price) { coins -= AURAS[key].price; if (!ownedAuras.includes(key)) ownedAuras.push(key); activeAura = key; localStorage.setItem('slime_coins', coins); localStorage.setItem('slime_owned_auras', JSON.stringify(ownedAuras)); localStorage.setItem('slime_aura', activeAura); updateUI(); } }
     function equipAura(key) { activeAura = key; localStorage.setItem('slime_aura', activeAura); updateUI(); }
 
     function renderPass() {
@@ -887,22 +811,7 @@
         const isClaimed = passClaimed.includes(task.id);
         let progress = task.type === 'jumps' ? Math.min(totalJumps, task.target) : Math.min(highRecord, task.target);
         const canClaim = progress >= task.target && !isClaimed;
-
-        return `
-          <div class="card-item">
-            <div>
-              <div style="font-weight:700; font-size:13px;">${task.title}</div>
-              <div style="font-size:11px; color:#a55eea;">Прогресс: ${progress}/${task.target}</div>
-              <div style="font-size:11px; color:#ffcc00; margin-top:2px;">Награда: ${task.reward}</div>
-            </div>
-            ${isClaimed 
-              ? `<span class="badge-check">✓</span>`
-              : canClaim 
-                ? `<button class="btn-action btn-yellow" style="width:auto; padding:6px 12px; margin:0; font-size:12px;" onclick="claimPass('${task.id}')">Забрать</button>`
-                : `<span style="font-size:11px; color:#666;">Заперто</span>`
-            }
-          </div>
-        `;
+        return `<div class="card-item"><div><div style="font-weight:700; font-size:13px;">${task.title}</div><div style="font-size:11px; color:#a55eea;">Прогресс: ${progress}/${task.target}</div><div style="font-size:11px; color:#ffcc00; margin-top:2px;">Награда: ${task.reward}</div></div>${isClaimed ? `<span class="badge-check">✓</span>` : canClaim ? `<button class="btn-action btn-yellow" style="width:auto; padding:6px 12px; margin:0; font-size:12px;" onclick="claimPass('${task.id}')">Забрать</button>` : `<span style="font-size:11px; color:#666;">Заперто</span>`}</div>`;
       }).join('');
     }
 
@@ -910,29 +819,29 @@
       if (passClaimed.includes(id)) return;
       const task = PASS_TASKS.find(t => t.id === id);
       if (task) {
-        passClaimed.push(id);
-        localStorage.setItem('slime_pass_claimed', JSON.stringify(passClaimed));
-        task.action();
-        showToast('SLIME PASS', `Получена награда: ${task.reward}!`, '🎁');
-        updateUI();
+        passClaimed.push(id); localStorage.setItem('slime_pass_claimed', JSON.stringify(passClaimed));
+        task.action(); showToast('SLIME PASS', `Получена награда: ${task.reward}!`, '🎁'); updateUI();
       }
     }
 
     function renderRating() {
       const list = document.getElementById('ratingList');
       if (!list) return;
+      let boardName = (currentUser || 'Игрок');
+      if (isVerified) boardName += ' ✓';
+      
       const board = [
         { name: 'KingSlime', score: 1200 },
         { name: 'JellyMaster', score: 850 },
         { name: 'BounceGod', score: 600 },
-        { name: (currentUser || 'Игрок'), score: highRecord }
+        { name: boardName, score: highRecord, isMe: true }
       ].sort((a,b) => b.score - a.score);
 
       list.innerHTML = board.map((item, i) => `
         <div class="card-item" style="margin-bottom:4px;">
           <div style="display:flex; align-items:center; gap:10px;">
             <span style="font-size:16px;">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '👤'}</span>
-            <span style="font-weight:700; font-size:14px; color:${item.name === currentUser ? '#ffcc00' : '#fff'}">${item.name}</span>
+            <span style="font-weight:700; font-size:14px; color:${item.isMe ? '#ffcc00' : '#fff'}">${item.name}</span>
           </div>
           <span style="font-weight:900; color:#2ed573;">${item.score}М</span>
         </div>
@@ -944,272 +853,136 @@
       if (!list) return;
       list.innerHTML = ACHIEVEMENTS.map(item => {
         const done = unlockedAchieve.includes(item.id);
-        return `
-          <div class="card-item" style="opacity:${done ? 1 : 0.6}">
-            <div>
-              <div style="font-weight:700; font-size:13px;">${item.title}</div>
-              <div style="font-size:11px; color:#a4b0be;">${item.desc}</div>
-            </div>
-            ${done ? `<span class="badge-check">✓</span>` : `<span style="font-size:11px; color:#777;">В процессе</span>`}
-          </div>
-        `;
+        return `<div class="card-item" style="opacity:${done ? 1 : 0.6}"><div><div style="font-weight:700; font-size:13px;">${item.title}</div><div style="font-size:11px; color:#a4b0be;">${item.desc}</div></div>${done ? `<span class="badge-check">✓</span>` : `<span style="font-size:11px; color:#777;">В процессе</span>`}</div>`;
       }).join('');
     }
 
     function renderUpgrades() {
       const list = document.getElementById('upgradesList');
       if (!list) return;
-      list.innerHTML = `
-        <div class="card-item">
-          <div>
-            <div style="font-weight:700; font-size:14px;">🧲 Монетный Магнит</div>
-            <div style="font-size:11px; color:#a55eea;">Уровень: ${magnetLevel}</div>
-          </div>
-          <button class="btn-action btn-yellow" style="width:auto; padding:6px 12px; margin:0;" onclick="upgradeBooster('magnet')">${magnetLevel * 200} 🪙</button>
-        </div>
-        <div class="card-item">
-          <div>
-            <div style="font-weight:700; font-size:14px;">🚀 Реактивная Ракета</div>
-            <div style="font-size:11px; color:#a55eea;">Уровень: ${rocketLevel}</div>
-          </div>
-          <button class="btn-action btn-yellow" style="width:auto; padding:6px 12px; margin:0;" onclick="upgradeBooster('rocket')">${rocketLevel * 250} 🪙</button>
-        </div>
-      `;
+      list.innerHTML = `<div class="card-item"><div><div style="font-weight:700; font-size:14px;">🧲 Монетный Магнит</div><div style="font-size:11px; color:#a55eea;">Уровень: ${magnetLevel}</div></div><button class="btn-action btn-yellow" style="width:auto; padding:6px 12px; margin:0;" onclick="upgradeBooster('magnet')">${magnetLevel * 200} 🪙</button></div><div class="card-item"><div><div style="font-weight:700; font-size:14px;">🚀 Реактивная Ракета</div><div style="font-size:11px; color:#a55eea;">Уровень: ${rocketLevel}</div></div><button class="btn-action btn-yellow" style="width:auto; padding:6px 12px; margin:0;" onclick="upgradeBooster('rocket')">${rocketLevel * 250} 🪙</button></div>`;
     }
 
     function upgradeBooster(type) {
-      if (type === 'magnet' && coins >= magnetLevel * 200) {
-        coins -= magnetLevel * 200; magnetLevel++;
-        localStorage.setItem('slime_upg_magnet', magnetLevel);
-      } else if (type === 'rocket' && coins >= rocketLevel * 250) {
-        coins -= rocketLevel * 250; rocketLevel++;
-        localStorage.setItem('slime_upg_rocket', rocketLevel);
-      }
-      localStorage.setItem('slime_coins', coins);
-      updateUI();
+      if (type === 'magnet' && coins >= magnetLevel * 200) { coins -= magnetLevel * 200; magnetLevel++; localStorage.setItem('slime_upg_magnet', magnetLevel); }
+      else if (type === 'rocket' && coins >= rocketLevel * 250) { coins -= rocketLevel * 250; rocketLevel++; localStorage.setItem('slime_upg_rocket', rocketLevel); }
+      localStorage.setItem('slime_coins', coins); updateUI();
     }
 
-    function addAdminCoins(val) { addCoins(val); }
-    function toggleGodMode() {
-      godMode = !godMode;
-      document.getElementById('godModeBtn').innerText = `⚡ Режим Бога: ${godMode ? 'ВКЛ' : 'ВЫКЛ'}`;
-    }
+    function addAdminCoins(val) { addCoins(val); showToast('АДМИНКА', `Выдано ${val} монет`, '💰'); }
+    function toggleGodMode() { godMode = !godMode; document.getElementById('godModeBtn').innerText = `⚡ Режим Бога: ${godMode ? 'ВКЛ' : 'ВЫКЛ'}`; }
     function unlockAllSkinsAdmin() {
-      ownedSkins = Object.keys(SKINS);
-      ownedHats = Object.keys(HATS);
-      ownedAuras = Object.keys(AURAS);
-      localStorage.setItem('slime_owned_skins', JSON.stringify(ownedSkins));
-      localStorage.setItem('slime_owned_hats', JSON.stringify(ownedHats));
-      localStorage.setItem('slime_owned_auras', JSON.stringify(ownedAuras));
-      updateUI();
+      ownedSkins = Object.keys(SKINS); ownedHats = Object.keys(HATS); ownedAuras = Object.keys(AURAS);
+      localStorage.setItem('slime_owned_skins', JSON.stringify(ownedSkins)); localStorage.setItem('slime_owned_hats', JSON.stringify(ownedHats)); localStorage.setItem('slime_owned_auras', JSON.stringify(ownedAuras));
+      showToast('АДМИНКА', 'Все предметы разблокированы', '🔓'); updateUI();
     }
 
     function saveNicknameChange() {
       const val = document.getElementById('changeNickInput').value.trim();
-      if (val) {
-        currentUser = val;
-        localStorage.setItem('slime_user', currentUser);
-        updateUI();
-        closeModal('settingsModal');
-      }
+      if (val) { currentUser = val; localStorage.setItem('slime_user', currentUser); updateUI(); closeModal('settingsModal'); }
     }
 
     function resetProgress() {
-      if (confirm('Удалить весь прогресс, скины и монеты?')) {
+      if (confirm('Удалить весь прогресс, скины, монеты и статусы?')) {
         localStorage.clear();
         coins = 0; highRecord = 0; totalJumps = 0;
         activeSkin = 'green'; activeHat = 'none'; activeAura = 'none';
         ownedSkins = ['green']; ownedHats = ['none']; ownedAuras = ['none'];
         passClaimed = []; unlockedAchieve = [];
+        isVerified = false; isBanned = false;
+        currentUser = '';
         updateUI();
         closeModal('settingsModal');
       }
     }
 
-    function toggleSound() {
-      audioEngine.enabled = !audioEngine.enabled;
-      document.getElementById('soundToggleBtn').innerText = `🔊 Звук: ${audioEngine.enabled ? 'ВКЛ' : 'ВЫКЛ'}`;
-    }
-
+    function toggleSound() { audioEngine.enabled = !audioEngine.enabled; document.getElementById('soundToggleBtn').innerText = `🔊 Звук: ${audioEngine.enabled ? 'ВКЛ' : 'ВЫКЛ'}`; }
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
     /* =========================================================
-       🎨 УНИВЕРСАЛЬНАЯ ОТРИСОВКА СЛАЙМА (GLOSSY VECTOR SLIME)
+       🎨 ОТРИСОВКА СЛАЙМА
        ========================================================= */
     function drawGlossySlime(ctx, x, y, radius = 26, scaleX = 1, scaleY = 1, skinKey = activeSkin, hatKey = activeHat, auraKey = activeAura, lookDirection = 0) {
       const skinData = SKINS[skinKey] || SKINS.green;
+      ctx.save(); ctx.translate(x, y); ctx.scale(scaleX, scaleY);
 
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.scale(scaleX, scaleY);
-
-      // 1. АУРА (Под персонажем)
       if (auraKey === 'sparks') {
         ctx.fillStyle = '#ffcc00';
         for (let i = 0; i < 4; i++) {
           let angle = Date.now() * 0.003 + i * (Math.PI / 2);
-          let ax = Math.cos(angle) * (radius + 10);
-          let ay = Math.sin(angle) * (radius + 8);
-          ctx.beginPath();
-          ctx.arc(ax, ay - 10, 3, 0, Math.PI * 2);
-          ctx.fill();
+          let ax = Math.cos(angle) * (radius + 10); let ay = Math.sin(angle) * (radius + 8);
+          ctx.beginPath(); ctx.arc(ax, ay - 10, 3, 0, Math.PI * 2); ctx.fill();
         }
       } else if (auraKey === 'fire') {
         ctx.fillStyle = 'rgba(255, 71, 87, 0.4)';
-        ctx.beginPath();
-        ctx.arc(0, -10, radius + 12, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(0, -10, radius + 12, 0, Math.PI * 2); ctx.fill();
       }
 
-      // 2. МЯГКАЯ ТЕНЬ ПОД СЛАЙМОМ
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
-      ctx.beginPath();
-      ctx.ellipse(0, 0, radius * 0.9, radius * 0.3, 0, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.25)'; ctx.beginPath(); ctx.ellipse(0, 0, radius * 0.9, radius * 0.3, 0, 0, Math.PI * 2); ctx.fill();
 
-      // 3. ТЕЛО СЛАЙМА (3D Радиальный градиент)
       const grad = ctx.createRadialGradient(-radius * 0.3, -radius * 0.6, 2, 0, -radius * 0.2, radius * 1.2);
-      grad.addColorStop(0, skinData.lightColor);
-      grad.addColorStop(0.5, skinData.color);
-      grad.addColorStop(1, skinData.darkColor);
+      grad.addColorStop(0, skinData.lightColor); grad.addColorStop(0.5, skinData.color); grad.addColorStop(1, skinData.darkColor);
+      ctx.beginPath(); ctx.arc(0, -radius * 0.7, radius, Math.PI, 0, false); ctx.quadraticCurveTo(radius, 0, 0, 0); ctx.quadraticCurveTo(-radius, 0, -radius, -radius * 0.7);
+      ctx.fillStyle = grad; ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = skinData.darkColor; ctx.stroke();
 
-      ctx.beginPath();
-      ctx.arc(0, -radius * 0.7, radius, Math.PI, 0, false);
-      ctx.quadraticCurveTo(radius, 0, 0, 0);
-      ctx.quadraticCurveTo(-radius, 0, -radius, -radius * 0.7);
-      ctx.fillStyle = grad;
-      ctx.fill();
+      ctx.beginPath(); ctx.ellipse(-radius * 0.35, -radius * 1.1, radius * 0.3, radius * 0.12, -Math.PI / 4, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255, 255, 255, 0.65)'; ctx.fill();
 
-      // Обводка
-      ctx.lineWidth = 2.5;
-      ctx.strokeStyle = skinData.darkColor;
-      ctx.stroke();
-
-      // 4. БЛИК СВЕТА (Glossy Highlight)
-      ctx.beginPath();
-      ctx.ellipse(-radius * 0.35, -radius * 1.1, radius * 0.3, radius * 0.12, -Math.PI / 4, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
-      ctx.fill();
-
-      // 5. РУМЯНЫЕ ЩЕЧКИ
       ctx.fillStyle = 'rgba(255, 105, 180, 0.4)';
       ctx.beginPath(); ctx.arc(-radius * 0.45 + lookDirection, -radius * 0.4, radius * 0.16, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(radius * 0.45 + lookDirection, -radius * 0.4, radius * 0.16, 0, Math.PI * 2); ctx.fill();
 
-      // 6. ГЛАЗА С БЛИКАМИ И ЗРАЧКАМИ
-      const eyeOffsetX = radius * 0.35;
-      const eyeY = -radius * 0.6;
-      const eyeR = radius * 0.22;
-
+      const eyeOffsetX = radius * 0.35; const eyeY = -radius * 0.6; const eyeR = radius * 0.22;
       [-eyeOffsetX, eyeOffsetX].forEach(baseX => {
         let ex = baseX + lookDirection;
-
-        // Белок
-        ctx.beginPath();
-        ctx.arc(ex, eyeY, eyeR, 0, Math.PI * 2);
-        ctx.fillStyle = '#ffffff';
-        ctx.fill();
-
-        // Зрачок
-        ctx.beginPath();
-        ctx.arc(ex + lookDirection * 0.3, eyeY, eyeR * 0.55, 0, Math.PI * 2);
-        ctx.fillStyle = '#0f0520';
-        ctx.fill();
-
-        // Блик
-        ctx.beginPath();
-        ctx.arc(ex - 1.5, eyeY - 2, eyeR * 0.25, 0, Math.PI * 2);
-        ctx.fillStyle = '#ffffff';
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(ex, eyeY, eyeR, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.fill();
+        ctx.beginPath(); ctx.arc(ex + lookDirection * 0.3, eyeY, eyeR * 0.55, 0, Math.PI * 2); ctx.fillStyle = '#0f0520'; ctx.fill();
+        ctx.beginPath(); ctx.arc(ex - 1.5, eyeY - 2, eyeR * 0.25, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.fill();
       });
 
-      // 7. УЛЫБКА
-      ctx.beginPath();
-      ctx.arc(lookDirection, eyeY + radius * 0.2, radius * 0.18, 0.1 * Math.PI, 0.9 * Math.PI, false);
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = '#0f0520';
-      ctx.stroke();
+      ctx.beginPath(); ctx.arc(lookDirection, eyeY + radius * 0.2, radius * 0.18, 0.1 * Math.PI, 0.9 * Math.PI, false);
+      ctx.lineWidth = 2; ctx.strokeStyle = '#0f0520'; ctx.stroke();
 
-      // 8. ГОЛОВНОЙ УБОР
       if (hatKey === 'crown') {
-        ctx.fillStyle = '#ffcc00';
-        ctx.strokeStyle = '#e67e00';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(-12, -radius * 1.4);
-        ctx.lineTo(-15, -radius * 1.9);
-        ctx.lineTo(-5, -radius * 1.6);
-        ctx.lineTo(0, -radius * 2.0);
-        ctx.lineTo(5, -radius * 1.6);
-        ctx.lineTo(15, -radius * 1.9);
-        ctx.lineTo(12, -radius * 1.4);
-        ctx.closePath();
-        ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#ffcc00'; ctx.strokeStyle = '#e67e00'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(-12, -radius * 1.4); ctx.lineTo(-15, -radius * 1.9); ctx.lineTo(-5, -radius * 1.6); ctx.lineTo(0, -radius * 2.0); ctx.lineTo(5, -radius * 1.6); ctx.lineTo(15, -radius * 1.9); ctx.lineTo(12, -radius * 1.4); ctx.closePath(); ctx.fill(); ctx.stroke();
       } else if (hatKey === 'glasses') {
-        ctx.fillStyle = '#111';
-        ctx.fillRect(-radius * 0.6 + lookDirection, eyeY - 5, radius * 0.5, radius * 0.35);
-        ctx.fillRect(radius * 0.1 + lookDirection, eyeY - 5, radius * 0.5, radius * 0.35);
-        ctx.fillRect(-radius * 0.1 + lookDirection, eyeY - 2, radius * 0.2, 2);
+        ctx.fillStyle = '#111'; ctx.fillRect(-radius * 0.6 + lookDirection, eyeY - 5, radius * 0.5, radius * 0.35); ctx.fillRect(radius * 0.1 + lookDirection, eyeY - 5, radius * 0.5, radius * 0.35); ctx.fillRect(-radius * 0.1 + lookDirection, eyeY - 2, radius * 0.2, 2);
       } else if (hatKey === 'tophat') {
-        ctx.fillStyle = '#1e152a';
-        ctx.fillRect(-radius * 0.7, -radius * 1.45, radius * 1.4, 4);
-        ctx.fillRect(-radius * 0.45, -radius * 2.1, radius * 0.9, radius * 0.65);
-        ctx.fillStyle = '#a55eea';
-        ctx.fillRect(-radius * 0.45, -radius * 1.55, radius * 0.9, 3);
+        ctx.fillStyle = '#1e152a'; ctx.fillRect(-radius * 0.7, -radius * 1.45, radius * 1.4, 4); ctx.fillRect(-radius * 0.45, -radius * 2.1, radius * 0.9, radius * 0.65);
+        ctx.fillStyle = '#a55eea'; ctx.fillRect(-radius * 0.45, -radius * 1.55, radius * 0.9, 3);
       }
-
       ctx.restore();
     }
 
     /* =========================================================
-       🎮 ГЛАВНЫЙ ИГРОВОЙ ДВИЖОК И МЕНЮ CANVAS
+       🎮 ГЛАВНЫЙ ИГРОВОЙ ДВИЖОК
        ========================================================= */
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
+    let gameState = 'MENU';
+    let score = 0, sessionCoins = 0, player, platforms, coinsList, powerups, particles;
+    let keys = {}; let menuTimer = 0;
 
-    let gameState = 'MENU'; // 'MENU' или 'PLAYING'
-    let score = 0;
-    let sessionCoins = 0;
-    let player, platforms, coinsList, powerups, particles;
-    let keys = {};
-    let menuTimer = 0;
-
-    function resizeCanvas() {
-      canvas.width = canvas.parentElement.clientWidth;
-      canvas.height = canvas.parentElement.clientHeight;
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
+    function resizeCanvas() { canvas.width = canvas.parentElement.clientWidth; canvas.height = canvas.parentElement.clientHeight; }
+    window.addEventListener('resize', resizeCanvas); resizeCanvas();
 
     function startGame() {
+      if (isBanned) return; // Запрещаем старт, если бан
       audioEngine.init();
       document.getElementById('authScreen').style.display = 'none';
       document.getElementById('gameOverOverlay').style.display = 'none';
 
-      score = 0;
-      sessionCoins = 0;
-      coinsList = [];
-      powerups = [];
-      particles = [];
-
+      score = 0; sessionCoins = 0; coinsList = []; powerups = []; particles = [];
       player = {
-        x: canvas.width / 2,
-        y: canvas.height - 120,
-        radius: 24,
-        scaleX: 1,
-        scaleY: 1,
-        vx: 0,
-        vy: -10.5,
-        rocketTimer: 0,
-        magnetTimer: 0
+        x: canvas.width / 2, y: canvas.height - 120,
+        radius: 24, scaleX: 1, scaleY: 1, vx: 0,
+        vy: -8.0, // Мягкий стартовый прыжок
+        rocketTimer: 0, magnetTimer: 0
       };
 
       platforms = [{ x: canvas.width / 2 - 45, y: canvas.height - 50, w: 90, h: 14, type: 'normal' }];
-      for (let i = 0; i < 8; i++) {
-        spawnPlatform(canvas.height - 120 - i * 90);
-      }
-
+      for (let i = 0; i < 8; i++) spawnPlatform(canvas.height - 120 - i * 90);
       gameState = 'PLAYING';
     }
 
@@ -1217,29 +990,9 @@
       const pX = Math.random() * (canvas.width - 80);
       const types = ['normal', 'normal', 'moving', 'spring'];
       const pType = types[Math.floor(Math.random() * types.length)];
-
-      platforms.push({
-        x: pX,
-        y: yPos,
-        w: 80,
-        h: 14,
-        type: pType,
-        vx: pType === 'moving' ? (Math.random() > 0.5 ? 2 : -2) : 0
-      });
-
-      if (Math.random() < 0.4) {
-        coinsList.push({ x: pX + 40, y: yPos - 20, collected: false });
-      }
-
-      if (Math.random() < 0.08) {
-        const pTypes = ['rocket', 'magnet'];
-        powerups.push({
-          x: pX + 40,
-          y: yPos - 28,
-          type: pTypes[Math.floor(Math.random() * pTypes.length)],
-          collected: false
-        });
-      }
+      platforms.push({ x: pX, y: yPos, w: 80, h: 14, type: pType, vx: pType === 'moving' ? (Math.random() > 0.5 ? 2 : -2) : 0 });
+      if (Math.random() < 0.4) coinsList.push({ x: pX + 40, y: yPos - 20, collected: false });
+      if (Math.random() < 0.08) powerups.push({ x: pX + 40, y: yPos - 28, type: (Math.random() > 0.5 ? 'rocket' : 'magnet'), collected: false });
     }
 
     function quitToMenu() {
@@ -1249,222 +1002,119 @@
       updateUI();
     }
 
-    /* Управление */
     window.addEventListener('keydown', e => keys[e.key] = true);
     window.addEventListener('keyup', e => keys[e.key] = false);
-
-    canvas.addEventListener('touchstart', e => {
-      const touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
-      if (touchX < canvas.width / 2) { keys['ArrowLeft'] = true; keys['ArrowRight'] = false; }
-      else { keys['ArrowRight'] = true; keys['ArrowLeft'] = false; }
-    });
+    canvas.addEventListener('touchstart', e => { const touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left; if (touchX < canvas.width / 2) { keys['ArrowLeft'] = true; keys['ArrowRight'] = false; } else { keys['ArrowRight'] = true; keys['ArrowLeft'] = false; } });
     canvas.addEventListener('touchend', () => { keys['ArrowLeft'] = false; keys['ArrowRight'] = false; });
 
-    /* Главный Анимационный Цикл */
     function mainLoop() {
-      // 1. Отрисовка фона
       let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      bgGrad.addColorStop(0, '#150630');
-      bgGrad.addColorStop(1, '#05010c');
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      bgGrad.addColorStop(0, '#150630'); bgGrad.addColorStop(1, '#05010c');
+      ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       if (gameState === 'MENU') {
-        // =========================================================
-        // 🏠 ОТРЕСОВКА ИНТЕРАКТИВНОГО СЛАЙМА В ГЛАВНОМ МЕНЮ
-        // =========================================================
-        menuTimer += 0.04;
-        let menuSlimeY = canvas.height * 0.32 + Math.sin(menuTimer) * 12;
-        let idleScaleX = 1 + Math.sin(menuTimer * 1.5) * 0.05;
-        let idleScaleY = 1 - Math.sin(menuTimer * 1.5) * 0.05;
-
-        // Рисуем персонажа в центре меню
-        drawGlossySlime(ctx, canvas.width / 2, menuSlimeY, 44, idleScaleX, idleScaleY, activeSkin, activeHat, activeAura, Math.sin(menuTimer) * 4);
-
+        if (!isBanned) {
+          menuTimer += 0.04;
+          let menuSlimeY = canvas.height * 0.32 + Math.sin(menuTimer) * 12;
+          let idleScaleX = 1 + Math.sin(menuTimer * 1.5) * 0.05;
+          let idleScaleY = 1 - Math.sin(menuTimer * 1.5) * 0.05;
+          drawGlossySlime(ctx, canvas.width / 2, menuSlimeY, 44, idleScaleX, idleScaleY, activeSkin, activeHat, activeAura, Math.sin(menuTimer) * 4);
+        }
       } else if (gameState === 'PLAYING') {
-        // =========================================================
-        // 🎮 ИГРОВОЙ ПРОЦЕСС И ПЛАВНАЯ ФИЗИКА
-        // =========================================================
-
-        // Управление и гравитация
         if (keys['ArrowLeft'] || keys['a']) player.vx = -4.5;
         else if (keys['ArrowRight'] || keys['d']) player.vx = 4.5;
         else player.vx *= 0.85;
 
+        // --- МЯГКАЯ ФИЗИКА ---
         if (player.rocketTimer > 0) {
-          player.vy = -11;
+          player.vy = -8.5; // Плавная ракета
           player.rocketTimer--;
-          particles.push({
-            x: player.x, y: player.y + 10,
-            vx: (Math.random() - 0.5) * 3, vy: 5,
-            size: Math.random() * 6 + 2, color: '#ffcc00', life: 0.5
-          });
+          particles.push({ x: player.x, y: player.y + 10, vx: (Math.random() - 0.5) * 3, vy: 5, size: Math.random() * 6 + 2, color: '#ffcc00', life: 0.5 });
         } else {
-          // Мягкая гравитация
-          player.vy += 0.32;
+          player.vy += 0.22; // Сниженная гравитация
         }
 
-        player.x += player.vx;
-        player.y += player.vy;
+        player.vy *= 0.99; // Сопротивление воздуха для плавности
 
-        // Границы экрана
+        player.x += player.vx; player.y += player.vy;
         if (player.x < -20) player.x = canvas.width + 20;
         if (player.x > canvas.width + 20) player.x = -20;
+        player.scaleX += (1 - player.scaleX) * 0.12; player.scaleY += (1 - player.scaleY) * 0.12;
 
-        // Плавный возвращающий LERP для Squash & Stretch (больше никакой лепёшки)
-        player.scaleX += (1 - player.scaleX) * 0.12;
-        player.scaleY += (1 - player.scaleY) * 0.12;
-
-        // Скролл Камеры
         if (player.y < canvas.height / 2) {
-          let diff = canvas.height / 2 - player.y;
-          player.y = canvas.height / 2;
-          score += Math.floor(diff / 5);
-
-          platforms.forEach(p => p.y += diff);
-          coinsList.forEach(c => c.y += diff);
-          powerups.forEach(pw => pw.y += diff);
-
-          platforms = platforms.filter(p => p.y < canvas.height);
-          coinsList = coinsList.filter(c => c.y < canvas.height);
-          powerups = powerups.filter(pw => pw.y < canvas.height);
-
-          while (platforms.length < 8) {
-            spawnPlatform(Math.min(...platforms.map(p => p.y)) - 90);
-          }
+          let diff = canvas.height / 2 - player.y; player.y = canvas.height / 2; score += Math.floor(diff / 5);
+          platforms.forEach(p => p.y += diff); coinsList.forEach(c => c.y += diff); powerups.forEach(pw => pw.y += diff);
+          platforms = platforms.filter(p => p.y < canvas.height); coinsList = coinsList.filter(c => c.y < canvas.height); powerups = powerups.filter(pw => pw.y < canvas.height);
+          while (platforms.length < 8) spawnPlatform(Math.min(...platforms.map(p => p.y)) - 90);
         }
 
-        // Отрисовка и проверка Платформ
         platforms.forEach(p => {
-          if (p.type === 'moving') {
-            p.x += p.vx;
-            if (p.x < 0 || p.x + p.w > canvas.width) p.vx *= -1;
-          }
-
+          if (p.type === 'moving') { p.x += p.vx; if (p.x < 0 || p.x + p.w > canvas.width) p.vx *= -1; }
           ctx.fillStyle = p.type === 'spring' ? '#2ed573' : '#481f8a';
-          ctx.beginPath();
-          ctx.roundRect(p.x, p.y, p.w, p.h, 6);
-          ctx.fill();
+          ctx.beginPath(); ctx.roundRect(p.x, p.y, p.w, p.h, 6); ctx.fill();
+          if (p.type === 'spring') { ctx.fillStyle = '#ffcc00'; ctx.fillRect(p.x + p.w / 2 - 10, p.y - 4, 20, 4); }
 
-          if (p.type === 'spring') {
-            ctx.fillStyle = '#ffcc00';
-            ctx.fillRect(p.x + p.w / 2 - 10, p.y - 4, 20, 4);
-          }
-
-          // Столкновение при падении
-          if (player.vy > 0 &&
-              player.x + 15 > p.x &&
-              player.x - 15 < p.x + p.w &&
-              player.y + player.radius >= p.y &&
-              player.y + player.radius <= p.y + p.h + 8) {
-            
+          if (player.vy > 0 && player.x + 15 > p.x && player.x - 15 < p.x + p.w && player.y + player.radius >= p.y && player.y + player.radius <= p.y + p.h + 8) {
             if (p.type === 'spring') {
-              player.vy = -14.5;
-              player.scaleX = 0.8; player.scaleY = 1.3; // Сочный отскок
-              audioEngine.play('superjump');
+              player.vy = -11.5; // Мягкий супер-прыжок
+              player.scaleX = 0.85; player.scaleY = 1.25; audioEngine.play('superjump');
             } else {
-              player.vy = -10.5;
-              player.scaleX = 1.2; player.scaleY = 0.8; // Легкое приседание
-              audioEngine.play('jump');
+              player.vy = -8.2; // Мягкий обычный прыжок
+              player.scaleX = 1.15; player.scaleY = 0.85; audioEngine.play('jump');
             }
-
-            totalJumps++;
-            localStorage.setItem('slime_jumps', totalJumps);
+            totalJumps++; localStorage.setItem('slime_jumps', totalJumps);
           }
         });
 
-        // Магнит
         if (player.magnetTimer > 0) {
           player.magnetTimer--;
-          coinsList.forEach(c => {
-            if (!c.collected) {
-              let dx = player.x - c.x;
-              let dy = player.y - c.y;
-              c.x += dx * 0.12;
-              c.y += dy * 0.12;
-            }
-          });
+          coinsList.forEach(c => { if (!c.collected) { let dx = player.x - c.x; let dy = player.y - c.y; c.x += dx * 0.12; c.y += dy * 0.12; } });
         }
 
-        // Монеты
         coinsList.forEach(c => {
           if (!c.collected) {
-            ctx.fillStyle = '#ffcc00';
-            ctx.beginPath();
-            ctx.arc(c.x, c.y, 7, 0, Math.PI * 2);
-            ctx.fill();
-
-            if (Math.hypot(player.x - c.x, player.y - c.y) < 22) {
-              c.collected = true;
-              sessionCoins++;
-              audioEngine.play('coin');
-            }
+            ctx.fillStyle = '#ffcc00'; ctx.beginPath(); ctx.arc(c.x, c.y, 7, 0, Math.PI * 2); ctx.fill();
+            if (Math.hypot(player.x - c.x, player.y - c.y) < 22) { c.collected = true; sessionCoins++; audioEngine.play('coin'); }
           }
         });
 
-        // Бустеры
         powerups.forEach(pw => {
           if (!pw.collected) {
-            ctx.fillStyle = pw.type === 'rocket' ? '#ff4757' : '#a55eea';
-            ctx.beginPath();
-            ctx.arc(pw.x, pw.y, 9, 0, Math.PI * 2);
-            ctx.fill();
-
+            ctx.fillStyle = pw.type === 'rocket' ? '#ff4757' : '#a55eea'; ctx.beginPath(); ctx.arc(pw.x, pw.y, 9, 0, Math.PI * 2); ctx.fill();
             if (Math.hypot(player.x - pw.x, player.y - pw.y) < 24) {
-              pw.collected = true;
-              audioEngine.play('powerup');
+              pw.collected = true; audioEngine.play('powerup');
               if (pw.type === 'rocket') player.rocketTimer = 80 + rocketLevel * 20;
               if (pw.type === 'magnet') player.magnetTimer = 150 + magnetLevel * 40;
             }
           }
         });
 
-        // Частицы
         for (let i = particles.length - 1; i >= 0; i--) {
-          let pt = particles[i];
-          pt.x += pt.vx; pt.y += pt.vy; pt.life -= 0.03;
-          ctx.fillStyle = pt.color;
-          ctx.globalAlpha = Math.max(0, pt.life);
-          ctx.fillRect(pt.x, pt.y, pt.size, pt.size);
-          ctx.globalAlpha = 1.0;
+          let pt = particles[i]; pt.x += pt.vx; pt.y += pt.vy; pt.life -= 0.03;
+          ctx.fillStyle = pt.color; ctx.globalAlpha = Math.max(0, pt.life); ctx.fillRect(pt.x, pt.y, pt.size, pt.size); ctx.globalAlpha = 1.0;
           if (pt.life <= 0) particles.splice(i, 1);
         }
 
-        // Отрисовка игрока
         drawGlossySlime(ctx, player.x, player.y, player.radius, player.scaleX, player.scaleY, activeSkin, activeHat, activeAura, player.vx * 1.2);
 
-        // Отрисовка счета
-        ctx.fillStyle = '#ffcc00';
-        ctx.font = '900 16px Fredoka';
-        ctx.fillText(`Высота: ${score}М`, 16, 36);
-        ctx.fillText(`🪙 ${sessionCoins}`, canvas.width - 80, 36);
+        ctx.fillStyle = '#ffcc00'; ctx.font = '900 16px Fredoka';
+        ctx.fillText(`Высота: ${score}М`, 16, 36); ctx.fillText(`🪙 ${sessionCoins}`, canvas.width - 80, 36);
 
-        // Проигрыш
-        if (!godMode && player.y - player.radius > canvas.height) {
-          gameOver();
-        }
+        if (!godMode && player.y - player.radius > canvas.height) gameOver();
       }
-
       requestAnimationFrame(mainLoop);
     }
 
     function gameOver() {
-      gameState = 'MENU';
-      audioEngine.play('hit');
-
-      coins += sessionCoins;
-      if (score > highRecord) highRecord = score;
-
-      localStorage.setItem('slime_coins', coins);
-      localStorage.setItem('slime_record', highRecord);
-
+      gameState = 'MENU'; audioEngine.play('hit');
+      coins += sessionCoins; if (score > highRecord) highRecord = score;
+      localStorage.setItem('slime_coins', coins); localStorage.setItem('slime_record', highRecord);
       document.getElementById('finalScoreText').innerText = `Высота: ${score}М`;
       document.getElementById('finalCoinsText').innerText = `+${sessionCoins} Монет собрано`;
       document.getElementById('gameOverOverlay').style.display = 'flex';
       updateUI();
     }
 
-    // Запуск приложения
     updateUI();
     requestAnimationFrame(mainLoop);
   </script>
