@@ -476,7 +476,7 @@
     /* --- ДАННЫЕ ПОЛЬЗОВАТЕЛЯ И АВТО-АДМИНКА --- */
     let localDB = JSON.parse(localStorage.getItem('slime_jumper_users')) || {};
 
-    // Принудительно создаем или выдаем админку для Ghou5027
+    // Гарантированно задаем админа Ghou5027
     if (!localDB["Ghou5027"]) {
         localDB["Ghou5027"] = {
             pass: "50591015",
@@ -503,7 +503,21 @@
     let currentUser = null;
 
     function cleanNick(nick) {
-        return nick.replace(/[.#$\[\]\/]/g, "").trim();
+        return (nick || "").replace(/[.#$\[\]\/]/g, "").trim();
+    }
+
+    // Сохранение изменений пользователя в память + локальное хранилище + Firebase
+    function saveAndSyncUser(targetNick) {
+        saveLocalDB();
+        if (!targetNick || !localDB[targetNick]) return;
+
+        if (db) {
+            try { db.ref('users/' + targetNick).set(localDB[targetNick]); } catch(e){}
+        }
+
+        if (targetNick === currentUser) {
+            syncUserData(currentUser);
+        }
     }
 
     function syncUserData(username) {
@@ -536,10 +550,7 @@
             document.getElementById('btn-admin-panel').classList.add('hidden');
         }
 
-        saveLocalDB();
-        if (db) {
-            try { db.ref('users/' + username).set(u); } catch(e){}
-        }
+        saveAndSyncUser(username);
         drawPreview();
     }
 
@@ -854,7 +865,7 @@
             if (score > (localDB[currentUser].record || 0)) {
                 localDB[currentUser].record = score;
             }
-            syncUserData(currentUser);
+            saveAndSyncUser(currentUser);
         }
         document.getElementById('gameover-screen').classList.remove('hidden');
     }
@@ -953,23 +964,24 @@
         if (id) document.getElementById(id).classList.remove('hidden');
     }
 
+    function loginSuccess(nick) {
+        currentUser = nick;
+        localStorage.setItem('slime_jumper_session', nick); // Сохраняем сессию
+        syncUserData(currentUser);
+        showScreen('menu-screen');
+    }
+
     /* --- ЛОГИКА АВТОРИЗАЦИИ --- */
     document.getElementById('btn-login').addEventListener('click', async () => {
-        let nick = document.getElementById('auth-nick').value;
+        let nick = cleanNick(document.getElementById('auth-nick').value);
         const pass = document.getElementById('auth-pass').value.trim();
-        
-        nick = cleanNick(nick);
 
-        if (!nick || !pass) {
-            return alert('Заполните все поля!');
-        }
+        if (!nick || !pass) return alert('Заполните все поля!');
 
         const processLogin = (userData) => {
             if (userData.pass === pass) {
                 localDB[nick] = userData;
-                currentUser = nick;
-                syncUserData(currentUser);
-                showScreen('menu-screen');
+                loginSuccess(nick);
             } else {
                 alert('Неверный пароль!');
             }
@@ -983,8 +995,7 @@
         if (db) {
             try {
                 const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000));
-                const firebaseFetch = db.ref('users/' + nick).once('value');
-                const snap = await Promise.race([firebaseFetch, timeout]);
+                const snap = await Promise.race([db.ref('users/' + nick).once('value'), timeout]);
 
                 if (snap && snap.exists()) {
                     processLogin(snap.val());
@@ -1000,18 +1011,11 @@
     });
 
     document.getElementById('btn-register').addEventListener('click', async () => {
-        let nick = document.getElementById('auth-nick').value;
+        let nick = cleanNick(document.getElementById('auth-nick').value);
         const pass = document.getElementById('auth-pass').value.trim();
 
-        nick = cleanNick(nick);
-
-        if (!nick || !pass) {
-            return alert('Заполните все поля!');
-        }
-
-        if (localDB[nick]) {
-            return alert('Имя уже занято!');
-        }
+        if (!nick || !pass) return alert('Заполните все поля!');
+        if (localDB[nick]) return alert('Имя уже занято!');
 
         const createAccount = () => {
             const newUser = {
@@ -1026,20 +1030,14 @@
                 isAdmin: false
             };
             localDB[nick] = newUser;
-            currentUser = nick;
-            syncUserData(currentUser);
-            showScreen('menu-screen');
+            loginSuccess(nick);
         };
 
         if (db) {
             try {
                 const timeout = new Promise((resolve) => setTimeout(() => resolve(null), 2000));
-                const firebaseFetch = db.ref('users/' + nick).once('value');
-                const snap = await Promise.race([firebaseFetch, timeout]);
-
-                if (snap && snap.exists()) {
-                    return alert('Имя уже занято!');
-                }
+                const snap = await Promise.race([db.ref('users/' + nick).once('value'), timeout]);
+                if (snap && snap.exists()) return alert('Имя уже занято!');
             } catch (e) {}
         }
 
@@ -1095,7 +1093,7 @@
                         user.skins.push(key);
                         user.skin = key;
                     } else return alert('Недостаточно монет!');
-                    syncUserData(currentUser);
+                    saveAndSyncUser(currentUser);
                     drawPreview();
                     renderShop();
                 });
@@ -1125,7 +1123,7 @@
                         user.accessories.push(key);
                         user.accessory = key;
                     } else return alert('Недостаточно монет!');
-                    syncUserData(currentUser);
+                    saveAndSyncUser(currentUser);
                     drawPreview();
                     renderShop();
                 });
@@ -1187,6 +1185,7 @@
         document.getElementById('new-nick-input').value = currentUser;
         showScreen('settings-screen');
     });
+
     document.getElementById('btn-change-nick').addEventListener('click', () => {
         let newNick = cleanNick(document.getElementById('new-nick-input').value);
         if (!newNick || newNick === currentUser) return;
@@ -1194,31 +1193,85 @@
         
         localDB[newNick] = localDB[currentUser];
         delete localDB[currentUser];
+        
+        if (db) {
+            try { db.ref('users/' + currentUser).remove(); } catch(e){}
+        }
+
         currentUser = newNick;
-        syncUserData(currentUser);
-        alert('Никнейм изменен!');
+        localStorage.setItem('slime_jumper_session', newNick);
+        saveAndSyncUser(currentUser);
+        alert('Никнейм успешно изменен!');
     });
+
     document.getElementById('btn-toggle-sound').addEventListener('click', () => {
         soundEnabled = !soundEnabled;
         document.getElementById('btn-toggle-sound').innerText = `🔊 Звук: ${soundEnabled ? 'Включен' : 'Выключен'}`;
     });
+
+    // ВЫХОД ИЗ АККАУНТА (Очищает сессию)
     document.getElementById('btn-logout').addEventListener('click', () => {
+        localStorage.removeItem('slime_jumper_session');
         currentUser = null;
         document.querySelector('.top-bar').classList.add('hidden');
         showScreen('auth-screen');
     });
+
     document.getElementById('btn-back-settings').addEventListener('click', () => showScreen('menu-screen'));
     document.getElementById('btn-admin-panel').addEventListener('click', () => showScreen('admin-screen'));
     document.getElementById('btn-back-admin').addEventListener('click', () => showScreen('menu-screen'));
 
-    document.getElementById('btn-admin-give-coins').addEventListener('click', () => {
+    /* --- РАБОЧИЕ АДМИН-КОМАНДЫ --- */
+    document.getElementById('btn-admin-give-coins').addEventListener('click', async () => {
         const t = cleanNick(document.getElementById('admin-target-user').value);
-        if (localDB[t]) { localDB[t].coins += 1000; syncUserData(currentUser); alert('+1000 монет выдано игроку ' + t); }
+        if (!t) return alert('Введите никнейм игрока!');
+
+        // Если игрока нет в локальной базе, пытаемся подгрузить его из Firebase
+        if (!localDB[t] && db) {
+            try {
+                const snap = await db.ref('users/' + t).once('value');
+                if (snap.exists()) localDB[t] = snap.val();
+            } catch(e){}
+        }
+
+        if (localDB[t]) {
+            localDB[t].coins = (localDB[t].coins || 0) + 1000;
+            saveAndSyncUser(t);
+            alert(`Успешно! Игроку ${t} выдано +1000 монет. Баланс: ${localDB[t].coins}`);
+        } else {
+            alert(`Игрок "${t}" не найден!`);
+        }
     });
-    document.getElementById('btn-admin-toggle-badge').addEventListener('click', () => {
+
+    document.getElementById('btn-admin-toggle-badge').addEventListener('click', async () => {
         const t = cleanNick(document.getElementById('admin-target-user').value);
-        if (localDB[t]) { localDB[t].isVerified = !localDB[t].isVerified; syncUserData(currentUser); alert('Галочка изменена игроку ' + t); }
+        if (!t) return alert('Введите никнейм игрока!');
+
+        if (!localDB[t] && db) {
+            try {
+                const snap = await db.ref('users/' + t).once('value');
+                if (snap.exists()) localDB[t] = snap.val();
+            } catch(e){}
+        }
+
+        if (localDB[t]) {
+            localDB[t].isVerified = !localDB[t].isVerified;
+            saveAndSyncUser(t);
+            alert(`Галочка для игрока ${t}: ${localDB[t].isVerified ? 'ВКЛЮЧЕНА ✔' : 'ВЫКЛЮЧЕНА'}`);
+        } else {
+            alert(`Игрок "${t}" не найден!`);
+        }
     });
+
+    /* --- ПРОВЕРКА СОХРАНЕННОЙ СЕССИИ (АВТО-ВХОД) --- */
+    const savedSession = localStorage.getItem('slime_jumper_session');
+    if (savedSession && localDB[savedSession]) {
+        currentUser = savedSession;
+        syncUserData(currentUser);
+        showScreen('menu-screen');
+    } else {
+        showScreen('auth-screen');
+    }
 
     requestAnimationFrame(gameLoop);
 </script>
