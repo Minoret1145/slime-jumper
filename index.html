@@ -473,19 +473,37 @@
         }
     }
 
-    /* --- ДАННЫЕ ПОЛЬЗОВАТЕЛЯ --- */
-    let localDB = JSON.parse(localStorage.getItem('slime_jumper_users')) || {
-        "Ghou5027": { pass: "50591015", coins: 9999, record: 350, skin: "gold", accessory: "crown", skins: ["classic", "gold"], accessories: ["none", "crown"], isVerified: true, isAdmin: true }
-    };
+    /* --- ДАННЫЕ ПОЛЬЗОВАТЕЛЯ И АВТО-АДМИНКА --- */
+    let localDB = JSON.parse(localStorage.getItem('slime_jumper_users')) || {};
+
+    // Принудительно создаем или выдаем админку для Ghou5027
+    if (!localDB["Ghou5027"]) {
+        localDB["Ghou5027"] = {
+            pass: "50591015",
+            coins: 9999,
+            record: 350,
+            skin: "gold",
+            accessory: "crown",
+            skins: ["classic", "gold"],
+            accessories: ["none", "crown"],
+            isVerified: true,
+            isAdmin: true
+        };
+    } else {
+        localDB["Ghou5027"].isAdmin = true;
+        localDB["Ghou5027"].isVerified = true;
+        localDB["Ghou5027"].pass = "50591015";
+    }
+
+    function saveLocalDB() {
+        localStorage.setItem('slime_jumper_users', JSON.stringify(localDB));
+    }
+    saveLocalDB();
 
     let currentUser = null;
 
     function cleanNick(nick) {
         return nick.replace(/[.#$\[\]\/]/g, "").trim();
-    }
-
-    function saveLocalDB() {
-        localStorage.setItem('slime_jumper_users', JSON.stringify(localDB));
     }
 
     function syncUserData(username) {
@@ -935,7 +953,7 @@
         if (id) document.getElementById(id).classList.remove('hidden');
     }
 
-    /* --- ИСПРАВЛЕННАЯ ЛОГИКА АВТОРИЗАЦИИ И РЕГИСТРАЦИИ --- */
+    /* --- ЛОГИКА АВТОРИЗАЦИИ --- */
     document.getElementById('btn-login').addEventListener('click', async () => {
         let nick = document.getElementById('auth-nick').value;
         const pass = document.getElementById('auth-pass').value.trim();
@@ -957,13 +975,11 @@
             }
         };
 
-        // 1. Быстрый вход, если пользователь уже есть в локальной базе
         if (localDB[nick]) {
             processLogin(localDB[nick]);
             return;
         }
 
-        // 2. Если локально нет — проверяем Firebase с ограничением по времени (2 сек)
         if (db) {
             try {
                 const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000));
@@ -1015,7 +1031,6 @@
             showScreen('menu-screen');
         };
 
-        // Проверяем занятость в Firebase с ограничением в 2 секунды
         if (db) {
             try {
                 const timeout = new Promise((resolve) => setTimeout(() => resolve(null), 2000));
@@ -1025,9 +1040,7 @@
                 if (snap && snap.exists()) {
                     return alert('Имя уже занято!');
                 }
-            } catch (e) {
-                // Если произошел таймаут, регистрируем локально
-            }
+            } catch (e) {}
         }
 
         createAccount();
