@@ -52,7 +52,7 @@
             display: block;
         }
 
-        /* Верхняя панель */
+        /* Верхняя панель (скрыта по умолчанию до входа) */
         .top-bar {
             position: absolute;
             top: 15px;
@@ -63,6 +63,10 @@
             align-items: center;
             z-index: 20;
             pointer-events: none;
+        }
+
+        .top-bar.hidden {
+            display: none !important;
         }
 
         .user-badge {
@@ -132,7 +136,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 25px;
+            padding: 20px;
             z-index: 10;
         }
 
@@ -167,6 +171,7 @@
             box-shadow: 0 6px 20px rgba(0, 114, 255, 0.35);
             transition: transform 0.1s, box-shadow 0.1s;
             text-align: center;
+            flex-shrink: 0;
         }
 
         .btn:active {
@@ -272,17 +277,18 @@
             to { opacity: 1; transform: scale(1.05); }
         }
 
-        /* Списки */
+        /* Списки с прокруткой */
         .scroll-list {
             width: 100%;
             max-width: 330px;
-            max-height: 48vh;
+            max-height: 32vh;
             overflow-y: auto;
-            margin: 12px 0;
+            margin: 10px 0;
             display: flex;
             flex-direction: column;
             gap: 10px;
             padding-right: 4px;
+            flex-shrink: 1;
         }
 
         .list-item {
@@ -295,37 +301,41 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
+        /* Canvas для превью в примерочной */
         #preview-canvas {
+            width: 140px;
+            height: 140px;
             background: rgba(20, 25, 45, 0.5);
             border-radius: 20px;
             border: 1px solid rgba(0, 242, 254, 0.3);
             margin-bottom: 10px;
+            flex-shrink: 0;
         }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <!-- Шапка Профиля -->
-    <div class="top-bar">
+    <!-- Шапка Профиля (скрыта на старте) -->
+    <div class="top-bar hidden">
         <div class="user-badge">
             <span>🧪</span>
             <div>
                 <div style="display: flex; align-items: center; gap: 4px;">
-                    <span id="display-name">admin</span>
+                    <span id="display-name">Player</span>
                     <span id="display-badge" class="verified-icon">✔</span>
                 </div>
-                <span id="display-role" class="user-role">АДМИНИСТРАТОР</span>
+                <span id="display-role" class="user-role">ИГРОК</span>
             </div>
         </div>
 
         <div class="stats-group">
-            <div class="stat-chip">🪙 <span id="display-coins">9999</span></div>
-            <div class="stat-chip">🏆 <span id="display-record">350м</span></div>
+            <div class="stat-chip">🪙 <span id="display-coins">0</span></div>
+            <div class="stat-chip">🏆 <span id="display-record">0м</span></div>
         </div>
     </div>
 
-    <div id="boss-warning" class="hidden">⚠️ ПОЯВИЛСЯ БОСС! ⚠️️</div>
+    <div id="boss-warning" class="hidden">⚠️ ПОЯВИЛСЯ БОСС! ⚠️</div>
 
     <canvas id="gameCanvas"></canvas>
 
@@ -355,8 +365,8 @@
 
     <!-- Гардероб & Аксессуары -->
     <div id="wardrobe-screen" class="screen hidden">
-        <h1 class="game-title" style="font-size: 3rem; margin-bottom: 10px;">Примерка</h1>
-        <canvas id="preview-canvas" width="120" height="120"></canvas>
+        <h1 class="game-title" style="font-size: 2.5rem; margin-bottom: 5px;">Примерка</h1>
+        <canvas id="preview-canvas" width="140" height="140"></canvas>
         
         <div style="display: flex; gap: 10px; width: 100%; max-width: 330px; margin-bottom: 5px;">
             <button class="tab-btn active" id="tab-skins">Скины</button>
@@ -367,7 +377,7 @@
         <button class="btn btn-secondary" id="btn-back-wardrobe">Назад</button>
     </div>
 
-    <!-- Рейтинг (Настоящий Firebase) -->
+    <!-- Рейтинг (Firebase) -->
     <div id="leaderboard-screen" class="screen hidden">
         <h1 class="game-title">Рейтинг</h1>
         <div class="scroll-list" id="leaderboard-list"></div>
@@ -482,7 +492,16 @@
     }
 
     function syncUserData(username) {
-        if (!username || !localDB[username]) return;
+        const topBar = document.querySelector('.top-bar');
+        
+        if (!username || !localDB[username]) {
+            topBar.classList.add('hidden');
+            return;
+        }
+
+        // Показываем шапку профиля после авторизации
+        topBar.classList.remove('hidden');
+
         const u = localDB[username];
         
         document.getElementById('display-name').innerText = username;
@@ -496,10 +515,11 @@
         }
 
         if (u.isAdmin) {
+            document.getElementById('display-role').innerText = 'АДМИНИСТРАТОР';
             document.getElementById('display-role').classList.remove('hidden');
             document.getElementById('btn-admin-panel').classList.remove('hidden');
         } else {
-            document.getElementById('display-role').classList.add('hidden');
+            document.getElementById('display-role').innerText = 'ИГРОК';
             document.getElementById('btn-admin-panel').classList.add('hidden');
         }
 
@@ -537,7 +557,7 @@
         cap: { name: "Кепка", price: 300 }
     };
 
-    /* --- ОТРИСОВКА КРАСИВОГО СЛАЙМА И ТОЧНЫХ АКСЕССУАРОВ --- */
+    /* --- ОТРИСОВКА СЛАЙМА И АКСЕССУАРОВ --- */
     function drawSlime(ctx, x, y, radius, skinKey, accKey, scaleX = 1, scaleY = 1) {
         ctx.save();
         ctx.translate(x, y);
@@ -545,7 +565,7 @@
 
         let s = SKINS[skinKey] || SKINS.classic;
 
-        // Тело Слайма (Капля / Градиент)
+        // Тело Слайма
         let grad = ctx.createRadialGradient(-radius*0.3, -radius*0.3, radius*0.1, 0, 0, radius * 1.2);
         if (s.rainbow) {
             let hue = (Date.now() / 10) % 360;
@@ -564,7 +584,7 @@
         ctx.arc(0, 0, radius, 0, Math.PI * 2);
         ctx.fill();
 
-        // Блик света на желе
+        // Блик
         ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
         ctx.beginPath();
         ctx.ellipse(-radius * 0.35, -radius * 0.35, radius * 0.35, radius * 0.2, Math.PI / 4, 0, Math.PI * 2);
@@ -585,7 +605,7 @@
         ctx.arc(radius * 0.34, -radius * 0.08, radius * 0.12, 0, Math.PI * 2);
         ctx.fill();
 
-        // Маленькие блики в глазах
+        // Блики в глазах
         ctx.fillStyle = '#fff';
         ctx.beginPath();
         ctx.arc(-radius * 0.25, -radius * 0.12, radius * 0.05, 0, Math.PI * 2);
@@ -599,13 +619,13 @@
         ctx.arc(0, radius * 0.1, radius * 0.25, 0.15 * Math.PI, 0.85 * Math.PI);
         ctx.stroke();
 
-        /* --- ИДЕАЛЬНО ПОДОГНАННЫЕ АКСЕССУАРЫ --- */
+        /* --- АКСЕССУАРЫ --- */
         if (accKey === 'crown') {
             ctx.fillStyle = '#ffd700';
             ctx.shadowBlur = 10;
             ctx.shadowColor = '#ffd700';
             ctx.beginPath();
-            let topY = -radius * 0.9;
+            let topY = -radius * 0.85;
             ctx.moveTo(-radius * 0.5, topY);
             ctx.lineTo(-radius * 0.6, topY - radius * 0.5);
             ctx.lineTo(-radius * 0.2, topY - radius * 0.25);
@@ -617,14 +637,12 @@
             ctx.fill();
         } 
         else if (accKey === 'headphones') {
-            // Ободок над головой
             ctx.strokeStyle = '#ff0055';
             ctx.lineWidth = radius * 0.18;
             ctx.beginPath();
             ctx.arc(0, 0, radius * 1.08, Math.PI * 1.1, Math.PI * 1.9);
             ctx.stroke();
 
-            // Амбушюры точно по бокам головы
             ctx.fillStyle = '#ff0055';
             ctx.shadowBlur = 8;
             ctx.shadowColor = '#ff0055';
@@ -637,15 +655,12 @@
             ctx.fillStyle = '#111';
             ctx.strokeStyle = '#00f2fe';
             ctx.lineWidth = 2;
-            // Левая линза
             ctx.beginPath();
             ctx.arc(-radius * 0.28, -radius * 0.1, radius * 0.3, 0, Math.PI * 2);
             ctx.fill(); ctx.stroke();
-            // Правая линза
             ctx.beginPath();
             ctx.arc(radius * 0.28, -radius * 0.1, radius * 0.3, 0, Math.PI * 2);
             ctx.fill(); ctx.stroke();
-            // Перемычка
             ctx.beginPath();
             ctx.moveTo(-radius * 0.02, -radius * 0.1);
             ctx.lineTo(radius * 0.02, -radius * 0.1);
@@ -663,11 +678,9 @@
         else if (accKey === 'cat_ears') {
             ctx.fillStyle = '#ff758c';
             ctx.beginPath();
-            // Левое ушко
             ctx.moveTo(-radius * 0.8, -radius * 0.4);
             ctx.lineTo(-radius * 0.5, -radius * 1.25);
             ctx.lineTo(-radius * 0.1, -radius * 0.85);
-            // Правое ушко
             ctx.moveTo(radius * 0.8, -radius * 0.4);
             ctx.lineTo(radius * 0.5, -radius * 1.25);
             ctx.lineTo(radius * 0.1, -radius * 0.85);
@@ -706,9 +719,11 @@
     const prevCanvas = document.getElementById('preview-canvas');
     const prevCtx = prevCanvas.getContext('2d');
     function drawPreview() {
+        if (!prevCtx) return;
         prevCtx.clearRect(0, 0, prevCanvas.width, prevCanvas.height);
-        const u = localDB[currentUser] || {};
-        drawSlime(prevCtx, 60, 68, 32, u.skin || 'classic', u.accessory || 'none');
+        if (!currentUser || !localDB[currentUser]) return;
+        const u = localDB[currentUser];
+        drawSlime(prevCtx, 70, 78, 36, u.skin || 'classic', u.accessory || 'none');
     }
 
     /* --- CANVAS ДЛЯ ИГРЫ --- */
@@ -1029,6 +1044,7 @@
         const list = document.getElementById('shop-list');
         list.innerHTML = '';
         const user = localDB[currentUser];
+        if (!user) return;
 
         if (currentTab === 'skins') {
             Object.keys(SKINS).forEach(key => {
@@ -1053,8 +1069,9 @@
                         user.coins -= item.price;
                         user.skins.push(key);
                         user.skin = key;
-                    } else alert('Недостаточно монет!');
+                    } else return alert('Недостаточно монет!');
                     syncUserData(currentUser);
+                    drawPreview();
                     renderShop();
                 });
                 list.appendChild(div);
@@ -1082,8 +1099,9 @@
                         user.coins -= item.price;
                         user.accessories.push(key);
                         user.accessory = key;
-                    } else alert('Недостаточно монет!');
+                    } else return alert('Недостаточно монет!');
                     syncUserData(currentUser);
+                    drawPreview();
                     renderShop();
                 });
                 list.appendChild(div);
@@ -1093,11 +1111,12 @@
 
     document.getElementById('btn-wardrobe').addEventListener('click', () => {
         renderShop();
+        drawPreview();
         showScreen('wardrobe-screen');
     });
     document.getElementById('btn-back-wardrobe').addEventListener('click', () => showScreen('menu-screen'));
 
-    /* --- РЕАЛЬНЫЙ РЕЙТИНГ ИЗ FIREBASE (БЕЗ БОТОВ) --- */
+    /* --- РЕЙТИНГ ИЗ FIREBASE --- */
     document.getElementById('btn-leaderboard').addEventListener('click', () => {
         const list = document.getElementById('leaderboard-list');
         list.innerHTML = '<div style="text-align:center;">Загрузка игроков из сети...</div>';
@@ -1156,18 +1175,22 @@
         soundEnabled = !soundEnabled;
         document.getElementById('btn-toggle-sound').innerText = `🔊 Звук: ${soundEnabled ? 'Включен' : 'Выключен'}`;
     });
-    document.getElementById('btn-logout').addEventListener('click', () => showScreen('auth-screen'));
+    document.getElementById('btn-logout').addEventListener('click', () => {
+        currentUser = null;
+        document.querySelector('.top-bar').classList.add('hidden');
+        showScreen('auth-screen');
+    });
     document.getElementById('btn-back-settings').addEventListener('click', () => showScreen('menu-screen'));
     document.getElementById('btn-admin-panel').addEventListener('click', () => showScreen('admin-screen'));
     document.getElementById('btn-back-admin').addEventListener('click', () => showScreen('menu-screen'));
 
     document.getElementById('btn-admin-give-coins').addEventListener('click', () => {
         const t = document.getElementById('admin-target-user').value.trim();
-        if (localDB[t]) { localDB[t].coins += 1000; syncUserData(t); alert('+1000 монет выдано'); }
+        if (localDB[t]) { localDB[t].coins += 1000; syncUserData(currentUser); alert('+1000 монет выдано игроку ' + t); }
     });
     document.getElementById('btn-admin-toggle-badge').addEventListener('click', () => {
         const t = document.getElementById('admin-target-user').value.trim();
-        if (localDB[t]) { localDB[t].isVerified = !localDB[t].isVerified; syncUserData(t); alert('Галочка изменена'); }
+        if (localDB[t]) { localDB[t].isVerified = !localDB[t].isVerified; syncUserData(currentUser); alert('Галочка изменена игроку ' + t); }
     });
 
     requestAnimationFrame(gameLoop);
