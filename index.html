@@ -52,7 +52,7 @@
             display: block;
         }
 
-        /* Верхняя панель (скрыта по умолчанию до входа) */
+        /* Верхняя панель (скрыта до входа) */
         .top-bar {
             position: absolute;
             top: 15px;
@@ -220,7 +220,7 @@
             text-align: center;
         }
 
-        /* Стрелки Управления */
+        /* Кнопки Управления */
         #touch-controls {
             position: absolute;
             bottom: 25px;
@@ -257,7 +257,6 @@
             transform: scale(0.96);
         }
 
-        /* Предупреждение Босса */
         #boss-warning {
             position: absolute;
             top: 22%;
@@ -277,7 +276,6 @@
             to { opacity: 1; transform: scale(1.05); }
         }
 
-        /* Списки с прокруткой */
         .scroll-list {
             width: 100%;
             max-width: 330px;
@@ -301,7 +299,6 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        /* Canvas для превью в примерочной */
         #preview-canvas {
             width: 140px;
             height: 140px;
@@ -316,7 +313,7 @@
 <body>
 
 <div id="game-container">
-    <!-- Шапка Профиля (скрыта на старте) -->
+    <!-- Верхняя шапка -->
     <div class="top-bar hidden">
         <div class="user-badge">
             <span>🧪</span>
@@ -344,7 +341,7 @@
         <div class="touch-btn" id="btn-right">Направо ►</div>
     </div>
 
-    <!-- Авторизация -->
+    <!-- Экран Авторизации -->
     <div id="auth-screen" class="screen">
         <h1 class="game-title">Slime Jumper</h1>
         <input type="text" id="auth-nick" placeholder="Введите Ник" maxlength="15">
@@ -359,11 +356,11 @@
         <button class="btn" id="btn-start">🎮 Играть</button>
         <button class="btn" id="btn-wardrobe">👕 Гардероб и Аксессуары</button>
         <button class="btn" id="btn-leaderboard">🏆 Рейтинг Игроков</button>
-        <button class="btn" id="btn-settings">⚙️ Настройки</button>
+        <button class="btn" id="btn-settings">⚙️️ Настройки</button>
         <button class="btn btn-admin hidden" id="btn-admin-panel">👑 Панель Админа</button>
     </div>
 
-    <!-- Гардероб & Аксессуары -->
+    <!-- Гардероб -->
     <div id="wardrobe-screen" class="screen hidden">
         <h1 class="game-title" style="font-size: 2.5rem; margin-bottom: 5px;">Примерка</h1>
         <canvas id="preview-canvas" width="140" height="140"></canvas>
@@ -377,7 +374,7 @@
         <button class="btn btn-secondary" id="btn-back-wardrobe">Назад</button>
     </div>
 
-    <!-- Рейтинг (Firebase) -->
+    <!-- Рейтинг -->
     <div id="leaderboard-screen" class="screen hidden">
         <h1 class="game-title">Рейтинг</h1>
         <div class="scroll-list" id="leaderboard-list"></div>
@@ -499,9 +496,7 @@
             return;
         }
 
-        // Показываем шапку профиля после авторизации
         topBar.classList.remove('hidden');
-
         const u = localDB[username];
         
         document.getElementById('display-name').innerText = username;
@@ -523,6 +518,7 @@
             document.getElementById('btn-admin-panel').classList.add('hidden');
         }
 
+        // Сохраняем и локально, и отправляем в Firebase
         saveLocalDB();
         if (db) {
             try { db.ref('users/' + username).set(u); } catch(e){}
@@ -565,7 +561,6 @@
 
         let s = SKINS[skinKey] || SKINS.classic;
 
-        // Тело Слайма
         let grad = ctx.createRadialGradient(-radius*0.3, -radius*0.3, radius*0.1, 0, 0, radius * 1.2);
         if (s.rainbow) {
             let hue = (Date.now() / 10) % 360;
@@ -584,13 +579,11 @@
         ctx.arc(0, 0, radius, 0, Math.PI * 2);
         ctx.fill();
 
-        // Блик
         ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
         ctx.beginPath();
         ctx.ellipse(-radius * 0.35, -radius * 0.35, radius * 0.35, radius * 0.2, Math.PI / 4, 0, Math.PI * 2);
         ctx.fill();
 
-        // Глаза
         ctx.shadowBlur = 0;
         ctx.fillStyle = '#fff';
         ctx.beginPath();
@@ -598,28 +591,24 @@
         ctx.arc(radius * 0.28, -radius * 0.1, radius * 0.25, 0, Math.PI * 2);
         ctx.fill();
 
-        // Зрачки
         ctx.fillStyle = '#0f111a';
         ctx.beginPath();
         ctx.arc(-radius * 0.22, -radius * 0.08, radius * 0.12, 0, Math.PI * 2);
         ctx.arc(radius * 0.34, -radius * 0.08, radius * 0.12, 0, Math.PI * 2);
         ctx.fill();
 
-        // Блики в глазах
         ctx.fillStyle = '#fff';
         ctx.beginPath();
         ctx.arc(-radius * 0.25, -radius * 0.12, radius * 0.05, 0, Math.PI * 2);
         ctx.arc(radius * 0.31, -radius * 0.12, radius * 0.05, 0, Math.PI * 2);
         ctx.fill();
 
-        // Улыбка
         ctx.strokeStyle = '#0f111a';
         ctx.lineWidth = radius * 0.08;
         ctx.beginPath();
         ctx.arc(0, radius * 0.1, radius * 0.25, 0.15 * Math.PI, 0.85 * Math.PI);
         ctx.stroke();
 
-        /* --- АКСЕССУАРЫ --- */
         if (accKey === 'crown') {
             ctx.fillStyle = '#ffd700';
             ctx.shadowBlur = 10;
@@ -715,7 +704,6 @@
         ctx.restore();
     }
 
-    // Отрисовка превью в гардеробе
     const prevCanvas = document.getElementById('preview-canvas');
     const prevCtx = prevCanvas.getContext('2d');
     function drawPreview() {
@@ -846,7 +834,6 @@
             }
         });
 
-        // Битва с Боссом
         if (score >= 100) {
             if (!boss.active) {
                 boss.active = true;
@@ -897,7 +884,6 @@
         ctx.save();
         ctx.translate(0, -cameraY);
 
-        // Платформы
         platforms.forEach(p => {
             ctx.fillStyle = p.type === 'spring' ? '#ff007f' : (p.type === 'moving' ? '#00f2fe' : '#00ff87');
             ctx.shadowBlur = 12;
@@ -911,7 +897,6 @@
             }
         });
 
-        // Монеты
         coins.forEach(c => {
             if (c.collected) return;
             ctx.fillStyle = '#ffd700';
@@ -922,7 +907,6 @@
             ctx.fill();
         });
 
-        // Босс
         if (boss.active) {
             ctx.save();
             ctx.translate(boss.x, boss.y);
@@ -963,7 +947,6 @@
             }
         }
 
-        // Отрисовка игрока
         player.scaleX += (1 - player.scaleX) * 0.12;
         player.scaleY += (1 - player.scaleY) * 0.12;
         const u = localDB[currentUser] || {};
@@ -985,7 +968,7 @@
         requestAnimationFrame(gameLoop);
     }
 
-    /* --- ЛОГИКА ЭКРАНОВ И АВТОРИЗАЦИИ --- */
+    /* --- ЛОГИКА ЭКРАНОВ И АВТОРИЗАЦИИ (С СИНХРОНИЗАЦИЕЙ FIREBASE) --- */
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
         if (id) document.getElementById(id).classList.remove('hidden');
@@ -996,13 +979,36 @@
         const pass = document.getElementById('auth-pass').value.trim();
         if (!nick || !pass) return alert('Заполните все поля!');
 
-        if (localDB[nick]) {
-            if (localDB[nick].pass === pass) {
+        const processLogin = (userData) => {
+            if (userData.pass === pass) {
+                localDB[nick] = userData;
                 currentUser = nick;
                 syncUserData(currentUser);
                 showScreen('menu-screen');
-            } else alert('Неверный пароль!');
-        } else alert('Игрок не найден. Нажмите "Зарегистрироваться"');
+            } else {
+                alert('Неверный пароль!');
+            }
+        };
+
+        // Сначала пробуем подтянуть из Firebase, если подключена сеть
+        if (db) {
+            db.ref('users/' + nick).once('value').then(snap => {
+                const val = snap.val();
+                if (val) {
+                    processLogin(val);
+                } else if (localDB[nick]) {
+                    processLogin(localDB[nick]);
+                } else {
+                    alert('Игрок не найден!');
+                }
+            }).catch(() => {
+                if (localDB[nick]) processLogin(localDB[nick]);
+                else alert('Игрок не найден!');
+            });
+        } else {
+            if (localDB[nick]) processLogin(localDB[nick]);
+            else alert('Игрок не найден!');
+        }
     });
 
     document.getElementById('btn-register').addEventListener('click', () => {
@@ -1010,22 +1016,39 @@
         const pass = document.getElementById('auth-pass').value.trim();
         if (!nick || !pass) return alert('Заполните все поля!');
 
-        if (localDB[nick]) return alert('Имя уже занято!');
-
-        localDB[nick] = {
-            pass, coins: 0, record: 0, skin: 'classic', accessory: 'none',
-            skins: ['classic'], accessories: ['none'], isVerified: false, isAdmin: false
+        const createAccount = () => {
+            const newUser = {
+                pass, coins: 0, record: 0, skin: 'classic', accessory: 'none',
+                skins: ['classic'], accessories: ['none'], isVerified: false, isAdmin: false
+            };
+            localDB[nick] = newUser;
+            currentUser = nick;
+            syncUserData(currentUser);
+            showScreen('menu-screen');
         };
-        currentUser = nick;
-        syncUserData(currentUser);
-        showScreen('menu-screen');
+
+        if (db) {
+            db.ref('users/' + nick).once('value').then(snap => {
+                if (snap.val() || localDB[nick]) {
+                    alert('Имя уже занято!');
+                } else {
+                    createAccount();
+                }
+            }).catch(() => {
+                if (localDB[nick]) alert('Имя уже занято!');
+                else createAccount();
+            });
+        } else {
+            if (localDB[nick]) alert('Имя уже занято!');
+            else createAccount();
+        }
     });
 
     document.getElementById('btn-start').addEventListener('click', () => { showScreen(null); initGame(); });
     document.getElementById('btn-restart').addEventListener('click', () => { document.getElementById('gameover-screen').classList.add('hidden'); initGame(); });
     document.getElementById('btn-to-menu').addEventListener('click', () => showScreen('menu-screen'));
 
-    /* --- ГАРДЕРОб С ВКЛАДКАМИ --- */
+    /* --- ГАРДЕРОб --- */
     let currentTab = 'skins';
     document.getElementById('tab-skins').addEventListener('click', () => {
         currentTab = 'skins';
@@ -1116,7 +1139,7 @@
     });
     document.getElementById('btn-back-wardrobe').addEventListener('click', () => showScreen('menu-screen'));
 
-    /* --- РЕЙТИНГ ИЗ FIREBASE --- */
+    /* --- РЕЙТИНГ --- */
     document.getElementById('btn-leaderboard').addEventListener('click', () => {
         const list = document.getElementById('leaderboard-list');
         list.innerHTML = '<div style="text-align:center;">Загрузка игроков из сети...</div>';
@@ -1156,7 +1179,7 @@
 
     document.getElementById('btn-back-leaderboard').addEventListener('click', () => showScreen('menu-screen'));
 
-    // Настройки & Админка
+    /* --- НАСТРОЙКИ & АДМИНКА --- */
     document.getElementById('btn-settings').addEventListener('click', () => {
         document.getElementById('new-nick-input').value = currentUser;
         showScreen('settings-screen');
@@ -1165,6 +1188,7 @@
         const newNick = document.getElementById('new-nick-input').value.trim();
         if (!newNick || newNick === currentUser) return;
         if (localDB[newNick]) return alert('Имя уже занято!');
+        
         localDB[newNick] = localDB[currentUser];
         delete localDB[currentUser];
         currentUser = newNick;
