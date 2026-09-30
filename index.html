@@ -3,19 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Slime Jump - Cyber Edition</title>
+  <title>Slime Jump: Ultimate Edition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700;900&display=swap" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Fredoka', cursive, sans-serif;
       user-select: none;
       -webkit-user-select: none;
     }
 
     body {
-      background: #060913;
+      background: #05020a;
       color: #ffffff;
       display: flex;
       justify-content: center;
@@ -24,247 +27,175 @@
       overflow: hidden;
     }
 
-    /* Главный контейнер приложения */
+    /* Главный игровой контейнер */
     .app-container {
       width: 100%;
       max-width: 420px;
       height: 94vh;
-      max-height: 840px;
-      background: #0c1220;
-      border: 1px solid #1a263d;
-      border-radius: 24px;
+      max-height: 850px;
+      background: linear-gradient(180deg, #1b0a3a 0%, #080214 100%);
+      border: 2px solid #4a1d96;
+      border-radius: 28px;
       display: flex;
       flex-direction: column;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 16px 50px rgba(0, 0, 0, 0.9), 0 0 20px rgba(46, 213, 115, 0.1);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(138, 43, 226, 0.25);
     }
 
-    /* Верхняя карточка профиля */
-    .user-card {
-      margin: 18px 18px 10px;
-      background: #141e30;
-      border: 1px solid #22324e;
-      border-radius: 16px;
-      padding: 12px 16px;
+    /* Шапка (Интерфейс) */
+    .top-bar {
+      padding: 16px 20px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+      align-items: center;
+      z-index: 10;
+      background: rgba(15, 5, 31, 0.4);
+      backdrop-filter: blur(5px);
     }
 
-    .user-left {
+    .pill-badge {
+      background: rgba(46, 18, 92, 0.8);
+      border: 1px solid #6332bd;
+      border-radius: 20px;
+      padding: 7px 16px;
       display: flex;
       align-items: center;
-      gap: 12px;
-    }
-
-    .user-avatar {
-      width: 42px;
-      height: 42px;
-      background: #2ed573;
-      border-radius: 10px;
-      box-shadow: 0 0 14px rgba(46, 213, 115, 0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.3s;
-    }
-
-    .user-details {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .user-name {
-      font-weight: 800;
-      font-size: 16px;
-      color: #ffffff;
-      letter-spacing: 0.3px;
-    }
-
-    .user-record {
+      gap: 8px;
       font-size: 13px;
-      color: #2ed573;
       font-weight: 700;
-      margin-top: 2px;
+      color: #e2d3ff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     }
 
-    .btn-login {
-      background: #1f2d47;
-      border: 1px solid #2e4368;
-      color: #e1e8ed;
-      padding: 8px 14px;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: 13px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s ease;
+    .pill-badge.coins {
+      color: #ffcc00;
+      border-color: #cca300;
     }
 
-    .btn-login:hover {
-      background: #2a3d60;
-      border-color: #3b5684;
+    .coin-icon {
+      width: 16px;
+      height: 16px;
+      background: #ffcc00;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 10px #ffcc00;
+      border: 2px solid #ffe680;
     }
 
-    /* Главный баннер логотипа */
-    .hero-section {
+    /* Экраны Авторизации и Главного Меню */
+    .auth-screen {
       flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      padding: 24px;
       text-align: center;
-      padding: 20px;
-      position: relative;
-    }
-
-    .boss-badge {
-      background: #ff4757;
-      color: #fff;
-      font-size: 11px;
-      font-weight: 900;
-      padding: 3px 9px;
-      border-radius: 6px;
-      letter-spacing: 0.8px;
-      position: absolute;
-      top: 20%;
-      right: 18%;
-      transform: rotate(10deg);
-      box-shadow: 0 0 15px rgba(255, 71, 87, 0.7);
-      animation: pulseGlow 1.4s infinite alternate ease-in-out;
-    }
-
-    @keyframes pulseGlow {
-      0% { transform: rotate(10deg) scale(1); box-shadow: 0 0 10px rgba(255, 71, 87, 0.5); }
-      100% { transform: rotate(10deg) scale(1.1); box-shadow: 0 0 20px rgba(255, 71, 87, 0.9); }
+      z-index: 5;
     }
 
     .game-title {
-      font-size: 42px;
+      font-size: 46px;
       font-weight: 900;
-      font-style: italic;
-      color: #2ed573;
-      text-shadow: 0 0 25px rgba(46, 213, 115, 0.6), 0 0 5px rgba(255, 255, 255, 0.8);
-      letter-spacing: 1.5px;
-      line-height: 1;
-    }
-
-    .subtitle {
-      color: #8899a6;
-      font-size: 13px;
-      margin-top: 10px;
-      font-weight: 500;
-    }
-
-    /* Блок кнопок меню */
-    .menu-actions {
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .btn-play {
-      background: #2ed573;
-      color: #0b150f;
-      font-size: 20px;
-      font-weight: 900;
-      border: none;
-      padding: 16px;
-      border-radius: 14px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+      background: linear-gradient(180deg, #fff3a8 0%, #ff9900 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(255, 153, 0, 0.6);
+      margin-bottom: 30px;
       letter-spacing: 1px;
-      box-shadow: 0 4px 25px rgba(46, 213, 115, 0.45);
-      transition: transform 0.15s, background 0.2s, box-shadow 0.2s;
     }
 
-    .btn-play:hover {
-      background: #32e07b;
-      box-shadow: 0 6px 30px rgba(46, 213, 115, 0.6);
+    .pill-input {
+      width: 90%;
+      max-width: 290px;
+      padding: 14px 22px;
+      border-radius: 25px;
+      background: #15072e;
+      border: 1.5px solid #481f8a;
+      color: #ffffff;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 700;
+      outline: none;
+      margin-bottom: 12px;
+      transition: all 0.25s ease;
     }
 
-    .btn-play:active {
-      transform: scale(0.97);
+    .pill-input::placeholder { color: #6a48a3; }
+    .pill-input:focus {
+      border-color: #ffcc00;
+      box-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
     }
 
-    .grid-buttons {
+    .btn-yellow {
+      width: 90%;
+      max-width: 290px;
+      padding: 15px;
+      border-radius: 25px;
+      background: linear-gradient(180deg, #ffcc00 0%, #e67e00 100%);
+      border: none;
+      color: #1a0800;
+      font-weight: 900;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 6px;
+      margin-bottom: 12px;
+      box-shadow: 0 5px 22px rgba(255, 170, 0, 0.45);
+      transition: transform 0.15s, box-shadow 0.2s;
+    }
+
+    .btn-yellow:active { transform: scale(0.96); }
+
+    .btn-dark-pill {
+      width: 90%;
+      max-width: 290px;
+      padding: 14px;
+      border-radius: 25px;
+      background: #1a0938;
+      border: 1.5px solid #431c80;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .btn-dark-pill:hover { background: #280d54; }
+    .btn-dark-pill:active { transform: scale(0.96); }
+
+    .lobby-menu {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      width: 90%;
+      max-width: 290px;
+    }
+
+    .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
 
-    .btn-menu {
-      background: #141e30;
-      border: 1px solid #22324e;
-      color: #ffffff;
-      padding: 13px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 14px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: all 0.2s;
-    }
-
-    .btn-menu:hover {
-      background: #1c2b45;
-      border-color: #2e4368;
-    }
-
-    .btn-admin {
-      background: #341f97;
-      border: 1px solid #5f27cd;
-      color: #ffffff;
-    }
-
-    .btn-admin:hover {
-      background: #4228b8;
-      border-color: #713bdb;
-    }
-
-    .footer-note {
-      text-align: center;
-      color: #556980;
-      font-size: 12px;
-      margin-bottom: 12px;
-      font-weight: 500;
-    }
-
-    /* Игровой холст */
     #gameCanvas {
       width: 100%;
       height: 100%;
       display: none;
-      background: #080d1a;
+      background: #080214;
     }
 
     /* Модальные окна */
     .modal {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(8, 13, 26, 0.96);
+      background: rgba(10, 3, 23, 0.96);
       backdrop-filter: blur(10px);
       display: none;
       flex-direction: column;
       padding: 24px;
       z-index: 100;
-      animation: fadeIn 0.2s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.98); }
-      to { opacity: 1; transform: scale(1); }
+      overflow-y: auto;
     }
 
     .modal-header {
@@ -272,173 +203,102 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
-      border-bottom: 1px solid #1c2b45;
+      border-bottom: 1.5px solid #3c1a75;
       padding-bottom: 12px;
     }
 
-    .modal-title {
-      font-size: 20px;
-      font-weight: 800;
-      color: #fff;
+    .modal-title { font-size: 20px; font-weight: 900; color: #ffcc00; }
+    .btn-close {
+      background: #250e4f; border: none; color: #fff;
+      width: 34px; height: 34px; border-radius: 50%;
+      font-weight: 900; cursor: pointer;
     }
 
-    .btn-close {
-      background: #1f2d47;
-      border: none;
-      color: #fff;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      font-weight: 800;
-      cursor: pointer;
+    /* Уведомление о достижениях */
+    .achievement-toast {
+      position: absolute;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: linear-gradient(135deg, #1c0a3c, #3b1875);
+      border: 2px solid #ffcc00;
+      border-radius: 16px;
+      padding: 10px 18px;
       display: flex;
       align-items: center;
-      justify-content: center;
+      gap: 12px;
+      z-index: 150;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.8);
     }
 
-    .form-group {
-      margin-bottom: 16px;
+    .achievement-toast.show {
+      transform: translateX(-50%) translateY(0);
     }
 
-    .form-group label {
-      display: block;
-      font-size: 13px;
-      color: #8899a6;
-      margin-bottom: 8px;
-      font-weight: 600;
-    }
-
-    .form-input {
-      width: 100%;
-      background: #141e30;
-      border: 1px solid #22324e;
-      padding: 12px 14px;
-      border-radius: 10px;
-      color: #fff;
-      font-size: 15px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .form-input:focus {
-      border-color: #2ed573;
-    }
-
-    .btn-action {
-      width: 100%;
-      background: #2ed573;
-      color: #0b150f;
-      font-weight: 800;
-      padding: 13px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 15px;
-      margin-top: 10px;
-      transition: background 0.2s;
-    }
-
-    .btn-action:hover {
-      background: #32e07b;
-    }
-
-    /* Экраны Бан и Game Over */
+    /* Экран Бана и Game Over */
     .ban-screen {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: #110507;
-      color: #ff4757;
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 30px;
-      z-index: 200;
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: #120206; color: #ff4757; display: none;
+      flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 30px; z-index: 200;
     }
-
-    .ban-icon { font-size: 64px; margin-bottom: 16px; }
-    .ban-title { font-size: 26px; font-weight: 900; margin-bottom: 10px; }
-    .ban-desc { font-size: 14px; color: #a4b0be; line-height: 1.5; }
 
     .game-over-overlay {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(4, 7, 15, 0.9);
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(6, 2, 15, 0.93); display: none;
+      flex-direction: column; align-items: center; justify-content: center;
       z-index: 90;
-      backdrop-filter: blur(6px);
-    }
-
-    /* Переключатель звука */
-    .toggle-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 0;
-      border-bottom: 1px solid #1a263d;
     }
   </style>
 </head>
 <body>
 
-  <div class="app-container">
+  <div class="app-container" id="appContainer">
     
-    <!-- Главное Меню -->
-    <div id="mainMenu" style="display: flex; flex-direction: column; height: 100%;">
-      
-      <!-- Карточка пользователя -->
-      <div class="user-card">
-        <div class="user-left">
-          <div class="user-avatar" id="avatarBox">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3">
-              <rect x="3" y="3" width="18" height="18" rx="5" />
-            </svg>
-          </div>
-          <div class="user-details">
-            <span class="user-name" id="displayName">Гость</span>
-            <span class="user-record" id="displayRecord">Рекорд: 0М</span>
-          </div>
+    <!-- Всплывающее Достижение -->
+    <div class="achievement-toast" id="achievementToast">
+      <div style="font-size: 28px;">🏆</div>
+      <div>
+        <div style="font-size: 11px; color: #ffcc00; font-weight: 900;">ДОСТИЖЕНИЕ ПОЛУЧЕНО!</div>
+        <div style="font-size: 13px; font-weight: 700;" id="achievementTitle">Первый Прыжок</div>
+      </div>
+    </div>
+
+    <!-- Верхний Бар -->
+    <div class="top-bar">
+      <div class="pill-badge">
+        ✏️ <span id="topPlayerText">80808 ИГРОК</span>
+      </div>
+      <div class="pill-badge coins">
+        <span class="coin-icon"></span>
+        <span id="topCoinsText">0</span>
+      </div>
+    </div>
+
+    <!-- Главная Авторизация / Лобби -->
+    <div class="auth-screen" id="authScreen">
+      <h1 class="game-title">Slime Jump</h1>
+
+      <div id="formBox" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+        <input type="text" class="pill-input" id="nickInput" placeholder="Введите Ник">
+        <input type="password" class="pill-input" id="passInput" placeholder="Введите Пароль">
+        
+        <button class="btn-yellow" onclick="handleLogin()">Войти</button>
+        <button class="btn-dark-pill" onclick="handleGuest()">Зарегистрироваться / Гость</button>
+      </div>
+
+      <div class="lobby-menu" id="lobbyBox">
+        <button class="btn-yellow" style="width: 100%; max-width: 100%;" onclick="startGame()">▶ ИГРАТЬ</button>
+        <div class="grid-2">
+          <button class="btn-dark-pill" style="width: 100%;" onclick="openModal('shopModal')">🛍 Магазин</button>
+          <button class="btn-dark-pill" style="width: 100%;" onclick="openModal('achieveModal')">🏆 Успехи</button>
         </div>
-        <button class="btn-login" onclick="openModal('authModal')">
-          👤 Войти
-        </button>
-      </div>
-
-      <!-- Центральный заголовок -->
-      <div class="hero-section">
-        <div class="boss-badge">BOSS 500M</div>
-        <h1 class="game-title">SLIME JUMP</h1>
-        <p class="subtitle">Прыгай вверх, уворачивайся от лазеров и сосулек!</p>
-      </div>
-
-      <!-- Главные Кнопки -->
-      <div class="menu-actions">
-        <button class="btn-play" onclick="startGame()">
-          ▶ ИГРАТЬ
-        </button>
-
-        <div class="grid-buttons">
-          <button class="btn-menu" onclick="openModal('wardrobeModal')">
-            👕 Гардероб
-          </button>
-          <button class="btn-menu" onclick="openModal('topModal')">
-            🏆 Топ Игроков
-          </button>
-          <button class="btn-menu" onclick="openModal('settingsModal')">
-            ⚙ Настройки
-          </button>
-          <button class="btn-menu btn-admin" onclick="openModal('adminModal')">
-            🛡 Админка
-          </button>
+        <div class="grid-2">
+          <button class="btn-dark-pill" style="width: 100%;" onclick="openModal('settingsModal')">⚙ Настройки</button>
+          <button class="btn-dark-pill" style="width: 100%; background: #3b0d5c;" onclick="openModal('adminModal')">🛡 Админка</button>
         </div>
-      </div>
-
-      <div class="footer-note">
-        Управление: Стрелки / A-D / Касания по бокам экрана
+        <button class="btn-dark-pill" style="width: 100%; margin-top: 5px; opacity: 0.7;" onclick="logout()">Сменить аккаунт</button>
       </div>
     </div>
 
@@ -447,34 +307,36 @@
 
     <!-- Экран Блокировки -->
     <div class="ban-screen" id="banScreen">
-      <div class="ban-icon">🚫</div>
-      <div class="ban-title">АККАУНТ ЗАБЛОКИРОВАН</div>
-      <div class="ban-desc">Доступ к игре заблокирован администратором системы. По вопросам разбана обратитесь в поддержку.</div>
+      <div style="font-size: 60px; margin-bottom: 12px;">🚫</div>
+      <h2 style="font-size: 24px; margin-bottom: 8px;">АККАУНТ ЗАБЛОКИРОВАН</h2>
+      <p style="font-size: 13px; color: #a4b0be;">Доступ ограничен администратором сервера.</p>
     </div>
 
-    <!-- Экран Окончания Игры -->
+    <!-- Экран Проигрыша -->
     <div class="game-over-overlay" id="gameOverOverlay">
-      <h2 style="font-size: 34px; color: #ff4757; font-weight: 900; margin-bottom: 8px; text-shadow: 0 0 15px rgba(255, 71, 87, 0.5);">ВЫ УПАЛИ!</h2>
-      <p style="font-size: 19px; color: #fff; margin-bottom: 24px; font-weight: 700;" id="finalScoreText">Высота: 0М</p>
-      <button class="btn-play" style="width: 220px;" onclick="startGame()">
-        🔄 Ещё раз
-      </button>
-      <button class="btn-menu" style="margin-top: 12px; width: 220px;" onclick="quitToMenu()">
-        🏠 В меню
-      </button>
+      <h2 style="font-size: 36px; color: #ff4757; font-weight: 900; margin-bottom: 8px;">ВЫ УПАЛИ!</h2>
+      <p style="font-size: 20px; color: #fff; margin-bottom: 6px;" id="finalScoreText">Высота: 0М</p>
+      <p style="font-size: 14px; color: #ffcc00; margin-bottom: 24px;" id="finalCoinsText">+0 Монет собрано</p>
+      <button class="btn-yellow" style="width: 220px;" onclick="startGame()">🔄 Ещё раз</button>
+      <button class="btn-dark-pill" style="width: 220px; margin-top: 10px;" onclick="quitToMenu()">🏠 В меню</button>
     </div>
 
-    <!-- Модалка Авторизации -->
-    <div class="modal" id="authModal">
+    <!-- Модалка Магазина -->
+    <div class="modal" id="shopModal">
       <div class="modal-header">
-        <span class="modal-title">Вход / Регистрация</span>
-        <button class="btn-close" onclick="closeModal('authModal')">✕</button>
+        <span class="modal-title">🛍 Магазин Скинов</span>
+        <button class="btn-close" onclick="closeModal('shopModal')">✕</button>
       </div>
-      <div class="form-group">
-        <label>Никнейм игрока</label>
-        <input type="text" class="form-input" id="authNameInput" placeholder="Введите имя...">
+      <div id="shopList" style="display: flex; flex-direction: column; gap: 12px;"></div>
+    </div>
+
+    <!-- Модалка Достижений -->
+    <div class="modal" id="achieveModal">
+      <div class="modal-header">
+        <span class="modal-title">🏆 Достижения</span>
+        <button class="btn-close" onclick="closeModal('achieveModal')">✕</button>
       </div>
-      <button class="btn-action" onclick="saveAuth()">Войти в аккаунт</button>
+      <div id="achieveList" style="display: flex; flex-direction: column; gap: 10px;"></div>
     </div>
 
     <!-- Модалка Настроек -->
@@ -483,65 +345,30 @@
         <span class="modal-title">⚙ Настройки</span>
         <button class="btn-close" onclick="closeModal('settingsModal')">✕</button>
       </div>
-      <div class="form-group">
-        <label>Изменить Никнейм</label>
-        <input type="text" class="form-input" id="settingsNickInput" placeholder="Новый ник...">
-      </div>
-      <button class="btn-action" onclick="updateNickname()" style="margin-bottom: 20px;">Сохранить ник</button>
-
-      <div class="toggle-row">
-        <span>Звуковые эффекты</span>
-        <input type="checkbox" id="soundToggle" checked style="transform: scale(1.4); cursor: pointer;">
-      </div>
-    </div>
-
-    <!-- Модалка Гардероба -->
-    <div class="modal" id="wardrobeModal">
-      <div class="modal-header">
-        <span class="modal-title">👕 Гардероб Слаймов</span>
-        <button class="btn-close" onclick="closeModal('wardrobeModal')">✕</button>
-      </div>
-      <p style="color: #8899a6; font-size: 13px; margin-bottom: 16px;">Выберите стиль вашего героя:</p>
-      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
-        <button class="btn-menu" style="background: #2ed573; color: #000; font-weight: 800;" onclick="selectSkin('#2ed573')">Изумрудный</button>
-        <button class="btn-menu" style="background: #00d2d3; color: #000; font-weight: 800;" onclick="selectSkin('#00d2d3')">Ледяной</button>
-        <button class="btn-menu" style="background: #ff4757; color: #fff; font-weight: 800;" onclick="selectSkin('#ff4757')">Огненный</button>
-        <button class="btn-menu" style="background: #a55eea; color: #fff; font-weight: 800;" onclick="selectSkin('#a55eea')">Кибер-Фиолет</button>
-        <button class="btn-menu" style="background: #ffa502; color: #000; font-weight: 800;" onclick="selectSkin('#ffa502')">Золотой</button>
-        <button class="btn-menu" style="background: #ff6b81; color: #fff; font-weight: 800;" onclick="selectSkin('#ff6b81')">Розовый</button>
-      </div>
-    </div>
-
-    <!-- Модалка Таблицы Лидеров -->
-    <div class="modal" id="topModal">
-      <div class="modal-header">
-        <span class="modal-title">🏆 Топ Игроков</span>
-        <button class="btn-close" onclick="closeModal('topModal')">✕</button>
-      </div>
-      <div id="leaderboardList" style="display: flex; flex-direction: column; gap: 10px;">
-        <!-- Динамически рендерится -->
-      </div>
+      <label style="font-size: 12px; color: #a482d9; margin-bottom: 6px; display: block;">Сменить Никнейм:</label>
+      <input type="text" class="pill-input" id="changeNickInput" style="width: 100%; max-width: 100%; text-align: left;" placeholder="Новый ник...">
+      <button class="btn-yellow" style="width: 100%; max-width: 100%;" onclick="saveNicknameChange()">Сохранить Ник</button>
+      <hr style="border-color: #3c1a75; margin: 15px 0;">
+      <button class="btn-dark-pill" style="width: 100%; background: #4a121a; color: #ff4757;" onclick="resetProgress()">🗑 Сбросить весь прогресс</button>
     </div>
 
     <!-- Модалка Админки -->
     <div class="modal" id="adminModal">
       <div class="modal-header">
-        <span class="modal-title">🛡 Управление Банами</span>
+        <span class="modal-title">🛡 Админ Панель</span>
         <button class="btn-close" onclick="closeModal('adminModal')">✕</button>
       </div>
-      <div class="form-group">
-        <label>Никнейм для блокировки / разблокировки</label>
-        <input type="text" class="form-input" id="adminBanInput" placeholder="Введите ник...">
+      <input type="text" class="pill-input" id="adminBanInput" style="width: 100%; max-width: 100%; text-align: left;" placeholder="Никнейм для бана...">
+      <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <button class="btn-yellow" style="background: linear-gradient(180deg, #ff4757 0%, #c0392b 100%); color: #fff;" onclick="toggleBan(true)">Забанить</button>
+        <button class="btn-yellow" style="background: linear-gradient(180deg, #2ed573 0%, #27ae60 100%); color: #000;" onclick="toggleBan(false)">Разбанить</button>
       </div>
-      <div style="display: flex; gap: 10px;">
-        <button class="btn-action" style="background: #ff4757; color: #fff;" onclick="toggleBanUser(true)">Забанить</button>
-        <button class="btn-action" style="background: #2ed573; color: #000;" onclick="toggleBanUser(false)">Разбанить</button>
-      </div>
-      <div style="margin-top: 24px;">
-        <label style="color:#8899a6; font-size:13px; font-weight: 600;">Список забаненных аккаунтов:</label>
-        <div id="bannedList" style="color: #ff4757; font-size: 14px; margin-top: 8px; font-weight: bold; background: #141e30; padding: 12px; border-radius: 8px; border: 1px solid #22324e;">
-          Нет забаненных
-        </div>
+      <hr style="border-color: #3c1a75; margin: 10px 0;">
+      <button class="btn-dark-pill" style="width: 100%; margin-bottom: 8px;" onclick="addAdminCoins()">💰 Выдать +1000 Монет</button>
+      <button class="btn-dark-pill" style="width: 100%; background: #123b28;" id="godModeBtn" onclick="toggleGodMode()">⚡ Режим Бога: ВЫКЛ</button>
+      <div style="margin-top: 15px;">
+        <span style="font-size: 12px; color: #8d6bba;">Забаненные пользователи:</span>
+        <div id="bannedListText" style="color: #ff4757; font-size: 13px; margin-top: 4px; font-weight: bold;">Нет</div>
       </div>
     </div>
 
@@ -549,98 +376,161 @@
 
   <script>
     // =========================================================
-    // СОСТОЯНИЕ И ДАННЫЕ ПРИЛОЖЕНИЯ
+    // 🔊 ЗВУКОВОЙ ДВИЖОК (WEB AUDIO API)
     // =========================================================
-    let currentUser = localStorage.getItem('slime_user') || 'Гость';
-    let highRecord = parseInt(localStorage.getItem('slime_record') || '0');
-    let selectedColor = localStorage.getItem('slime_color') || '#2ed573';
-    let bannedUsers = JSON.parse(localStorage.getItem('slime_banned') || '[]');
-    let soundEnabled = true;
-
-    // Синтезатор Звуков (Web Audio API)
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
 
-    function playSound(type) {
-      if (!soundEnabled) return;
+    function initAudio() {
       if (!audioCtx) audioCtx = new AudioCtx();
-
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-
-      const now = audioCtx.currentTime;
-
-      if (type === 'jump') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(180, now);
-        osc.frequency.exponentialRampToValueAtTime(420, now + 0.12);
-        gain.gain.setValueAtTime(0.3, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
-        osc.start(now);
-        osc.stop(now + 0.12);
-      } else if (type === 'laser') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(600, now);
-        osc.frequency.linearRampToValueAtTime(150, now + 0.2);
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
-        osc.start(now);
-        osc.stop(now + 0.2);
-      } else if (type === 'icicle') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(800, now);
-        osc.frequency.exponentialRampToValueAtTime(200, now + 0.15);
-        gain.gain.setValueAtTime(0.25, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
-        osc.start(now);
-        osc.stop(now + 0.15);
-      } else if (type === 'gameover') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(300, now);
-        osc.frequency.linearRampToValueAtTime(80, now + 0.4);
-        gain.gain.setValueAtTime(0.4, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
-        osc.start(now);
-        osc.stop(now + 0.4);
-      }
     }
 
-    // Обновление UI
-    function updateUI() {
-      document.getElementById('displayName').innerText = currentUser;
-      document.getElementById('displayRecord').innerText = `Рекорд: ${highRecord}М`;
-      document.getElementById('avatarBox').style.background = selectedColor;
-      document.getElementById('avatarBox').style.boxShadow = `0 0 14px ${selectedColor}`;
-      document.getElementById('settingsNickInput').value = currentUser;
+    function playSound(type) {
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
 
-      // Проверка бана
-      if (bannedUsers.map(u => u.toLowerCase()).includes(currentUser.toLowerCase())) {
+        const now = audioCtx.currentTime;
+
+        if (type === 'jump') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(180, now);
+          osc.frequency.exponentialRampToValueAtTime(450, now + 0.15);
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+          osc.start(now); osc.stop(now + 0.15);
+        } else if (type === 'coin') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(600, now);
+          osc.frequency.setValueAtTime(900, now + 0.08);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+          osc.start(now); osc.stop(now + 0.2);
+        } else if (type === 'rocket') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(100, now);
+          osc.frequency.linearRampToValueAtTime(800, now + 0.4);
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+          osc.start(now); osc.stop(now + 0.4);
+        } else if (type === 'hit') {
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(120, now);
+          osc.frequency.exponentialRampToValueAtTime(30, now + 0.25);
+          gain.gain.setValueAtTime(0.4, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+          osc.start(now); osc.stop(now + 0.25);
+        }
+      } catch(e) {}
+    }
+
+    // =========================================================
+    // 💾 СОСТОЯНИЕ И ДАННЫЕ
+    // =========================================================
+    let currentUser = localStorage.getItem('slime_user') || '';
+    let coins = parseInt(localStorage.getItem('slime_coins') || '0');
+    let highRecord = parseInt(localStorage.getItem('slime_record') || '0');
+    let activeSkin = localStorage.getItem('slime_skin') || 'green';
+    let ownedSkins = JSON.parse(localStorage.getItem('slime_owned_skins') || '["green"]');
+    let unlockedAchieve = JSON.parse(localStorage.getItem('slime_achieve') || '[]');
+    let bannedUsers = JSON.parse(localStorage.getItem('slime_banned') || '[]');
+    let godMode = false;
+
+    const SKINS = {
+      green: { name: 'Зеленый Классик', price: 0, color: '#2ed573', trail: '#7bed9f' },
+      ice: { name: 'Ледяной Слайм', price: 150, color: '#00d2d3', trail: '#74b9ff' },
+      fire: { name: 'Огненный Всплеск', price: 300, color: '#ff4757', trail: '#ff7f50' },
+      gold: { name: 'Золотой Король', price: 600, color: '#ffcc00', trail: '#ffeaa7' },
+      shadow: { name: 'Теневой Демон', price: 1000, color: '#a55eea', trail: '#8854d0' }
+    };
+
+    const ACHIEVEMENTS = [
+      { id: 'jump_100', title: 'Высотный Полет', desc: 'Достигните высоты 100М', reward: 50 },
+      { id: 'boss_1', title: 'Лазерный Победитель', desc: 'Преодолейте 500М и первого Босса', reward: 150 },
+      { id: 'ice_boss', title: 'Победитель Холода', desc: 'Встретьте Ледяного Босса на 600М', reward: 200 },
+      { id: 'coins_500', title: 'Богач', desc: 'Накопите 500 монет', reward: 100 }
+    ];
+
+    function updateUI() {
+      const topName = currentUser ? currentUser.toUpperCase() : '80808 ИГРОК';
+      document.getElementById('topPlayerText').innerText = topName;
+      document.getElementById('topCoinsText').innerText = coins;
+
+      if (currentUser) {
+        document.getElementById('formBox').style.display = 'none';
+        document.getElementById('lobbyBox').style.display = 'flex';
+      } else {
+        document.getElementById('formBox').style.display = 'flex';
+        document.getElementById('lobbyBox').style.display = 'none';
+      }
+
+      if (currentUser && bannedUsers.map(u => u.toLowerCase()).includes(currentUser.toLowerCase())) {
         document.getElementById('banScreen').style.display = 'flex';
       } else {
         document.getElementById('banScreen').style.display = 'none';
       }
 
-      renderLeaderboard();
+      renderShop();
+      renderAchievements();
       renderBannedList();
     }
 
-    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function checkAchievements() {
+      if (highRecord >= 100) unlockAchieve('jump_100');
+      if (highRecord >= 500) unlockAchieve('boss_1');
+      if (highRecord >= 600) unlockAchieve('ice_boss');
+      if (coins >= 500) unlockAchieve('coins_500');
+    }
 
-    function saveAuth() {
-      const val = document.getElementById('authNameInput').value.trim();
+    function unlockAchieve(id) {
+      if (!unlockedAchieve.includes(id)) {
+        unlockedAchieve.push(id);
+        const item = ACHIEVEMENTS.find(a => a.id === id);
+        if (item) {
+          coins += item.reward;
+          localStorage.setItem('slime_coins', coins);
+          localStorage.setItem('slime_achieve', JSON.stringify(unlockedAchieve));
+          showToast(item.title);
+          updateUI();
+        }
+      }
+    }
+
+    function showToast(title) {
+      const toast = document.getElementById('achievementToast');
+      document.getElementById('achievementTitle').innerText = title;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function handleLogin() {
+      initAudio();
+      const val = document.getElementById('nickInput').value.trim();
       if (val) {
         currentUser = val;
         localStorage.setItem('slime_user', currentUser);
         updateUI();
-        closeModal('authModal');
       }
     }
 
-    function updateNickname() {
-      const val = document.getElementById('settingsNickInput').value.trim();
+    function handleGuest() {
+      initAudio();
+      currentUser = 'Игрок_' + Math.floor(Math.random() * 89999 + 10000);
+      localStorage.setItem('slime_user', currentUser);
+      updateUI();
+    }
+
+    function logout() {
+      currentUser = '';
+      localStorage.removeItem('slime_user');
+      updateUI();
+    }
+
+    function saveNicknameChange() {
+      const val = document.getElementById('changeNickInput').value.trim();
       if (val) {
         currentUser = val;
         localStorage.setItem('slime_user', currentUser);
@@ -649,90 +539,146 @@
       }
     }
 
-    function selectSkin(color) {
-      selectedColor = color;
-      localStorage.setItem('slime_color', color);
-      updateUI();
-      closeModal('wardrobeModal');
+    function resetProgress() {
+      if (confirm('Сбросить весь прогресс, монеты и рекорды?')) {
+        localStorage.clear();
+        coins = 0; highRecord = 0; activeSkin = 'green'; ownedSkins = ['green']; unlockedAchieve = [];
+        updateUI();
+        closeModal('settingsModal');
+      }
     }
 
-    function toggleBanUser(status) {
+    function renderShop() {
+      const list = document.getElementById('shopList');
+      list.innerHTML = Object.keys(SKINS).map(key => {
+        const item = SKINS[key];
+        const isOwned = ownedSkins.includes(key);
+        const isActive = activeSkin === key;
+
+        return `
+          <div style="background: #1c0a3c; border: 1.5px solid #431c80; padding: 12px 16px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 28px; height: 28px; background: ${item.color}; border-radius: 8px; box-shadow: 0 0 10px ${item.color}"></div>
+              <div>
+                <div style="font-weight: 700; font-size: 14px;">${item.name}</div>
+                <div style="font-size: 12px; color: #ffcc00;">${isOwned ? 'Куплено' : item.price + ' Монет'}</div>
+              </div>
+            </div>
+            ${isActive 
+              ? `<span style="color: #2ed573; font-weight: 900; font-size: 13px;">АКТИВЕН</span>`
+              : isOwned 
+                ? `<button class="btn-dark-pill" style="width: auto; padding: 6px 14px; font-size: 12px;" onclick="equipSkin('${key}')">Надеть</button>`
+                : `<button class="btn-yellow" style="width: auto; padding: 6px 14px; font-size: 12px; margin: 0;" onclick="buySkin('${key}')">Купить</button>`
+            }
+          </div>
+        `;
+      }).join('');
+    }
+
+    function buySkin(key) {
+      const item = SKINS[key];
+      if (coins >= item.price) {
+        coins -= item.price;
+        ownedSkins.push(key);
+        activeSkin = key;
+        localStorage.setItem('slime_coins', coins);
+        localStorage.setItem('slime_owned_skins', JSON.stringify(ownedSkins));
+        localStorage.setItem('slime_skin', activeSkin);
+        updateUI();
+      }
+    }
+
+    function equipSkin(key) {
+      activeSkin = key;
+      localStorage.setItem('slime_skin', activeSkin);
+      updateUI();
+    }
+
+    function renderAchievements() {
+      const list = document.getElementById('achieveList');
+      list.innerHTML = ACHIEVEMENTS.map(item => {
+        const done = unlockedAchieve.includes(item.id);
+        return `
+          <div style="background: ${done ? '#182c23' : '#1c0a3c'}; border: 1px solid ${done ? '#2ed573' : '#431c80'}; padding: 12px; border-radius: 14px; opacity: ${done ? 1 : 0.6};">
+            <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 14px;">
+              <span>${item.title}</span>
+              <span style="color: #ffcc00;">+${item.reward} 🪙</span>
+            </div>
+            <div style="font-size: 12px; color: #a4b0be; margin-top: 4px;">${item.desc}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleBan(status) {
       const target = document.getElementById('adminBanInput').value.trim();
       if (!target) return;
-
-      const targetLower = target.toLowerCase();
+      const lower = target.toLowerCase();
       if (status) {
-        if (!bannedUsers.map(u => u.toLowerCase()).includes(targetLower)) {
-          bannedUsers.push(target);
-        }
+        if (!bannedUsers.map(u => u.toLowerCase()).includes(lower)) bannedUsers.push(target);
       } else {
-        bannedUsers = bannedUsers.filter(u => u.toLowerCase() !== targetLower);
+        bannedUsers = bannedUsers.filter(u => u.toLowerCase() !== lower);
       }
-
       localStorage.setItem('slime_banned', JSON.stringify(bannedUsers));
       document.getElementById('adminBanInput').value = '';
       updateUI();
     }
 
     function renderBannedList() {
-      const box = document.getElementById('bannedList');
-      if (bannedUsers.length === 0) {
-        box.innerText = 'Список забаненных пуст';
-      } else {
-        box.innerText = bannedUsers.join(', ');
-      }
+      document.getElementById('bannedListText').innerText = bannedUsers.length > 0 ? bannedUsers.join(', ') : 'Нет';
     }
 
-    function renderLeaderboard() {
-      const list = document.getElementById('leaderboardList');
-      const scores = [
-        { name: currentUser, score: highRecord },
-        { name: "ProJumper", score: 540 },
-        { name: "IceMaster", score: 410 },
-        { name: "CyberSlime", score: 290 }
-      ].sort((a, b) => b.score - a.score);
-
-      list.innerHTML = scores.map((item, idx) => `
-        <div style="background: #141e30; padding: 12px 16px; border-radius: 10px; border: 1px solid #22324e; display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-weight: 700;">#${idx + 1} <span style="color: ${item.name === currentUser ? '#2ed573' : '#fff'};">${item.name}</span></span>
-          <span style="color: #2ed573; font-weight: 900; font-size: 15px;">${item.score}М</span>
-        </div>
-      `).join('');
+    function addAdminCoins() {
+      coins += 1000;
+      localStorage.setItem('slime_coins', coins);
+      updateUI();
     }
 
-    document.getElementById('soundToggle').addEventListener('change', (e) => {
-      soundEnabled = e.target.checked;
-    });
+    function toggleGodMode() {
+      godMode = !godMode;
+      document.getElementById('godModeBtn').innerText = `⚡ Режим Бога: ${godMode ? 'ВКЛ' : 'ВЫКЛ'}`;
+    }
+
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
     // =========================================================
-    // ИГРОВОЙ ДВИЖОК CANVAS
+    // 🎮 ИГРОВОЙ ДВИЖОК CANVAS
     // =========================================================
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
     let gameActive = false;
     let score = 0;
-    let player, platforms, particles, boss1, boss2, icicles;
+    let sessionCoins = 0;
+    let player, platforms, particles, coinsList, boss1, boss2, icicles;
     let keys = {};
+    let screenShake = 0;
 
-    function initGameCanvas() {
+    function initCanvas() {
       canvas.width = canvas.parentElement.clientWidth;
       canvas.height = canvas.parentElement.clientHeight;
     }
 
     function startGame() {
+      initAudio();
       if (bannedUsers.map(u => u.toLowerCase()).includes(currentUser.toLowerCase())) {
         updateUI();
         return;
       }
 
-      initGameCanvas();
-      document.getElementById('mainMenu').style.display = 'none';
+      initCanvas();
+      document.getElementById('authScreen').style.display = 'none';
       document.getElementById('gameOverOverlay').style.display = 'none';
       canvas.style.display = 'block';
 
       score = 0;
+      sessionCoins = 0;
       particles = [];
+      coinsList = [];
+      icicles = [];
+
+      const skinData = SKINS[activeSkin] || SKINS.green;
 
       player = {
         x: canvas.width / 2 - 16,
@@ -740,362 +686,327 @@
         w: 32,
         h: 32,
         vx: 0,
-        vy: -11,
-        color: selectedColor,
-        squash: 1
+        vy: -11.5,
+        color: skinData.color,
+        trailColor: skinData.trail,
+        hasRocket: 0
       };
 
-      // Генерация платформ
       platforms = [
         { x: canvas.width / 2 - 45, y: canvas.height - 40, w: 90, h: 14, type: 'normal' }
       ];
 
       for (let i = 0; i < 8; i++) {
-        spawnPlatform(canvas.height - 110 - i * 85);
+        spawnPlatform(canvas.height - 120 - i * 85);
       }
 
-      // Босс 1 (100М - 500М)
-      boss1 = {
-        active: false,
-        x: canvas.width / 2,
-        y: 80,
-        angle: 0,
-        sweepSpeed: 0.025
-      };
+      boss1 = { active: false, x: canvas.width / 2, y: 80, laserAngle: 0, warningTimer: 0 };
+      boss2 = { active: false, x: canvas.width / 2, y: 90, timer: 0 };
 
-      // Босс 2 (Ледяной Слайм 600M+)
-      boss2 = {
-        active: false,
-        x: canvas.width / 2,
-        y: 90,
-        timer: 0,
-        floatOffset: 0
-      };
-
-      icicles = [];
       gameActive = true;
       requestAnimationFrame(gameLoop);
     }
 
-    function spawnPlatform(y) {
-      const types = ['normal', 'normal', 'moving', 'breakable', 'spring'];
-      const type = types[Math.floor(Math.random() * types.length)];
+    function spawnPlatform(yPos) {
+      const types = ['normal', 'normal', 'moving', 'broken', 'spring'];
+      const pType = types[Math.floor(Math.random() * types.length)];
+      const pX = Math.random() * (canvas.width - 75);
+
       platforms.push({
-        x: Math.random() * (canvas.width - 80),
-        y: y,
+        x: pX,
+        y: yPos,
         w: 75,
         h: 14,
-        type: type,
-        vx: type === 'moving' ? (Math.random() > 0.5 ? 2 : -2) : 0,
+        type: pType,
+        vx: pType === 'moving' ? (Math.random() > 0.5 ? 2 : -2) : 0,
         broken: false
       });
+
+      if (Math.random() < 0.4) {
+        coinsList.push({ x: pX + 30, y: yPos - 25, collected: false });
+      }
+    }
+
+    function createExplosion(x, y, color, count = 15) {
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: x, y: y,
+          vx: (Math.random() - 0.5) * 8,
+          vy: (Math.random() - 0.5) * 8,
+          size: Math.random() * 5 + 2,
+          color: color,
+          life: 1
+        });
+      }
     }
 
     function quitToMenu() {
       gameActive = false;
       canvas.style.display = 'none';
       document.getElementById('gameOverOverlay').style.display = 'none';
-      document.getElementById('mainMenu').style.display = 'flex';
+      document.getElementById('authScreen').style.display = 'flex';
       updateUI();
     }
 
-    // Слушатели управления
     window.addEventListener('keydown', e => keys[e.key] = true);
     window.addEventListener('keyup', e => keys[e.key] = false);
 
     canvas.addEventListener('touchstart', e => {
       const touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
-      if (touchX < canvas.width / 2) {
-        keys['ArrowLeft'] = true; keys['ArrowRight'] = false;
-      } else {
-        keys['ArrowRight'] = true; keys['ArrowLeft'] = false;
-      }
+      if (touchX < canvas.width / 2) { keys['ArrowLeft'] = true; keys['ArrowRight'] = false; }
+      else { keys['ArrowRight'] = true; keys['ArrowLeft'] = false; }
     });
 
-    canvas.addEventListener('touchend', () => {
-      keys['ArrowLeft'] = false; keys['ArrowRight'] = false;
-    });
+    canvas.addEventListener('touchend', () => { keys['ArrowLeft'] = false; keys['ArrowRight'] = false; });
 
-    // Создание частиц
-    function createParticles(x, y, color, count = 6) {
-      for (let i = 0; i < count; i++) {
-        particles.push({
-          x: x, y: y,
-          vx: (Math.random() - 0.5) * 6,
-          vy: (Math.random() - 0.5) * 6,
-          size: Math.random() * 4 + 2,
-          color: color,
-          life: 20
-        });
-      }
-    }
-
-    // Главный игровой цикл
     function gameLoop() {
       if (!gameActive) return;
 
-      ctx.fillStyle = '#080d1a';
+      ctx.save();
+      if (screenShake > 0) {
+        ctx.translate((Math.random() - 0.5) * screenShake, (Math.random() - 0.5) * screenShake);
+        screenShake *= 0.9;
+      }
+
+      ctx.fillStyle = '#080214';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Физика Игрока
-      if (keys['ArrowLeft'] || keys['a'] || keys['A']) player.vx = -5.5;
-      else if (keys['ArrowRight'] || keys['d'] || keys['D']) player.vx = 5.5;
+      // Движение игрока
+      if (keys['ArrowLeft'] || keys['a']) player.vx = -5.5;
+      else if (keys['ArrowRight'] || keys['d']) player.vx = 5.5;
       else player.vx *= 0.82;
 
-      player.vy += 0.42; // Гравитация
+      if (player.hasRocket > 0) {
+        player.vy = -12;
+        player.hasRocket--;
+        createExplosion(player.x + 16, player.y + 32, '#ffcc00', 2);
+      } else {
+        player.vy += 0.44;
+      }
+
       player.x += player.vx;
       player.y += player.vy;
 
-      // Телепорт по краям
-      if (player.x < -20) player.x = canvas.width - 15;
-      if (player.x > canvas.width) player.x = -15;
+      if (player.x < -16) player.x = canvas.width - 16;
+      if (player.x > canvas.width) player.x = -16;
 
-      // Скролл экрана
+      // Шлейф за слаймом
+      if (Math.abs(player.vy) > 2) {
+        particles.push({
+          x: player.x + 16, y: player.y + 16,
+          vx: 0, vy: 0, size: Math.random() * 6 + 4,
+          color: player.trailColor, life: 0.6
+        });
+      }
+
+      // Камера / Скролл
       if (player.y < canvas.height / 2) {
         let diff = canvas.height / 2 - player.y;
         player.y = canvas.height / 2;
         score += Math.floor(diff / 4);
 
-        platforms.forEach(p => {
-          p.y += diff;
-          if (p.y > canvas.height) {
-            platforms.splice(platforms.indexOf(p), 1);
-            spawnPlatform(0);
-          }
-        });
+        platforms.forEach(p => p.y += diff);
+        coinsList.forEach(c => c.y += diff);
+        icicles.forEach(ic => ic.y += diff);
+
+        platforms = platforms.filter(p => p.y < canvas.height);
+        coinsList = coinsList.filter(c => c.y < canvas.height);
+
+        while (platforms.length < 8) {
+          spawnPlatform(Math.min(...platforms.map(p => p.y)) - 85);
+        }
       }
 
-      // Отрисовка и физика Платформ
+      // Отрисовка Платформ
       platforms.forEach(p => {
-        if (p.broken) return;
-
         if (p.type === 'moving') {
           p.x += p.vx;
-          if (p.x <= 0 || p.x + p.w >= canvas.width) p.vx *= -1;
+          if (p.x < 0 || p.x + p.w > canvas.width) p.vx *= -1;
         }
 
-        // Цвета платформ
-        if (p.type === 'normal') ctx.fillStyle = '#1e3799';
-        else if (p.type === 'moving') ctx.fillStyle = '#2ed573';
-        else if (p.type === 'breakable') ctx.fillStyle = '#eb2f06';
-        else if (p.type === 'spring') ctx.fillStyle = '#f6b93b';
+        ctx.fillStyle = p.type === 'broken' ? '#ff4757' : p.type === 'spring' ? '#2ed573' : '#481f8a';
+        if (!p.broken) {
+          ctx.beginPath();
+          ctx.roundRect(p.x, p.y, p.w, p.h, 6);
+          ctx.fill();
 
-        ctx.beginPath();
-        ctx.roundRect(p.x, p.y, p.w, p.h, 6);
-        ctx.fill();
-
-        if (p.type === 'spring') {
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(p.x + p.w / 2 - 8, p.y - 4, 16, 4);
+          if (p.type === 'spring') {
+            ctx.fillStyle = '#ffcc00';
+            ctx.fillRect(p.x + p.w / 2 - 8, p.y - 4, 16, 4);
+          }
         }
 
         // Столкновение с платформой
-        if (player.vy > 0 &&
+        if (!p.broken && player.vy > 0 &&
             player.x + player.w > p.x &&
             player.x < p.x + p.w &&
             player.y + player.h >= p.y &&
             player.y + player.h <= p.y + p.h + 12) {
           
-          if (p.type === 'breakable') {
-            p.broken = true;
-            createParticles(p.x + p.w/2, p.y, '#eb2f06', 10);
-          } else if (p.type === 'spring') {
-            player.vy = -16; // Высокий прыжок
-            playSound('jump');
-            createParticles(player.x + 16, player.y + 32, '#f6b93b', 8);
+          if (p.type === 'spring') {
+            player.vy = -16;
+            playSound('rocket');
+            createExplosion(player.x + 16, player.y + 32, '#ffcc00', 10);
           } else {
-            player.vy = -11; // Обычный прыжок
+            player.vy = -11.5;
             playSound('jump');
-            createParticles(player.x + 16, player.y + 32, player.color, 6);
+          }
+
+          if (p.type === 'broken') {
+            p.broken = true;
+            createExplosion(p.x + p.w / 2, p.y, '#ff4757', 12);
+          }
+        }
+      });
+
+      // Монеты
+      coinsList.forEach(c => {
+        if (!c.collected) {
+          ctx.fillStyle = '#ffcc00';
+          ctx.beginPath();
+          ctx.arc(c.x, c.y, 7, 0, Math.PI * 2);
+          ctx.fill();
+
+          if (Math.hypot(player.x + 16 - c.x, player.y + 16 - c.y) < 22) {
+            c.collected = true;
+            sessionCoins++;
+            playSound('coin');
+            createExplosion(c.x, c.y, '#ffcc00', 6);
           }
         }
       });
 
       // =========================================================
-      // БОСС 1: ЛАЗЕРНЫЙ СЛАЙМ (100M - 500M)
+      // БОСС 1: ЛАЗЕРНЫЙ ДЕМОН (100M - 500M) -> Исчезает на 500M
       // =========================================================
       if (score >= 100 && score <= 500) {
         boss1.active = true;
-        boss1.angle += boss1.sweepSpeed;
+        boss1.laserAngle += 0.03;
 
-        // Корпус Босса 1
-        ctx.fillStyle = '#ff4757';
-        ctx.shadowColor = '#ff4757';
-        ctx.shadowBlur = 15;
-        ctx.beginPath();
-        ctx.arc(boss1.x, boss1.y, 36, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-
-        // Злой красный глаз
-        ctx.fillStyle = '#000';
-        ctx.beginPath();
-        ctx.arc(boss1.x, boss1.y, 14, 0, Math.PI * 2);
-        ctx.fill();
         ctx.fillStyle = '#ff4757';
         ctx.beginPath();
-        ctx.arc(boss1.x, boss1.y, 6, 0, Math.PI * 2);
+        ctx.arc(boss1.x, boss1.y, 34, 0, Math.PI * 2);
         ctx.fill();
 
-        // ДВИГАЮЩИЕСЯ ЛАЗЕРЫ (сканирующий луч)
-        const sweepX1 = boss1.x + Math.sin(boss1.angle) * (canvas.width / 2 - 10);
-        const sweepX2 = boss1.x - Math.sin(boss1.angle) * (canvas.width / 2 - 10);
+        // Оборона
+        ctx.strokeStyle = '#ff7f50';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(boss1.x, boss1.y, 46, boss1.laserAngle, boss1.laserAngle + Math.PI * 1.5);
+        ctx.stroke();
 
+        // Лазерный луч
+        const sweepX = boss1.x + Math.sin(boss1.laserAngle) * (canvas.width / 2 - 10);
         ctx.strokeStyle = '#ff4757';
         ctx.lineWidth = 5;
-        ctx.shadowColor = '#ff4757';
-        ctx.shadowBlur = 12;
-
-        // Луч 1
+        ctx.shadowColor = '#ff4757'; ctx.shadowBlur = 12;
         ctx.beginPath();
-        ctx.moveTo(boss1.x - 15, boss1.y + 20);
-        ctx.lineTo(sweepX1, canvas.height);
+        ctx.moveTo(boss1.x, boss1.y);
+        ctx.lineTo(sweepX, canvas.height);
         ctx.stroke();
-
-        // Луч 2
-        ctx.beginPath();
-        ctx.moveTo(boss1.x + 15, boss1.y + 20);
-        ctx.lineTo(sweepX2, canvas.height);
-        ctx.stroke();
-
         ctx.shadowBlur = 0;
 
-        // Коллизия с лазерами
-        if ((Math.abs(player.x - sweepX1) < 22 || Math.abs(player.x - sweepX2) < 22) && player.y > boss1.y + 40) {
-          playSound('laser');
+        if (!godMode && Math.abs(player.x + 16 - sweepX) < 18 && player.y > boss1.y) {
           gameOver();
         }
-      } else {
-        if (boss1.active) {
-          // Эффект исчезновения на 500М
-          createParticles(boss1.x, boss1.y, '#ff4757', 30);
-          boss1.active = false;
-        }
+      } else if (boss1.active && score > 500) {
+        boss1.active = false;
+        createExplosion(boss1.x, boss1.y, '#ff4757', 40);
+        screenShake = 15;
+        playSound('hit');
       }
 
       // =========================================================
-      // БОСС 2: ЛЕДЯНОЙ СЛАЙМ СО ЗЛЫМ ЛИЦОМ (600M+)
+      // БОСС 2: ЛЕДЯНОЙ СЛАЙМ (600M+) -> Сосульки
       // =========================================================
       if (score >= 600) {
         boss2.active = true;
         boss2.timer++;
-        boss2.floatOffset = Math.sin(boss2.timer * 0.05) * 8;
 
-        const bY = boss2.y + boss2.floatOffset;
-
-        // Ледяное свечение
+        // Тело Ледяного Слайма
         ctx.fillStyle = '#00d2d3';
-        ctx.shadowColor = '#00d2d3';
-        ctx.shadowBlur = 20;
         ctx.beginPath();
-        ctx.arc(boss2.x, bY, 42, 0, Math.PI * 2);
+        ctx.arc(boss2.x, boss2.y, 40, 0, Math.PI * 2);
         ctx.fill();
-        ctx.shadowBlur = 0;
 
-        // Ледяные шипы / Ледяная корона
+        // Шипы-Корона
         ctx.fillStyle = '#74b9ff';
         ctx.beginPath();
-        ctx.moveTo(boss2.x - 35, bY - 20); ctx.lineTo(boss2.x - 22, bY - 55); ctx.lineTo(boss2.x - 10, bY - 30);
-        ctx.moveTo(boss2.x - 12, bY - 30); ctx.lineTo(boss2.x, bY - 60); ctx.lineTo(boss2.x + 12, bY - 30);
-        ctx.moveTo(boss2.x + 10, bY - 30); ctx.lineTo(boss2.x + 22, bY - 55); ctx.lineTo(boss2.x + 35, bY - 20);
+        ctx.moveTo(boss2.x - 30, boss2.y - 20); ctx.lineTo(boss2.x - 18, boss2.y - 45); ctx.lineTo(boss2.x - 6, boss2.y - 28);
+        ctx.moveTo(boss2.x + 6, boss2.y - 28); ctx.lineTo(boss2.x + 18, boss2.y - 45); ctx.lineTo(boss2.x + 30, boss2.y - 20);
         ctx.fill();
 
-        // ЗЛОЕ ЛИЦО
-        // Насупленные злые брови
-        ctx.strokeStyle = '#0c1220';
-        ctx.lineWidth = 4;
+        // Злое Лицо
+        ctx.strokeStyle = '#080214'; ctx.lineWidth = 4;
         ctx.beginPath();
-        ctx.moveTo(boss2.x - 24, bY - 14); ctx.lineTo(boss2.x - 6, bY - 4);
-        ctx.moveTo(boss2.x + 24, bY - 14); ctx.lineTo(boss2.x + 6, bY - 4);
+        ctx.moveTo(boss2.x - 22, boss2.y - 14); ctx.lineTo(boss2.x - 6, boss2.y - 4);
+        ctx.moveTo(boss2.x + 22, boss2.y - 14); ctx.lineTo(boss2.x + 6, boss2.y - 4);
         ctx.stroke();
 
-        // Злые глаза
-        ctx.fillStyle = '#0c1220';
-        ctx.fillRect(boss2.x - 20, bY - 2, 10, 10);
-        ctx.fillRect(boss2.x + 10, bY - 2, 10, 10);
+        ctx.fillStyle = '#080214';
+        ctx.fillRect(boss2.x - 18, boss2.y - 2, 8, 8);
+        ctx.fillRect(boss2.x + 10, boss2.y - 2, 8, 8);
 
-        // Злая оскаленная пасть
-        ctx.beginPath();
-        ctx.moveTo(boss2.x - 14, bY + 18);
-        ctx.lineTo(boss2.x, bY + 12);
-        ctx.lineTo(boss2.x + 14, bY + 18);
-        ctx.stroke();
-
-        // Спавн СОСУЛЕК
+        // Стрельба Сосульками
         if (boss2.timer % 55 === 0) {
-          playSound('icicle');
           icicles.push({
             x: Math.random() * (canvas.width - 30) + 15,
-            y: bY + 40,
-            vy: Math.random() * 2 + 5.5,
-            size: Math.random() * 8 + 14
+            y: boss2.y + 35,
+            vy: 6
           });
         }
-      } else {
-        boss2.active = false;
       }
 
-      // Физика и отрисовка СОСУЛЕК
+      // Сосульки Ледяного Босса
       for (let i = icicles.length - 1; i >= 0; i--) {
         let ic = icicles[i];
         ic.y += ic.vy;
 
-        // Рисуем острую ледяную сосульку
         ctx.fillStyle = '#74b9ff';
-        ctx.shadowColor = '#00d2d3';
-        ctx.shadowBlur = 8;
         ctx.beginPath();
-        ctx.moveTo(ic.x, ic.y + ic.size * 2);
-        ctx.lineTo(ic.x + ic.size / 2, ic.y);
-        ctx.lineTo(ic.x - ic.size / 2, ic.y);
-        ctx.closePath();
+        ctx.moveTo(ic.x, ic.y + 22);
+        ctx.lineTo(ic.x + 8, ic.y);
+        ctx.lineTo(ic.x - 8, ic.y);
         ctx.fill();
-        ctx.shadowBlur = 0;
 
-        // Коллизия с игроком
-        if (Math.abs(player.x + 16 - ic.x) < 18 && Math.abs(player.y + 16 - ic.y) < 20) {
-          createParticles(player.x, player.y, '#74b9ff', 15);
+        if (!godMode && Math.hypot(player.x + 16 - ic.x, player.y + 16 - ic.y) < 20) {
           gameOver();
         }
 
         if (ic.y > canvas.height) icicles.splice(i, 1);
       }
 
-      // Обновление частиц
+      // Частицы
       for (let i = particles.length - 1; i >= 0; i--) {
         let pt = particles[i];
-        pt.x += pt.vx;
-        pt.y += pt.vy;
-        pt.life--;
+        pt.x += pt.vx; pt.y += pt.vy; pt.life -= 0.03;
         ctx.fillStyle = pt.color;
+        ctx.globalAlpha = Math.max(0, pt.life);
         ctx.fillRect(pt.x, pt.y, pt.size, pt.size);
+        ctx.globalAlpha = 1.0;
         if (pt.life <= 0) particles.splice(i, 1);
       }
 
-      // Отрисовка Игрока (Слайма)
+      // Отрисовка Игрока
       ctx.fillStyle = player.color;
-      ctx.shadowColor = player.color;
-      ctx.shadowBlur = 10;
       ctx.beginPath();
       ctx.roundRect(player.x, player.y, player.w, player.h, 10);
       ctx.fill();
-      ctx.shadowBlur = 0;
 
-      // Глазки слайма
+      // Глаза
       ctx.fillStyle = '#000';
-      ctx.fillRect(player.x + 7, player.y + 9, 5, 6);
-      ctx.fillRect(player.x + 20, player.y + 9, 5, 6);
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(player.x + 8, player.y + 10, 2, 2);
-      ctx.fillRect(player.x + 21, player.y + 10, 2, 2);
+      ctx.fillRect(player.x + 7, player.y + 8, 6, 6);
+      ctx.fillRect(player.x + 19, player.y + 8, 6, 6);
 
-      // Высота
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '900 18px sans-serif';
+      // Текстовый HUD
+      ctx.fillStyle = '#ffcc00';
+      ctx.font = '900 16px Fredoka';
       ctx.fillText(`Высота: ${score}М`, 16, 32);
+      ctx.fillText(`🪙 ${sessionCoins}`, canvas.width - 70, 32);
 
-      // Условие падения
-      if (player.y > canvas.height) {
+      ctx.restore();
+
+      if (!godMode && player.y > canvas.height) {
         gameOver();
       } else {
         requestAnimationFrame(gameLoop);
@@ -1104,17 +1015,23 @@
 
     function gameOver() {
       gameActive = false;
-      playSound('gameover');
-      if (score > highRecord) {
-        highRecord = score;
-        localStorage.setItem('slime_record', highRecord);
-      }
+      playSound('hit');
+      screenShake = 20;
+
+      coins += sessionCoins;
+      if (score > highRecord) highRecord = score;
+
+      localStorage.setItem('slime_coins', coins);
+      localStorage.setItem('slime_record', highRecord);
+
+      checkAchievements();
+
       document.getElementById('finalScoreText').innerText = `Высота: ${score}М`;
+      document.getElementById('finalCoinsText').innerText = `+${sessionCoins} Монет собрано`;
       document.getElementById('gameOverOverlay').style.display = 'flex';
       updateUI();
     }
 
-    // Инициализация при старте
     updateUI();
   </script>
 </body>
