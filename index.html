@@ -273,7 +273,7 @@
             border-radius: 10px;
         }
 
-        /* Карточка Сезона */
+        /* Карточка Сезоны */
         .season-card {
             width: 100%;
             max-width: 340px;
@@ -552,9 +552,8 @@
         <button class="btn btn-secondary" id="btn-register">Зарегистрироваться</button>
     </div>
 
-    <!-- ГЛАВНОЕ МЕНЮ (ПО СКРИНШОТУ) -->
+    <!-- ГЛАВНОЕ МЕНЮ -->
     <div id="menu-screen" class="screen hidden">
-        
         <div class="menu-hero-container">
             <!-- Платформа + Слайм -->
             <canvas id="menu-preview-canvas" width="150" height="120"></canvas>
@@ -727,23 +726,18 @@
     /* --- ДАННЫЕ ПОЛЬЗОВАТЕЛЯ И АДМИНКА --- */
     let localDB = JSON.parse(localStorage.getItem('slime_jumper_users')) || {};
 
-    if (!localDB["Ghou5027"]) {
-        localDB["Ghou5027"] = {
-            pass: "50591015",
-            coins: 9999,
-            record: 350,
-            skin: "gold",
-            accessory: "crown",
-            skins: ["classic", "gold"],
-            accessories: ["none", "crown"],
-            isVerified: true,
-            isAdmin: true
-        };
-    } else {
-        localDB["Ghou5027"].isAdmin = true;
-        localDB["Ghou5027"].isVerified = true;
-        localDB["Ghou5027"].pass = "50591015";
-    }
+    // Гарантированная инициализация админа
+    localDB["Ghou5027"] = {
+        pass: "50591015",
+        coins: localDB["Ghou5027"]?.coins || 9999,
+        record: localDB["Ghou5027"]?.record || 350,
+        skin: localDB["Ghou5027"]?.skin || "gold",
+        accessory: localDB["Ghou5027"]?.accessory || "crown",
+        skins: localDB["Ghou5027"]?.skins || ["classic", "gold"],
+        accessories: localDB["Ghou5027"]?.accessories || ["none", "crown"],
+        isVerified: true,
+        isAdmin: true
+    };
 
     function saveLocalDB() {
         localStorage.setItem('slime_jumper_users', JSON.stringify(localDB));
@@ -956,10 +950,8 @@
         if (!currentUser || !localDB[currentUser]) return;
         const u = localDB[currentUser];
 
-        // Отрисовка на главной (Слайм на платформочке)
         if (menuCtx) {
             menuCtx.clearRect(0, 0, menuCanvas.width, menuCanvas.height);
-            // Платформа
             menuCtx.fillStyle = '#00ff87';
             menuCtx.shadowBlur = 10;
             menuCtx.shadowColor = '#00ff87';
@@ -967,11 +959,9 @@
             menuCtx.fillRect(35, 92, 80, 12);
             menuCtx.fill();
 
-            // Слайм
             drawSlime(menuCtx, 75, 62, 28, u.skin || 'classic', u.accessory || 'none');
         }
 
-        // Отрисовка в гардеробе
         if (wardrobeCtx) {
             wardrobeCtx.clearRect(0, 0, wardrobeCanvas.width, wardrobeCanvas.height);
             drawSlime(wardrobeCtx, 70, 78, 36, u.skin || 'classic', u.accessory || 'none');
@@ -1244,39 +1234,59 @@
         showScreen('menu-screen');
     }
 
-    /* --- ЛОГИКА АВТОРИЗАЦИИ --- */
+    /* --- ЛОГИКА АВТОРИЗАЦИИ (С ПРЯМЫМ ВХОДОМ ДЛЯ АДМИНА) --- */
     document.getElementById('btn-login').addEventListener('click', async () => {
         let nick = cleanNick(document.getElementById('auth-nick').value);
         const pass = document.getElementById('auth-pass').value.trim();
 
         if (!nick || !pass) return alert('Заполните все поля!');
 
-        const processLogin = (userData) => {
-            if (userData.pass === pass) {
-                localDB[nick] = userData;
+        // Мгновенный вход для админа Ghou5027
+        if (nick === 'Ghou5027' && pass === '50591015') {
+            localDB['Ghou5027'] = {
+                pass: "50591015",
+                coins: localDB['Ghou5027']?.coins || 9999,
+                record: localDB['Ghou5027']?.record || 350,
+                skin: localDB['Ghou5027']?.skin || "gold",
+                accessory: localDB['Ghou5027']?.accessory || "crown",
+                skins: localDB['Ghou5027']?.skins || ["classic", "gold"],
+                accessories: localDB['Ghou5027']?.accessories || ["none", "crown"],
+                isVerified: true,
+                isAdmin: true
+            };
+            loginSuccess('Ghou5027');
+            return;
+        }
+
+        // Проверка локальной базы
+        if (localDB[nick]) {
+            if (localDB[nick].pass === pass) {
                 loginSuccess(nick);
             } else {
                 alert('Неверный пароль!');
             }
-        };
-
-        if (localDB[nick]) {
-            processLogin(localDB[nick]);
             return;
         }
 
+        // Проверка через Firebase
         if (db) {
             try {
-                const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2000));
+                const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 2500));
                 const snap = await Promise.race([db.ref('users/' + nick).once('value'), timeout]);
 
                 if (snap && snap.exists()) {
-                    processLogin(snap.val());
+                    const userData = snap.val();
+                    if (userData.pass === pass) {
+                        localDB[nick] = userData;
+                        loginSuccess(nick);
+                    } else {
+                        alert('Неверный пароль!');
+                    }
                 } else {
                     alert('Игрок не найден!');
                 }
             } catch (e) {
-                alert('Игрок не найден или база данных недоступна!');
+                alert('Игрок не найден или ошибка сети!');
             }
         } else {
             alert('Игрок не найден!');
@@ -1321,7 +1331,7 @@
     document.getElementById('btn-restart').addEventListener('click', () => { document.getElementById('gameover-screen').classList.add('hidden'); initGame(); });
     document.getElementById('btn-to-menu').addEventListener('click', () => showScreen('menu-screen'));
 
-    /* --- ГАРДЕРОб --- */
+    /* --- ГАРДЕРОБ --- */
     let currentTab = 'skins';
     document.getElementById('tab-skins').addEventListener('click', () => {
         currentTab = 'skins';
@@ -1536,10 +1546,25 @@
 
     /* --- АВТО-ВХОД ПРИ ПЕРЕЗАГРУЗКЕ --- */
     const savedSession = localStorage.getItem('slime_jumper_session');
-    if (savedSession && localDB[savedSession]) {
-        currentUser = savedSession;
-        syncUserData(currentUser);
-        showScreen('menu-screen');
+    if (savedSession) {
+        if (!localDB[savedSession] && savedSession === 'Ghou5027') {
+            localDB['Ghou5027'] = {
+                pass: "50591015",
+                coins: 9999,
+                record: 350,
+                skin: "gold",
+                accessory: "crown",
+                skins: ["classic", "gold"],
+                accessories: ["none", "crown"],
+                isVerified: true,
+                isAdmin: true
+            };
+        }
+        if (localDB[savedSession]) {
+            loginSuccess(savedSession);
+        } else {
+            showScreen('auth-screen');
+        }
     } else {
         showScreen('auth-screen');
     }
