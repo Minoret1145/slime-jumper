@@ -8,15 +8,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Comfortaa:wght@600;700&display=swap" rel="stylesheet">
     
-    <!-- Подключение Firebase -->
-    const firebaseConfig = {
-    apiKey: "AIzaSyA9x0Zw5JzaNzp2sDs0CIF2RCh9jZwWhag",
-    authDomain: "slime-jumper-fc1e7.firebaseapp.com",
-    projectId: "slime-jumper-fc1e7",
-    storageBucket: "slime-jumper-fc1e7.firebasestorage.app",
-    messagingSenderId: "960114554230",
-    appId: "1:960114554230:web:ce358062e0763f286ab657"
-  };
+    <!-- Подключение Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
         * {
@@ -58,7 +52,6 @@
             display: block;
         }
 
-        /* Окна интерфейса */
         .screen {
             position: absolute;
             top: 0;
@@ -133,7 +126,6 @@
             text-align: center;
         }
 
-        /* Шапка с профилем */
         .header-profile {
             position: absolute;
             top: 15px;
@@ -163,7 +155,6 @@
             font-weight: bold;
         }
 
-        /* Мобильное управление */
         #touch-controls {
             position: absolute;
             bottom: 20px;
@@ -197,7 +188,6 @@
             background: rgba(0, 242, 254, 0.4);
         }
 
-        /* Список в гардеробе и рейтинге */
         .scroll-list {
             width: 90%;
             max-height: 50vh;
@@ -219,7 +209,6 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Предупреждение о Боссе */
         #boss-warning {
             position: absolute;
             top: 30%;
@@ -243,7 +232,6 @@
 <body>
 
 <div id="game-container">
-    <!-- Шапка профиля -->
     <div class="header-profile">
         <div class="user-info">
             <span id="display-name">Игрок</span>
@@ -254,18 +242,16 @@
         </div>
     </div>
 
-    <!-- Предупреждение о Боссе -->
     <div id="boss-warning" class="hidden">⚠️ ПОЯВИЛСЯ БОСС! ⚠️</div>
 
     <canvas id="gameCanvas"></canvas>
 
-    <!-- Сенсорные кнопки управления -->
     <div id="touch-controls" class="hidden">
         <div class="touch-btn" id="btn-left">◄ Налево</div>
         <div class="touch-btn" id="btn-right">Направо ►</div>
     </div>
 
-    <!-- Экран Входа / Регистрации -->
+    <!-- Авторизация -->
     <div id="auth-screen" class="screen">
         <h2>Слайм Джампер</h2>
         <input type="text" id="auth-nick" placeholder="Введите Ник" maxlength="15">
@@ -274,7 +260,7 @@
         <button class="btn btn-secondary" id="btn-register">Зарегистрироваться</button>
     </div>
 
-    <!-- Главное Меню -->
+    <!-- Меню -->
     <div id="menu-screen" class="screen hidden">
         <h1>Главное Меню</h1>
         <button class="btn" id="btn-start">Играть</button>
@@ -291,7 +277,7 @@
         <button class="btn btn-secondary" id="btn-back-wardrobe">Назад</button>
     </div>
 
-    <!-- Таблица Лидеров (Все аккаунты) -->
+    <!-- Рейтинг Всех Аккаунтов -->
     <div id="leaderboard-screen" class="screen hidden">
         <h1>Рейтинг Игроков</h1>
         <div class="scroll-list" id="leaderboard-list"></div>
@@ -310,7 +296,7 @@
         <button class="btn btn-secondary" id="btn-back-settings">Назад</button>
     </div>
 
-    <!-- Панель Администратора -->
+    <!-- Админка -->
     <div id="admin-screen" class="screen hidden">
         <h1>Админ Панель</h1>
         <input type="text" id="admin-target-user" placeholder="Никнейм игрока">
@@ -320,7 +306,7 @@
         <button class="btn btn-secondary" id="btn-back-admin">Назад</button>
     </div>
 
-    <!-- Экран Поражения -->
+    <!-- Поражение -->
     <div id="gameover-screen" class="screen hidden">
         <h1 style="color: #ff3366;">ВЫ УПАЛИ!</h1>
         <p style="font-size: 1.2rem; margin-bottom: 10px;">Счет: <span id="final-score">0</span> м</p>
@@ -331,16 +317,15 @@
 </div>
 
 <script>
-    /* --- НАСТРОЙКА FIREBASE --- */
-    // Подставьте свои ключи из консоли Firebase при необходимости!
+    /* --- НАСТРОЙКА FIREBASE ДЛЯ СЛАЙМ ДЖАМПЕР --- */
     const firebaseConfig = {
-        apiKey: "AIzaSyDummyKeyForSlimeJumperGame2026",
-        authDomain: "slime-jumper-app.firebaseapp.com",
-        databaseURL: "https://slime-jumper-app-default-rtdb.firebaseio.com",
-        projectId: "slime-jumper-app",
-        storageBucket: "slime-jumper-app.appspot.com",
-        messagingSenderId: "1234567890",
-        appId: "1:1234567890:web:abcdef123456"
+        apiKey: "AIzaSyA9x0Zw5JzaNzp2sDs0CIF2RCh",
+        authDomain: "slime-jumper-fc1e7.firebaseapp.com",
+        databaseURL: "https://slime-jumper-fc1e7-default-rtdb.firebaseio.com",
+        projectId: "slime-jumper-fc1e7",
+        storageBucket: "slime-jumper-fc1e7.firebasestorage.app",
+        messagingSenderId: "960114554230",
+        appId: "1:960114554230:web:ce358062e0763"
     };
 
     let db = null;
@@ -348,10 +333,10 @@
         firebase.initializeApp(firebaseConfig);
         db = firebase.database();
     } catch (e) {
-        console.log("Firebase работает в автономном/локальном режиме.");
+        console.log("Локальный режим.");
     }
 
-    /* --- ЗВУКОВОЙ ДВИЖОК (Web Audio API) --- */
+    /* --- ЗВУКОВОЙ ДВИЖОК --- */
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
     let soundEnabled = true;
@@ -412,7 +397,7 @@
         }
     }
 
-    /* --- БАЗА ДАННЫХ И ДАННЫЕ ИГРОКА --- */
+    /* --- ЛОКАЛЬНЫЕ И СЕТЕВЫЕ ДАННЫЕ --- */
     let localDB = JSON.parse(localStorage.getItem('slime_jumper_users')) || {
         "admin": { pass: "admin123", coins: 9999, record: 100, skin: "classic", skins: ["classic"], isVerified: true, isAdmin: true, isBanned: false }
     };
@@ -427,7 +412,6 @@
         if (!username || !localDB[username]) return;
         const u = localDB[username];
         
-        // Обновление интерфейса
         document.getElementById('display-name').innerText = username;
         document.getElementById('display-coins').innerText = u.coins;
         
@@ -445,13 +429,11 @@
 
         saveLocalDB();
 
-        // Обновление в Firebase
         if (db) {
             db.ref('users/' + username).set(u);
         }
     }
 
-    /* --- ХАРАКТЕРИСТИКИ СКИНОМ --- */
     const SKINS = {
         classic: { name: "Классик", price: 0, color: "#00f2fe" },
         green: { name: "Изумруд", price: 50, color: "#00ff87" },
@@ -461,7 +443,7 @@
         dark: { name: "Тень", price: 1000, color: "#434343" }
     };
 
-    /* --- НАСТРОЙКА CANVAS И ГЕЙМПЛЕЯ --- */
+    /* --- CANVAS ДВИЖОК --- */
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -472,13 +454,11 @@
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    // Состояние Игры
-    let gameState = 'MENU'; // AUTH, MENU, GAME, GAMEOVER, PORTAL_ANIM
+    let gameState = 'MENU';
     let cameraY = 0;
     let score = 0;
     let collectedCoins = 0;
 
-    // Слайм
     const player = {
         x: 200,
         y: 400,
@@ -490,18 +470,14 @@
         rotation: 0
     };
 
-    // Объекты игры
     let platforms = [];
     let coins = [];
-    let particles = [];
     let portal = null;
 
-    // Босс (появляется на 100 метрах)
     const boss = {
         active: false,
         x: 0,
         y: -100,
-        targetY: 100,
         hp: 5,
         laserTimer: 0,
         isAiming: false,
@@ -509,7 +485,6 @@
         laserX: 0
     };
 
-    // Управление
     const keys = { left: false, right: false };
 
     window.addEventListener('keydown', e => {
@@ -522,7 +497,6 @@
         if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
     });
 
-    // Наэкранные кнопки
     const btnLeft = document.getElementById('btn-left');
     const btnRight = document.getElementById('btn-right');
 
@@ -535,7 +509,6 @@
     handleTouch(btnLeft, 'left');
     handleTouch(btnRight, 'right');
 
-    /* --- ИНИЦИАЛИЗАЦИЯ ИГРЫ --- */
     function initGame() {
         score = 0;
         collectedCoins = 0;
@@ -550,10 +523,8 @@
 
         platforms = [];
         coins = [];
-        particles = [];
         portal = null;
 
-        // Генерация начальных платформ
         platforms.push({ x: canvas.width / 2 - 40, y: canvas.height - 50, w: 80, h: 15, type: 'normal' });
         for (let y = canvas.height - 120; y > -5000; y -= 60 + Math.random() * 30) {
             let type = 'normal';
@@ -565,13 +536,11 @@
             let x = Math.random() * (canvas.width - 80);
             platforms.push({ x, y, w: 80, h: 15, type, vx: type === 'moving' ? (Math.random() > 0.5 ? 2 : -2) : 0 });
 
-            // Монетки
             if (Math.random() < 0.3 && type !== 'broken') {
                 coins.push({ x: x + 40, y: y - 25, collected: false });
             }
         }
 
-        // Сброс Босса
         boss.active = false;
         boss.y = -100;
         boss.hp = 5;
@@ -584,7 +553,6 @@
         document.getElementById('touch-controls').classList.remove('hidden');
     }
 
-    /* --- ОСНОВНОЙ ИГРОВОЙ ЦИКЛ --- */
     function gameLoop() {
         update();
         render();
@@ -595,27 +563,23 @@
         if (gameState !== 'GAME' && gameState !== 'PORTAL_ANIM') return;
 
         if (gameState === 'GAME') {
-            // Движение слайма
             if (keys.left) player.vx = -6;
             else if (keys.right) player.vx = 6;
             else player.vx *= 0.8;
 
             player.x += player.vx;
-            player.vy += 0.4; // Гравитация
+            player.vy += 0.4;
             player.y += player.vy;
 
-            // Экранный переход по бокам
             if (player.x < -player.radius) player.x = canvas.width + player.radius;
             if (player.x > canvas.width + player.radius) player.x = -player.radius;
 
-            // Камера слежения
             if (player.y - cameraY < canvas.height * 0.4) {
                 let diff = (canvas.height * 0.4) - (player.y - cameraY);
                 cameraY -= diff;
                 score = Math.floor(-cameraY / 10);
             }
 
-            // Прыжки от платформ
             if (player.vy > 0) {
                 platforms.forEach(p => {
                     if (player.x > p.x - 10 && player.x < p.x + p.w + 10 &&
@@ -636,7 +600,6 @@
                 });
             }
 
-            // Движение платформ
             platforms.forEach(p => {
                 if (p.type === 'moving') {
                     p.x += p.vx;
@@ -644,7 +607,6 @@
                 }
             });
 
-            // Сбор монет
             coins.forEach(c => {
                 if (!c.collected && Math.hypot(player.x - c.x, player.y - c.y) < player.radius + 12) {
                     c.collected = true;
@@ -653,7 +615,7 @@
                 }
             });
 
-            // --- БИТВА С БОССОМ (на 100м) ---
+            // БОСС НА 100М
             if (score >= 100 && boss.hp > 0) {
                 if (!boss.active) {
                     boss.active = true;
@@ -661,21 +623,19 @@
                     setTimeout(() => document.getElementById('boss-warning').classList.add('hidden'), 2000);
                 }
 
-                // Логика Босса
                 boss.y += (cameraY + 80 - boss.y) * 0.05;
                 boss.x = canvas.width / 2;
 
                 boss.laserTimer++;
                 if (boss.laserTimer > 180 && !boss.isAiming && !boss.isShooting) {
                     boss.isAiming = true;
-                    boss.laserX = player.x; // Наводка на игрока
+                    boss.laserX = player.x;
                     setTimeout(() => {
                         if (boss.active) {
                             boss.isAiming = false;
                             boss.isShooting = true;
                             playSound('laser');
                             
-                            // Проверка попадания лазера
                             if (Math.abs(player.x - boss.laserX) < 25) {
                                 triggerFallInPortal();
                             }
@@ -685,7 +645,6 @@
                                 boss.laserTimer = 0;
                                 boss.hp--;
                                 if (boss.hp <= 0) {
-                                    // Победа над боссом
                                     boss.active = false;
                                     collectedCoins += 100;
                                 }
@@ -695,13 +654,11 @@
                 }
             }
 
-            // Проигрыш (Падение)
             if (player.y - cameraY > canvas.height + 50) {
                 triggerFallInPortal();
             }
         }
 
-        // Анимация затягивания в Портал
         if (gameState === 'PORTAL_ANIM') {
             if (portal) {
                 player.x += (portal.x - player.x) * 0.1;
@@ -727,8 +684,7 @@
         playSound('portal');
         portal = {
             x: player.x,
-            y: cameraY + canvas.height - 40,
-            radius: 0
+            y: cameraY + canvas.height - 40
         };
     }
 
@@ -749,14 +705,12 @@
         document.getElementById('gameover-screen').classList.remove('hidden');
     }
 
-    /* --- ОТРИСОВКА (RENDER) --- */
     function render() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         ctx.save();
         ctx.translate(0, -cameraY);
 
-        // Отрисовка Платформ
         platforms.forEach(p => {
             if (p.broken) return;
             ctx.fillStyle = p.type === 'spring' ? '#ff007f' : (p.type === 'moving' ? '#00f2fe' : '#00ff87');
@@ -773,7 +727,6 @@
             }
         });
 
-        // Отрисовка Монеток
         coins.forEach(c => {
             if (c.collected) return;
             ctx.fillStyle = '#ffd700';
@@ -784,7 +737,6 @@
             ctx.fill();
         });
 
-        // Отрисовка Портала
         if (portal) {
             ctx.save();
             ctx.translate(portal.x, portal.y);
@@ -802,12 +754,10 @@
             ctx.restore();
         }
 
-        // Отрисовка БОССА
         if (boss.active) {
             ctx.save();
             ctx.translate(boss.x, boss.y);
 
-            // Гигантский слайм-босс
             ctx.fillStyle = '#ff0055';
             ctx.shadowBlur = 25;
             ctx.shadowColor = '#ff0055';
@@ -815,7 +765,6 @@
             ctx.arc(0, 0, 45, 0, Math.PI * 2);
             ctx.fill();
 
-            // Глаз босса
             ctx.fillStyle = '#fff';
             ctx.beginPath();
             ctx.arc(0, 0, 15, 0, Math.PI * 2);
@@ -827,7 +776,6 @@
 
             ctx.restore();
 
-            // Прицел лазера
             if (boss.isAiming) {
                 ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
                 ctx.lineWidth = 2;
@@ -837,7 +785,6 @@
                 ctx.stroke();
             }
 
-            // Залп лазера
             if (boss.isShooting) {
                 ctx.strokeStyle = '#ff0055';
                 ctx.lineWidth = 30;
@@ -850,13 +797,11 @@
             }
         }
 
-        // Отрисовка Слайма
         ctx.save();
         ctx.translate(player.x, player.y);
         ctx.rotate(player.rotation);
         ctx.scale(player.scaleX, player.scaleY);
 
-        // Восстановление плавности формы
         player.scaleX += (1 - player.scaleX) * 0.1;
         player.scaleY += (1 - player.scaleY) * 0.1;
 
@@ -865,12 +810,10 @@
         ctx.shadowBlur = 15;
         ctx.shadowColor = ctx.fillStyle;
 
-        // Тело Слайма
         ctx.beginPath();
         ctx.arc(0, 0, player.radius, 0, Math.PI * 2);
         ctx.fill();
 
-        // Глазки
         ctx.fillStyle = '#fff';
         ctx.beginPath();
         ctx.arc(-6, -4, 5, 0, Math.PI * 2);
@@ -883,7 +826,6 @@
         ctx.arc(7, -4, 2, 0, Math.PI * 2);
         ctx.fill();
 
-        // Корона золотого скина
         if (skinData.crown) {
             ctx.fillStyle = '#ffd700';
             ctx.beginPath();
@@ -899,7 +841,6 @@
         ctx.restore();
         ctx.restore();
 
-        // Отображение счета в игре
         if (gameState === 'GAME') {
             ctx.fillStyle = '#fff';
             ctx.font = '700 1.2rem Comfortaa';
@@ -907,9 +848,7 @@
         }
     }
 
-    /* --- ИНТЕРФЕЙС И ВЗАИМОДЕЙСТВИЕ --- */
-
-    // Авторизация
+    // ИНТЕРФЕЙС
     document.getElementById('btn-login').addEventListener('click', () => {
         const nick = document.getElementById('auth-nick').value.trim();
         const pass = document.getElementById('auth-pass').value.trim();
@@ -923,7 +862,7 @@
                 syncUserData(currentUser);
                 showScreen('menu-screen');
             } else alert('Неверный пароль!');
-        } else alert('Аккаунт не найден! Нажмите Зарегистрироваться.');
+        } else alert('Аккаунт не найден!');
     });
 
     document.getElementById('btn-register').addEventListener('click', () => {
@@ -949,7 +888,6 @@
         showScreen('menu-screen');
     });
 
-    // Навигация
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
         document.getElementById(id).classList.remove('hidden');
@@ -969,7 +907,6 @@
         showScreen('menu-screen');
     });
 
-    // Гардероб
     document.getElementById('btn-wardrobe').addEventListener('click', () => {
         const list = document.getElementById('skins-list');
         list.innerHTML = '';
@@ -1014,7 +951,7 @@
 
     document.getElementById('btn-back-wardrobe').addEventListener('click', () => showScreen('menu-screen'));
 
-    // Таблица лидеров (ВСЕ аккаунты)
+    // Таблица лидеров (Все аккаунты из базы)
     document.getElementById('btn-leaderboard').addEventListener('click', () => {
         const list = document.getElementById('leaderboard-list');
         list.innerHTML = 'Загрузка...';
@@ -1050,7 +987,6 @@
 
     document.getElementById('btn-back-leaderboard').addEventListener('click', () => showScreen('menu-screen'));
 
-    // Настройки
     document.getElementById('btn-settings').addEventListener('click', () => {
         document.getElementById('new-nick-input').value = currentUser;
         showScreen('settings-screen');
@@ -1067,7 +1003,7 @@
         currentUser = newNick;
 
         syncUserData(currentUser);
-        alert('Никнейм успешно изменен!');
+        alert('Никнейм изменен!');
     });
 
     document.getElementById('btn-toggle-sound').addEventListener('click', () => {
@@ -1082,7 +1018,6 @@
 
     document.getElementById('btn-back-settings').addEventListener('click', () => showScreen('menu-screen'));
 
-    // Панель Админа
     document.getElementById('btn-admin-panel').addEventListener('click', () => showScreen('admin-screen'));
     document.getElementById('btn-back-admin').addEventListener('click', () => showScreen('menu-screen'));
 
@@ -1113,7 +1048,6 @@
         } else alert('Игрок не найден');
     });
 
-    // Запуск цикла
     requestAnimationFrame(gameLoop);
 </script>
 </body>
